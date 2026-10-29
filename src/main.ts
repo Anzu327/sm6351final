@@ -67,7 +67,7 @@ document.querySelectorAll<HTMLElement>('[data-hero]').forEach(button=>{
   const hero=heroes[button.dataset.hero as keyof typeof heroes];
   const record=()=>bundle?.meteorites.find(r=>r.id===hero.id)??null;
   button.addEventListener('mouseenter',()=>preview(record()));button.addEventListener('mouseleave',hidePreview);button.addEventListener('focus',()=>preview(record()));button.addEventListener('blur',hidePreview);
-  button.addEventListener('click',()=>{const r=record();if(!r)return;if(mode!=='explore')enterAtlas();selectRecord(r,true);if(matchMedia('(hover: none)').matches)preview(r);});
+  button.addEventListener('click',()=>{const r=record();if(!r)return;if(mode!=='explore')enterAtlas();if(layer!=='meteorites')document.querySelector<HTMLButtonElement>('[data-layer="meteorites"]')?.click();selectRecord(r,true);if(matchMedia('(hover: none)').matches)preview(r);});
 });
 function enterAtlas(){returnY=scrollY;mode='explore';document.body.classList.add('exploring');el('story').hidden=true;el('header').hidden=true;el('atlas').hidden=false;el('story-heroes').hidden=false;scene?.explore();hidePreview();update();el('return-story').focus();}
 document.querySelectorAll('[data-enter]').forEach(b=>b.addEventListener('click',enterAtlas));
