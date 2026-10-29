@@ -7,6 +7,7 @@ The opening contains **one meteorite and a small Scroll hint only**. Two compani
 - [Agent instructions](AGENTS.md)
 - [Story, design, interaction and data contract](docs/PROJECT_SPEC.md)
 - [Team handoff and verification ledger](docs/HANDOFF.md)
+- [Material asset provenance](docs/ASSETS.md)
 - [Selected motion storyboard](docs/design-target.jpg)
 - [Snapshot manifest](public/data/manifest.json)
 - [Verification workflow](.github/workflows/verify.yml)

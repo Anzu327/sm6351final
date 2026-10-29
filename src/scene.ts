@@ -1,7 +1,7 @@
 import Globe from 'globe.gl';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { rock, pallasite, setOpacity } from './models';
+import { rock, pallasite, setOpacity, applyMineralTexture } from './models';
 import { hasLocation, isMeteorite, type RecordItem, type Layer } from './types';
 import { heroes } from './story';
 
@@ -44,6 +44,12 @@ export class SpaceScene {
     const key=new THREE.DirectionalLight(0xcddcf0,1.35);key.position.set(-3,4,2);this.rig.add(key,key.target);
     const fill=new THREE.DirectionalLight(0xd9c0a0,.42);fill.position.set(3,-1,1);this.rig.add(fill,fill.target);
     this.activeModel=this.main;
+    Promise.all([
+      applyMineralTexture(this.main,'assets/iron-albedo.jpg'),
+      applyMineralTexture(this.companion.exterior,'assets/iron-albedo.jpg'),
+      applyMineralTexture(this.companion.cut,'assets/pallasite-albedo.jpg',true),
+      applyMineralTexture(this.beauty,'assets/breccia-albedo.jpg')
+    ]).then(()=>{host.dataset.materials='ready';}).catch(()=>{host.dataset.materials='failed';onIssue('A mineral texture could not load. Reload to restore the detailed material.');});
     const starGeometry=new THREE.BufferGeometry();const stars=[];let seed=83;
     const rng=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
     for(let i=0;i<1900;i++){const a=rng()*Math.PI*2,z=rng()*2-1,r=1500;stars.push(Math.sqrt(1-z*z)*Math.cos(a)*r,z*r,Math.sqrt(1-z*z)*Math.sin(a)*r);}
@@ -106,7 +112,7 @@ export class SpaceScene {
     object.position.set(0,0,0);object.scale.setScalar(mobile?.26:.35);setOpacity(object,1);
     if(id===heroes.fukang.id)this.setCut(true);
   }
-  setCut(cut:boolean){this.companion.cut.visible=cut;this.companion.exterior.visible=!cut;}
+  setCut(cut:boolean){this.host.dataset.cut=String(cut);this.companion.cut.visible=cut;this.companion.exterior.visible=!cut;}
   explore(){this.mode='explore';this.previewId='';this.preview(null);this.controls(true);this.layout();[this.main,this.companion.group,this.beauty].forEach(x=>setOpacity(x,0));this.globe.showGlobe(true).showAtmosphere(true);this.dataPoints.material.uniforms.uOpacity.value=.82;this.globe.pointOfView({lat:20,lng:20,altitude:innerWidth<700?4.2:2.3},0);}
   setRecords(records:RecordItem[],layer:Layer){this.plotted=records.filter(hasLocation);const positions=[],sizes=[];
     for(const r of this.plotted){const c=this.globe.getCoords(r.lat,r.lng,.006);positions.push(c.x,c.y,c.z);const value=isMeteorite(r)?r.massG:r.energyKt;sizes.push(value===null?1.4:1.5+Math.min(4,Math.log10(1+value)*.48));}

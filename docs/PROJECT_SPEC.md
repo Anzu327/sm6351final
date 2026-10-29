@@ -70,3 +70,8 @@ Cleaning:
 GitHub API writes to main only for this delivery. Local project cloning/editing and public deployment were not authorized. GitHub Actions runs on the source commit and records screenshots plus the npm dependency lock through the GitHub API. The evidence commit may have no separate CI run; docs/qa/run.json points to the source SHA actually checked. If main advances, the workflow skips the evidence commit rather than mixing revisions.
 
 Tests cover scrolling in both directions, model rotation, hover-only previews, search/filters, Black Beauty without a pin, layer-specific units, missing data, failed-load retry, mobile layout, reduced motion and WebGL failure. Browser screenshots require human/agent visual review; test success alone is insufficient.
+
+## Model realism and material assets
+Geometry uses a dense indexed smooth mesh, explicit concave pit intersections for the iron specimen, physically based material response and authored mineral albedo textures. Texture maps use filtering and mipmaps; avoid nearest-neighbor pixel noise or unlit white faceted placeholders. The pallasite cut face and crust can be toggled from its atlas detail while previewing; the model still hides when hover/focus ends.
+
+The exact Sikhote-Alin scan found at Museum Wales / Sketchfab (8eaab162b9144299ad42104c386ac5b5) reports isDownloadable=false. It was not copied, scraped or mislabeled as a bundled model. Current geometries remain authored approximations, with no visible scan disclaimer requested by the owner. A future licensed specimen scan must match the actual hero identity; do not substitute a different meteorite while keeping its name.

@@ -5,11 +5,12 @@ export function rock(kind: 'iron'|'basalt'): THREE.Group {
   const rng=random(kind==='iron'?1947:7034);
   const geometry=new THREE.IcosahedronGeometry(1,48);
   const p=geometry.attributes.position;
-  const craters=Array.from({length:kind==='iron'?82:28},()=>({direction:new THREE.Vector3(rng()*2-1,rng()*2-1,rng()*2-1).normalize(),width:.0025+rng()*.012,depth:.06+rng()*.12}));
+  const radial=(n:THREE.Vector3)=>1+.095*Math.sin(n.x*5+n.y*3)+.07*Math.cos(n.z*7-n.y*4);
+  const craters=Array.from({length:kind==='iron'?64:11},()=>{const direction=new THREE.Vector3(rng()*2-1,rng()*2-1,rng()*2-1).normalize();const pitRadius=.12+rng()*.18,depth=kind==='iron'?.045+rng()*.12:.018+rng()*.025;return {center:direction.multiplyScalar(radial(direction)+pitRadius-depth),radius:pitRadius};});
   const colors=[]; const v=new THREE.Vector3();
   for(let i=0;i<p.count;i++){
-    v.fromBufferAttribute(p,i).normalize(); let radius=1+.095*Math.sin(v.x*5+v.y*3)+.07*Math.cos(v.z*7-v.y*4);
-    for(const c of craters){const d=1-v.dot(c.direction); radius-=c.depth*Math.exp(-d/c.width);}
+    v.fromBufferAttribute(p,i).normalize(); let radius=radial(v);
+    for(const c of craters){const dot=v.dot(c.center),discriminant=dot*dot-c.center.lengthSq()+c.radius*c.radius;if(discriminant>0){const near=dot-Math.sqrt(discriminant),far=dot+Math.sqrt(discriminant);if(radius<far&&radius>near)radius=near;}}
     const rough=Math.sin(v.x*49+Math.sin(v.z*27))*Math.sin(v.y*51+v.z*11);
     radius+=rough*.004;
     const x=v.x,y=v.y,z=v.z;
@@ -30,14 +31,10 @@ export function rock(kind: 'iron'|'basalt'): THREE.Group {
     pixels[i]=grain;pixels[i+1]=grain*.94;pixels[i+2]=grain*.85;pixels[i+3]=255;
     const h=Math.floor(100+n*55+broad*18);bumps[i]=bumps[i+1]=bumps[i+2]=h;bumps[i+3]=255;
   }
-  const texture=new THREE.DataTexture(pixels,size,size);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.needsUpdate=true;
-  const bump=new THREE.DataTexture(bumps,size,size);bump.wrapS=bump.wrapT=THREE.RepeatWrapping;bump.needsUpdate=true;
+  const texture=new THREE.DataTexture(pixels,size,size);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;
+  const bump=new THREE.DataTexture(bumps,size,size);bump.wrapS=bump.wrapT=THREE.RepeatWrapping;bump.magFilter=THREE.LinearFilter;bump.minFilter=THREE.LinearMipmapLinearFilter;bump.generateMipmaps=true;bump.needsUpdate=true;
   const material=new THREE.MeshStandardMaterial({color:kind==='iron'?0xaaa49a:0x393a39,map:texture,bumpMap:bump,bumpScale:kind==='iron'?.065:.04,metalness:kind==='iron'?.88:.12,roughness:kind==='iron'?.56:.91,envMapIntensity:kind==='iron'?.32:.2});
   const group=new THREE.Group(); group.add(new THREE.Mesh(smooth,material));
-  if(kind==='basalt'){
-    const rng2=random(56);
-    for(let i=0;i<85;i++){const a=rng2()*Math.PI*2,b=Math.acos(rng2()*2-1),s=.009+rng2()*.028; const stone=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),new THREE.MeshStandardMaterial({color:i%3?0x60615c:0xa4a399,roughness:.94}));stone.position.set(Math.sin(b)*Math.cos(a)*.92,Math.cos(b)*1.02,Math.sin(b)*Math.sin(a)*.8);group.add(stone);}
-  }
   group.rotation.set(.12,-.5,.18); return group;
 }
 export function pallasite(): {group:THREE.Group;cut:THREE.Group;exterior:THREE.Group} {
@@ -67,4 +64,13 @@ export function pallasite(): {group:THREE.Group;cut:THREE.Group;exterior:THREE.G
 export function setOpacity(object: THREE.Object3D,value:number) {
   object.visible=value>.002;
   object.traverse(o=>{if(o instanceof THREE.Mesh){const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){m.transparent=value<.999;m.opacity=value;m.depthWrite=value>.85;}}});
+}
+
+/** Load the project-authored mineral albedo. This improves visual realism; it is not a specimen scan. */
+export async function applyMineralTexture(group:THREE.Group,path:string,cut=false){
+  const texture=await new THREE.TextureLoader().loadAsync(import.meta.env.BASE_URL+path);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;
+  if(cut){texture.offset.set(.5,.5);texture.repeat.set(.5,.5);}
+  group.traverse(o=>{if(o instanceof THREE.Mesh){const mats=Array.isArray(o.material)?o.material:[o.material];const material=mats[0] as THREE.MeshStandardMaterial;
+    material.color.set(0xffffff);material.map=texture;material.bumpMap=texture;material.bumpScale=cut?.018:.025;material.vertexColors=false;material.metalness=cut?.48:path.includes('breccia')?.08:.9;material.roughness=cut?.33:path.includes('breccia')?.88:.48;material.envMapIntensity=cut?.5:.55;if(cut)material.metalnessMap=null;material.needsUpdate=true;
+  }});
 }

@@ -7,10 +7,12 @@
 - Fukang official classification and recovery report, Meteoritical Bulletin: https://www.lpi.usra.edu/meteor/metbull.cfm?code=34491
 - Black Beauty / NWA 7034 image and identification, NASA: https://science.nasa.gov/resource/black-beauty-mars-meteorite/
 - Globe.gl: https://globe.gl/ and https://github.com/vasturiano/globe.gl (MIT).
-- Earth texture: https://github.com/vasturiano/three-globe/blob/master/example/img/earth-blue-marble.jpg, bundled as public/assets/earth.jpg at 1024 × 512; repository license https://github.com/vasturiano/three-globe/blob/master/LICENSE.
+- Earth texture: https://github.com/vasturiano/three-globe/blob/master/example/img/earth-blue-marble.jpg, bundled as public/assets/earth.jpg at 2048 × 1024; repository license https://github.com/vasturiano/three-globe/blob/master/LICENSE.
 - Three.js and RoomEnvironment: https://threejs.org/ (MIT).
 - GSAP: https://gsap.com/; see the installed package's license.
 - D3: https://d3js.org/ (ISC).
 - Lucide icons: https://lucide.dev/ (ISC).
 - The selected storyboard in docs/design-target.jpg is AI-generated visual direction. Its fictional point placement is not data. The live site uses actual catalog coordinates.
 - The meteorite geometries and materials are authored for this project. They are not specimen scans.
+
+- Project-authored iron, pallasite and breccia albedo textures were generated with the built-in image_gen tool. They are not scientific scans or photographs of the named specimens; see [asset provenance and prompts](ASSETS.md).
