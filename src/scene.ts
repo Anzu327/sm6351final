@@ -83,7 +83,7 @@ export class SpaceScene {
     if(hit?.index!==undefined){const r=this.plotted[hit.index];if(r)this.onSelect(r);}
   };
   private controls(explore:boolean) {const c=this.globe.controls();c.enabled=explore||this.mode==='story';c.enableZoom=explore;c.enableRotate=explore||this.mode==='story';c.enablePan=false;c.autoRotate=false;c.minDistance=125;c.maxDistance=700;this.host.dataset.controls=explore?'explore':'story';this.host.style.touchAction=explore?'none':'pan-y';}
-  setIntro(p:number){this.mode='intro';this.progress=p;this.controls(false);this.layout();
+  setIntro(p:number){if(this.reduced)p=p<.45?0:p<1.9?1.6:p<2.95?2.9:4;this.mode='intro';this.progress=p;this.controls(false);this.layout();
     const join=smooth(.35,1.45,p),leave=smooth(1.8,2.8,p),handoff=smooth(2.3,2.95,p),earth=smooth(2.95,3.8,p);
     const mobile=innerWidth<700;const unit=mobile?.73:1;
     this.main.scale.setScalar(unit*THREE.MathUtils.lerp(1.0,.002,handoff));this.main.position.set(0,0,0);setOpacity(this.main,1-smooth(2.8,2.95,p));
