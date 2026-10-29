@@ -40,3 +40,5 @@ Raw source files are in `data/raw/`; normalized browser shards are in `public/da
 
 ## Verification evidence
 The workflow checks types, complete datasets, production build, and Playwright browser behavior on a remote GitHub runner. It saves screenshots and the build as artifacts. For main pushes, it records screenshots, the npm lockfile and `docs/qa/run.json` through the GitHub API, provided main has not advanced. The evidence JSON identifies the **source commit actually tested**. A green build alone does not establish visual fidelity.
+
+Latest checked source: `71d3fe2999fa8b6fbae189677db3b92921909a05`. [Verification run](https://github.com/Anzu327/sm6351final/actions/runs/40818270037) succeeded: type/data/build checks passed; Playwright recorded four direct passes and one capture case passing on retry. The visual comparison and remaining scope limits are in [design-qa.md](design-qa.md).
