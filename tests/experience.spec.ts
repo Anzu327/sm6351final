@@ -3,7 +3,7 @@ import {mkdir} from 'node:fs/promises';
 const screenshot=async(page:Page,name:string)=>{await mkdir('qa-screenshots',{recursive:true});await page.screenshot({path:'qa-screenshots/'+name+'.png'});};
 async function ready(page:Page){await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-data','ready');await expect(page.locator('#space')).toHaveAttribute('data-ready','true');await expect(page.locator('#space')).toHaveAttribute('data-texture','ready');}
 test('silent opening, reversible companions, Earth handoff, hover-only featured models',async({page})=>{
- const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await ready(page);
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',e=>{if(e.type()==='error'&&/THREE.WebGLProgram|Shader Error/i.test(e.text()))errors.push(e.text());});await ready(page);
  await expect(page.locator('#header')).toBeHidden();await expect(page.locator('#atlas')).toBeHidden();await expect(page.locator('#scroll-hint')).toBeVisible();await expect(page.locator('.chapter h1').first()).not.toBeInViewport();await screenshot(page,'opening-desktop');
  const canvas=page.locator('#space canvas');await canvas.hover({position:{x:720,y:450}});await page.mouse.move(720,450);await page.mouse.down();await page.mouse.move(850,500,{steps:8});await page.mouse.up();await expect(page.locator('#space')).toHaveAttribute('data-rotation',/.+/);
  const height=await page.evaluate(()=>innerHeight);
