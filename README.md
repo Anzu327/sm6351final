@@ -27,7 +27,7 @@ npm run build
 npx playwright install chromium
 npm test
 ```
-The owner requested GitHub API-only edits for this delivery; no local checkout or project edits were used. Running commands above is for teammates who choose to work locally. No public deployment is configured.
+The owner requested GitHub API-only edits for this delivery; no local checkout or project edits were used. Running commands above is for teammates who choose to work locally. GitHub Pages deployment is configured in `.github/workflows/deploy-pages.yml`. Repository Pages settings must use **GitHub Actions**. See [deployment status and recovery](docs/DEPLOYMENT.md).
 
 ## Real data, bundled with the site
 - 45,716 meteorite records from the historical NASA Meteorite Landings catalog; 32,186 have usable locations.
