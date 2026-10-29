@@ -1,0 +1,36 @@
+import {test,expect, type Page} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+const screenshot=async(page:Page,name:string)=>{await mkdir('qa-screenshots',{recursive:true});await page.screenshot({path:'qa-screenshots/'+name+'.png'});};
+async function ready(page:Page){await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-data','ready');await expect(page.locator('#space')).toHaveAttribute('data-ready','true');await expect(page.locator('#space')).toHaveAttribute('data-texture','ready');}
+test('silent opening, reversible companions, Earth handoff, hover-only featured models',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await ready(page);
+ await expect(page.locator('#header')).toBeHidden();await expect(page.locator('#atlas')).toBeHidden();await expect(page.locator('#scroll-hint')).toBeVisible();await expect(page.locator('.chapter h1').first()).not.toBeInViewport();await screenshot(page,'opening-desktop');
+ const canvas=page.locator('#space canvas');await canvas.hover({position:{x:720,y:450}});await page.mouse.move(720,450);await page.mouse.down();await page.mouse.move(850,500,{steps:8});await page.mouse.up();await expect(page.locator('#space')).toHaveAttribute('data-rotation',/.+/);
+ const height=await page.evaluate(()=>innerHeight);
+ await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*1.55);await expect(page.locator('#space')).toHaveAttribute('data-phase','1');await screenshot(page,'companions-joined');
+ await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*2.65);await expect(page.locator('#space')).toHaveAttribute('data-phase','2');await screenshot(page,'companions-leaving');
+ await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*3.9);await expect(page.locator('#space')).toHaveAttribute('data-phase','3');await screenshot(page,'earth-handoff');
+ await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await expect(page.locator('#space')).toHaveAttribute('data-intro','0.000');await expect(page.locator('#header')).toBeHidden();
+ await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*5.2);await expect(page.locator('#story-heroes')).toBeVisible();await expect(page.locator('#space')).toHaveAttribute('data-preview','');
+ await page.locator('[data-hero=fukang]').hover();await expect(page.locator('#space')).toHaveAttribute('data-preview','nasa:34491');await screenshot(page,'hover-fukang');await page.mouse.move(20,100);await expect(page.locator('#hover-preview')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+test('atlas search, missing location, filters, independent fireball units, and story return',async({page})=>{
+ await ready(page);await page.evaluate(()=>scrollTo({top:innerHeight*8.5,behavior:'instant'}));await page.locator('[data-enter]').first().click();await expect(page.locator('#atlas')).toBeVisible();await expect(page.locator('#counts')).toHaveText('45,716 matching records');
+ await page.locator('#search').fill('Black Beauty');await expect(page.locator('#counts')).toHaveText('1 matching records');await expect(page.locator('#map-count')).toHaveText('0 mapped · 1 without usable coordinates');await page.locator('#record-list button').click();await expect(page.locator('#details')).toContainText('Unavailable · not mapped');await page.locator('#record-list button').hover();await expect(page.locator('#space')).toHaveAttribute('data-preview','nasa:54831');await screenshot(page,'black-beauty-unmapped');
+ await page.locator('#reset').click();await page.locator('#status').selectOption('Fell');await expect(page.locator('#counts')).not.toHaveText('45,716 matching records');await page.locator('#from').fill('2000');await page.locator('#to').fill('1900');await expect(page.locator('#range-error')).toBeVisible();await expect(page.locator('#counts')).toHaveText('0 matching records');
+ await page.locator('#reset').click();await page.locator('#search').fill('not-a-real-meteorite-xyz');await expect(page.locator('#record-list')).toContainText('No matching records');
+ await page.locator('[data-layer=fireballs]').click();await expect(page.locator('#meteorite-filters')).toBeHidden();await expect(page.locator('#counts')).toHaveText('1,074 matching records');await expect(page.locator('#size-legend')).toContainText('kt TNT');await page.locator('#record-list button').first().click();await expect(page.locator('#details')).toContainText('Peak brightness (UTC)');await screenshot(page,'fireball-atlas');
+ await page.locator('[data-layer=meteorites]').click();await page.locator('#search').fill('Fukang');await expect(page.locator('#counts')).toHaveText('1 matching records');await page.locator('#record-list button').click();await expect(page.locator('#details')).toContainText('Pallasite, PMG');await screenshot(page,'meteorite-atlas');
+ await page.locator('#return-story').click();await expect(page.locator('#atlas')).toBeHidden();expect(await page.evaluate(()=>scrollY)).toBeGreaterThan(1000);
+});
+test('mobile layout and point selection equivalent',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await ready(page);await screenshot(page,'opening-mobile');await page.evaluate(()=>scrollTo({top:innerHeight*8.5,behavior:'instant'}));await page.locator('[data-enter]').first().click();await page.locator('#search').fill('Black Beauty');await expect(page.locator('#counts')).toHaveText('1 matching records');await page.locator('#record-list button').click();await screenshot(page,'atlas-mobile');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+test('archive loading failure has a working retry',async({page})=>{
+ await page.route('**/data/manifest.json',r=>r.abort());await page.goto('/');await expect(page.locator('#data-error')).toBeVisible();await page.unroute('**/data/manifest.json');await page.locator('#retry').click();await expect(page.locator('body')).toHaveAttribute('data-data','ready');await expect(page.locator('#data-error')).toBeHidden();
+});
+test('reduced motion and WebGL failure retain readable story and atlas',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type:string,...args:unknown[]){if(type==='webgl'||type==='webgl2'||type==='experimental-webgl')return null;return (original as Function).call(this,type,...args);} as typeof original;});
+ await page.goto('/');await expect(page.locator('body')).toHaveClass(/no-webgl/);await expect(page.locator('body')).toHaveAttribute('data-data','ready');await page.evaluate(()=>scrollTo({top:innerHeight*2,behavior:'instant'}));await page.locator('[data-enter]').first().click();await expect(page.locator('#atlas')).toBeVisible();await page.locator('#search').fill('Fukang');await expect(page.locator('#counts')).toHaveText('1 matching records');await screenshot(page,'webgl-fallback');
+});

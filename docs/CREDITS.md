@@ -1,0 +1,16 @@
+# Sources and credits
+- NASA Meteorite Landings catalog: https://data.nasa.gov/dataset/meteorite-landings
+- Preserved NASA CSV transport and source attribution: https://github.com/stefmolin/pandas-workshop/blob/45e34fb30ffcecc9fe0b4d71b83fd991a69ccde1/data/README.md
+- Raw snapshot: https://github.com/stefmolin/pandas-workshop/blob/45e34fb30ffcecc9fe0b4d71b83fd991a69ccde1/data/Meteorite_Landings.csv
+- NASA/JPL Fireball Data API and field definitions: https://ssd-api.jpl.nasa.gov/doc/fireball.html
+- Sikhote-Alin collection and impact explanation, American Museum of Natural History: https://www.amnh.org/exhibitions/permanent/meteorites/meteorite-impacts/sikhote-alin
+- Fukang official classification and recovery report, Meteoritical Bulletin: https://www.lpi.usra.edu/meteor/metbull.cfm?code=34491
+- Black Beauty / NWA 7034 image and identification, NASA: https://science.nasa.gov/resource/black-beauty-mars-meteorite/
+- Globe.gl: https://globe.gl/ and https://github.com/vasturiano/globe.gl (MIT).
+- Earth texture: https://github.com/vasturiano/three-globe/blob/master/example/img/earth-blue-marble.jpg, bundled as public/assets/earth.jpg at 1024 × 512; repository license https://github.com/vasturiano/three-globe/blob/master/LICENSE.
+- Three.js and RoomEnvironment: https://threejs.org/ (MIT).
+- GSAP: https://gsap.com/; see the installed package's license.
+- D3: https://d3js.org/ (ISC).
+- Lucide icons: https://lucide.dev/ (ISC).
+- The selected storyboard in docs/design-target.jpg is AI-generated visual direction. Its fictional point placement is not data. The live site uses actual catalog coordinates.
+- The meteorite geometries and materials are authored for this project. They are not specimen scans.

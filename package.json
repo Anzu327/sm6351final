@@ -1,0 +1,31 @@
+{
+  "name": "traces-from-space",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "check:data": "node scripts/check-data.mjs",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "three": "0.186.1",
+    "globe.gl": "2.46.2",
+    "gsap": "3.15.0",
+    "d3": "7.9.0",
+    "world-atlas": "2.0.2",
+    "topojson-client": "3.1.0",
+    "lucide": "0.468.0"
+  },
+  "devDependencies": {
+    "vite": "8.3.5",
+    "typescript": "7.0.2",
+    "@types/three": "0.186.0",
+    "@types/d3": "7.4.3",
+    "@types/topojson-client": "3.1.5",
+    "@playwright/test": "1.64.1"
+  }
+}

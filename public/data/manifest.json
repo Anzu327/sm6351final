@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "acquiredAt": "2026-10-29",
+  "acquisitionDatePrecision": "day",
+  "meteoriteShards": [
+    "data/meteorites-00.json",
+    "data/meteorites-01.json",
+    "data/meteorites-02.json",
+    "data/meteorites-03.json",
+    "data/meteorites-04.json",
+    "data/meteorites-05.json",
+    "data/meteorites-06.json",
+    "data/meteorites-07.json"
+  ],
+  "meteorites": {
+    "total": 45716,
+    "mapped": 32186,
+    "source": "https://data.nasa.gov/dataset/meteorite-landings",
+    "transport": "https://github.com/stefmolin/pandas-workshop/blob/45e34fb30ffcecc9fe0b4d71b83fd991a69ccde1/data/Meteorite_Landings.csv",
+    "sourceBlobSha": "76b222ef72144595b2d4692d0c965e7934264451",
+    "yearWindow": [
+      860,
+      2013
+    ],
+    "snapshotNote": "Historical NASA catalog copy; acquisition in 2026 does not imply catalog completeness through 2026."
+  },
+  "fireballs": {
+    "total": 1074,
+    "mapped": 888,
+    "source": "https://ssd-api.jpl.nasa.gov/fireball.api",
+    "apiVersion": "1.2"
+  },
+  "cleaning": {
+    "year-missing": 291,
+    "coordinate-placeholder-0-0": 6214,
+    "coordinates-missing": 7315,
+    "mass-not-positive": 19,
+    "coordinates-out-of-range": 1,
+    "year-outside-snapshot-range": 1
+  }
+}
