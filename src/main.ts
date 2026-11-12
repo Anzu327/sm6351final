@@ -115,7 +115,8 @@ ScrollTrigger.create({
 for (const [i, chapter] of chapters.entries()) {
   const section = el(chapter.slug);
   ScrollTrigger.create({
-    trigger: section, start: 'top 65%', end: i === chapters.length - 1 ? 'max' : 'bottom 65%',
+    trigger: section, start: 'top 65%',
+    end: i === chapters.length - 1 ? () => ScrollTrigger.maxScroll(window) + 1 : 'bottom 65%',
     onToggle: self => { if (self.isActive) activate(i); },
   });
 }
