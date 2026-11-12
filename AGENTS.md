@@ -23,7 +23,7 @@
 - tests and .github/workflows: remote checks, browser evidence and CI-generated dependency lock.
 
 ## Collaboration
-Use separate feature branches after this initial delivery, with a PR describing behavior and checks. Do not rewrite other agents' uncommitted work or force-push. No fuzzy hero matching: use nasa:23593, nasa:34491, nasa:54831.
+Use separate feature branches after this initial delivery, with a PR describing behavior and checks. Do not rewrite other agents' uncommitted work or force-push. No fuzzy hero matching: use nasa:57165, nasa:34491, nasa:11890.
 Coordinate schema changes before editing shared files. Keep work areas small; owners can divide work using HANDOFF.md.
 
 ## Definition of done

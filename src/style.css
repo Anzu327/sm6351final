@@ -14,3 +14,10 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition-duration:.01ms!important}#intro{height:220svh}.chapter{min-height:100svh}}
 
 .surface-toggle{font-size:10px;padding:8px 10px;margin:0 0 12px;border-color:#ffffff28;background:#121820}
+
+.arrival-records{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.arrival-records button[aria-pressed=true]{border-color:#b5a992;color:#e8dbc0}
+.hoba-scale{margin:18px 0 0;max-width:290px;font-size:10px;color:#b6bbc1}
+.hoba-scale figcaption{margin-bottom:10px}
+.hoba-scale div{display:grid;grid-template-columns:minmax(0,1fr) 95px;align-items:center;gap:10px;margin:8px 0}
+.hoba-scale-bar{height:3px;width:var(--length);background:#b5a992}

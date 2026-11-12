@@ -5,6 +5,7 @@ Implemented in source:
 - Silent one-stone opening, scroll-controlled companion join / sideward exit / Earth reveal.
 - Single Globe.gl / Three.js renderer, procedural specimens, bundled Earth texture.
 - No always-visible specimen in Earth view; featured-model hover/focus previews, touch selection.
+- Chelyabinsk, Fukang and Hoba lead the story. The first chapter compares catalog and peak-brightness records; the Hoba chapter compares documented width with a human height reference.
 - Four source-backed chapters, atlas mode with explicit return, source links.
 - Complete meteorite and fireball snapshots, filtering, map picking, paginated lists, detail fields and linked D3 charts.
 - Data load retry, WebGL fallback, mobile layout and reduced-motion support.
