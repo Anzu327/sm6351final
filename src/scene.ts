@@ -85,8 +85,30 @@ export class SpaceScene {
     this.globe.scene().add(this.stars);
     this.dataPoints=new THREE.Points(new THREE.BufferGeometry(),new THREE.ShaderMaterial({
       transparent:true,depthWrite:false,uniforms:{uOpacity:{value:0},uRatio:{value:Math.min(devicePixelRatio,1.7)},uColor:{value:new THREE.Color('#dbd5c6')}},
-      vertexShader:'attribute float pointSize; uniform float uRatio; void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);gl_PointSize=pointSize*uRatio;}',
-      fragmentShader:'uniform vec3 uColor;uniform float uOpacity;void main(){float d=length(gl_PointCoord-0.5);if(d>0.5)discard;gl_FragColor=vec4(uColor,(1.0-smoothstep(0.15,0.5,d))*uOpacity);}'
+      vertexShader: `
+        attribute float pointSize;
+        uniform float uRatio;
+        varying float vFacing;
+        void main() {
+          vec3 point = (modelMatrix * vec4(position, 1.0)).xyz;
+          float facing = dot(normalize(position), normalize(cameraPosition - point));
+          // The same points project closer together near the edge of the sphere.
+          vFacing = smoothstep(-.04, .45, facing);
+          gl_Position = projectionMatrix * viewMatrix * vec4(point, 1.0);
+          gl_PointSize = pointSize * uRatio * mix(.66, 1.0, vFacing);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        uniform float uOpacity;
+        varying float vFacing;
+        void main() {
+          float distanceToCenter = length(gl_PointCoord - .5);
+          if (distanceToCenter > .5) discard;
+          float alpha = (1.0 - smoothstep(.15, .5, distanceToCenter)) * mix(.18, 1.0, vFacing);
+          gl_FragColor = vec4(uColor, alpha * uOpacity);
+        }
+      `
     }));this.globe.scene().add(this.dataPoints);
     this.highlightRing.visible = false;
     this.globe.scene().add(this.highlightRing);
