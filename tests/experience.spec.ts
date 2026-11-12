@@ -2,8 +2,8 @@ import {test,expect, type Page} from '@playwright/test';
 import {mkdir} from 'node:fs/promises';
 const screenshot=async(page:Page,name:string)=>{await mkdir('qa-screenshots',{recursive:true});await page.screenshot({path:'qa-screenshots/'+name+'.png',timeout:30000});};
 async function ready(page:Page){await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-data','ready');await expect(page.locator('#space')).toHaveAttribute('data-ready','true');await expect(page.locator('#space')).toHaveAttribute('data-texture','ready');await expect(page.locator('#space')).toHaveAttribute('data-materials','ready');}
+test.use({ video: 'on' });
 test.describe('recorded story walkthroughs', () => {
- test.use({ video: 'on' });
  test('single fragment, reversible handoff and chapter previews', async ({page}) => {
   test.setTimeout(180000);
   const errors: string[] = [];
