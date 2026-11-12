@@ -1,7 +1,7 @@
 {
-  "sourceSha": "0071811308a79d5ba95598f9de3e014311db1d1a",
+  "sourceSha": "4996b0c5936ea9c21a928681b444fcb9d6e8d85a",
   "status": "success",
-  "runUrl": "https://github.com/Anzu327/sm6351final/actions/runs/42830661948",
+  "runUrl": "https://github.com/Anzu327/sm6351final/actions/runs/43148794120",
   "screenshots": [
     "atlas-mobile.png",
     "black-beauty-unmapped.png",
@@ -10,10 +10,11 @@
     "earth-handoff.png",
     "fireball-atlas.png",
     "hover-fukang.png",
+    "hover-hoba.png",
     "meteorite-atlas.png",
     "opening-desktop.png",
     "opening-mobile.png",
     "webgl-fallback.png"
   ],
-  "recordedAt": "2026-11-10T14:09:15.014Z"
+  "recordedAt": "2026-11-12T03:33:32.837Z"
 }
