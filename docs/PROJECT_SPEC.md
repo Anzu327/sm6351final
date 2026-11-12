@@ -8,28 +8,19 @@
 [已选视觉参考](design-target.jpg)表达镜头顺序，不是天体位置的事实依据。参考图的示例地球点位不作数据使用；实际位置必须使用 catalog ID 对应的真实坐标。陨石模型为程序化几何与材质，不称为真实扫描或精确复原，也不在主画面额外标注。
 
 ## 镜头时序与鼠标
-开场滚动段默认 500svh，其中实际受控距离为 400svh，进度统一为 0–4：
-- 0–0.35：只有 Chelyabinsk，小幅慢转，可用鼠标拖拽旋转。
-- 0.35–1.45：Fukang 与 Hoba 从后方靠近两侧。
-- 1.45–1.8：三颗同框，保留观察时间。
-- 1.8–2.8：两颗同伴分别向左右远离。
-- 2.3–2.95：主角缩小并隐藏。
-- 2.95–3.8：Globe.gl 地球出现并拉近可读尺度，主角对应的地理点得到强调；没有 3D 陨石遮挡地球。
-- 3.8–4：地球构图稳定，再进入文字叙事。
+开场高度为 300svh，实际受控距离为 200svh。先观察和拖动 Chelyabinsk 碎片，随后它缩向地球上目录点的投影。目录点接住碎片，地球拉近。富康和霍巴在各自的章节才首次出现。第一章只显示主角的当前记录，进入下一章时才淡入完整点集。
 
-按滚动位置直接计算每帧状态，支持逆向滚动与跳章，不做一次性入场动画。启用 reduced motion 时取消自动旋转、缩短滚动距离，并以离散静态状态切换替代连续飞离和镜头拉远，仍保留可读叙事。
+滚动可逆。地球叙事阶段可拖拽旋转，滚轮继续推进故事。章节之间的短镜头可被拖拽或跳章打断。进入 atlas 后滚轮缩放，Return to story 恢复原滚动位置。减少动态效果模式使用静态构图，跳过镜头转动、文字位移和选点微光。
 
-地球叙事阶段可拖拽旋转，滚轮继续推进故事。进入 atlas 后滚轮缩放，页面不滚动；Return to story 恢复原滚动位置。加减按钮供触屏与键盘用户缩放。
+地图按可见点的屏幕距离选点。鼠标命中半径为 10 CSS 像素，触屏为 22 CSS 像素。点的视觉尺寸继续编码质量或能量。选中后显示实心标记和细环，地图点选成功时出现一次短促放射效果。React Bits 的 Animated Content 和 Click Spark 是章节入场和选点效果的设计参考。
 
-**地球可见后，陨石模型仅在 hover 预览中出现。** 三位主角可从数据点或底部姓名入口唤起。Black Beauty 仍可从搜索列表查到，目录没有可用坐标。普通记录显示真实字段与详情，不将三位主角的模型冒充任意记录的外形。离开目标或按 Escape 收起预览，手机以点按选择代替 hover。
+故事中的富康和霍巴模型由章节按钮打开，可用 Escape 或切章关闭。图鉴继续支持从地球数据点、姓名入口和列表预览主角模型。Black Beauty 可通过搜索查看，无可用坐标。
 
 ## 四段英文叙事
-1. **One among many.** Chelyabinsk: observed fall on 15 February 2013. Compare the ground catalog record with the JPL peak-brightness observation by switching layers. The two locations have different meanings and the map does not infer a flight path.
-2. **A window inside.** Fukang: found near Fukang, China in 2000. Its pallasite cut face exposes olivine crystals within iron-nickel metal. Crystal effects belong to the polished section, not a glowing natural crust.
-3. **A change of scale.** Hoba: an iron meteorite discovered in Namibia in 1920. Compare the documented 2.95 m width with a 1.75 m human-height reference. The three models in the opening are sized for composition.
-4. **Follow your curiosity.** Transition from three protagonists into the atlas. Conclude that a discovery map reflects both visitors and human discovery/recording effort.
-
-Each chapter exposes an authoritative source link. There is no narration audio or autoplay sound.
+1. **Chelyabinsk: One event, two records.** 地面目录记录与 JPL 火球最亮点分别用圆点和菱形表示，后者的观测高度约为 23.3 km。两个坐标表达各自数据源的含义。
+2. **A window inside.** 通过 Inspect the cut 查看富康橄榄石和铁镍金属的抛光剖面。
+3. **A change of scale.** 通过 Compare the scale 查看霍巴模型，并将目录所附资料中的 2.95 m 宽度和 1.75 m 人体身高参照并列。
+4. **Follow your curiosity.** 进入完整图鉴，比较陨石目录与火球观测。
 
 ## Data contract and provenance
 Meteorite:

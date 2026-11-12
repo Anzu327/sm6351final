@@ -1,4 +1,5 @@
 import Globe from 'globe.gl';
+import { gsap } from 'gsap';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { rock, pallasite, setOpacity, applyMineralTexture } from './models';
@@ -19,36 +20,58 @@ export class SpaceScene {
   onSelect:(r:RecordItem)=>void=()=>{};
   onPreview:(r:RecordItem|null)=>void=()=>{};
   private lastPick=0; private previewId='';
-  private ray=new THREE.Raycaster(); private mouse=new THREE.Vector2();
+  private projected = new THREE.Vector3();
+  private viewProjection = new THREE.Matrix4();
+  private cameraMove: gsap.core.Tween | null = null;
+  private catalogFade: gsap.core.Tween | null = null;
+  private sparkStarted = -Infinity;
+  private pressedPointer: number | null = null;
+  private pointerDragged = false;
+  private earthOpacity = 1;
   private resizeObserver:ResizeObserver;
   private animationId=0;
-  private highlightRing = new THREE.Mesh(
-    new THREE.PlaneGeometry(2, 2),
+  private marker = new THREE.Points(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3)),
     new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
-      uniforms: { uColor: { value: new THREE.Color('#d3c3a0') }, uOpacity: { value: .75 } },
+      uniforms: {
+        uRatio: { value: Math.min(devicePixelRatio, 1.7) },
+        uOpacity: { value: 1 },
+        uSpark: { value: 1 },
+        uFireball: { value: false },
+        uColor: { value: new THREE.Color('#e3d2ac') },
+        uSparkColor: { value: new THREE.Color('#e3d2ac') },
+      },
       vertexShader: `
-        varying vec2 vRingPosition;
+        uniform float uRatio;
         void main() {
-          vRingPosition = position.xy;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+          gl_PointSize = 48. * uRatio;
         }
       `,
       fragmentShader: `
-        varying vec2 vRingPosition;
-        uniform vec3 uColor;
         uniform float uOpacity;
+        uniform float uSpark;
+        uniform bool uFireball;
+        uniform vec3 uColor;
+        uniform vec3 uSparkColor;
         void main() {
-          float signedDistance = length(vRingPosition) - .72;
-          float distanceToRing = abs(signedDistance);
-          // Approximate pixel coverage for a 0.6-pixel stroke at every zoom.
-          float pixelSize = max(fwidth(signedDistance), .0001);
-          float coverage = 1.0 - smoothstep(.0, .8, distanceToRing / pixelSize);
-          gl_FragColor = vec4(uColor, coverage * .6 * uOpacity);
+          vec2 p = (gl_PointCoord - .5) * 48.;
+          float r = length(p);
+          float shape = uFireball ? (abs(p.x) + abs(p.y)) * .83 : r;
+          float core = 1. - smoothstep(3.2, 4.4, shape);
+          float ring = 1. - smoothstep(.25, 1.05, abs(shape - 8.5));
+          // Six short rays spread from the selected record once.
+          float angle = atan(p.y, p.x + .0001);
+          float rays = 1. - smoothstep(.035, .095, abs(sin(angle * 3.)));
+          float distance = 10. + 10. * (1. - pow(1. - uSpark, 2.));
+          float spark = rays * (1. - smoothstep(.6, 3., abs(r - distance))) * (1. - uSpark);
+          float alpha = max(max(core, ring * .65), spark);
+          gl_FragColor = vec4(mix(uColor, uSparkColor, spark), alpha * uOpacity);
           #include <colorspace_fragment>
         }
-      `
+      `,
     })
   );
   constructor(private host:HTMLElement,private onIssue:(s:string)=>void) {
@@ -64,6 +87,7 @@ export class SpaceScene {
       const earthMaterial=new THREE.MeshPhongMaterial({map:texture,color:0x98a6b4,shininess:2,specular:0x080c13});
       earthMaterial.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\nfloat earthGray=dot(diffuseColor.rgb,vec3(0.2126,0.7152,0.0722));\ndiffuseColor.rgb=mix(vec3(earthGray),diffuseColor.rgb,0.10)*vec3(0.37,0.49,0.65);');};
       this.globe.globeMaterial(earthMaterial);
+      this.setEarthOpacity(this.earthOpacity);
       host.dataset.texture='ready';
     },undefined,()=>{host.dataset.texture='failed';onIssue('Earth texture unavailable. Locations and record lists remain usable.');});
     this.globe.lights([new THREE.AmbientLight(0x9ba9bc,.28),new THREE.DirectionalLight(0xe8edf4,.9)]);
@@ -110,52 +134,198 @@ export class SpaceScene {
         }
       `
     }));this.globe.scene().add(this.dataPoints);
-    this.highlightRing.visible = false;
-    this.globe.scene().add(this.highlightRing);
+    this.marker.visible = false;
+    this.marker.frustumCulled = false;
+    this.globe.scene().add(this.marker);
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(host);
     this.host.addEventListener('pointerdown',this.pointerDown);
     this.host.addEventListener('pointermove',this.pointerMove);
     this.host.addEventListener('pointerup',this.pointerUp);
-    this.host.addEventListener('pointercancel',()=>{this.dragging=false;});
-    this.host.addEventListener('pointerleave',()=>{if(this.mode!=='intro')this.onPreview(null);});
+    this.host.addEventListener('pointercancel', this.cancelPointer);
+    window.addEventListener('pointerup', this.releaseOutside);
+    this.host.addEventListener('pointerleave',()=>{if(this.mode==='explore')this.onPreview(null);});
     renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();onIssue('The 3D context was lost. Reload to restore it; the story and records are still readable.');});
     this.setIntro(0);this.tick();host.dataset.ready='true';
   }
   private resize() {const w=innerWidth,h=innerHeight;this.globe.width(w).height(h);(this.globe.camera() as THREE.PerspectiveCamera).updateProjectionMatrix();this.layout();}
-  private layout(){const camera=(this.globe.camera() as THREE.PerspectiveCamera);if(this.mode==='explore'&&innerWidth<700)camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*.2,innerWidth,innerHeight);else camera.clearViewOffset();this.rig.position.set(0,0,-4.7); if(this.mode==='story'){this.rig.position.x=innerWidth<700?0:1.1;this.rig.position.y=innerWidth<700?.78:0;}}
-  private pointerDown=(e:PointerEvent)=>{this.downX=this.lastX=e.clientX;this.downY=this.lastY=e.clientY;this.dragging=true;if(this.mode!=='intro'){this.onPreview(null);return;}this.host.setPointerCapture(e.pointerId);};
-  private pick(e:PointerEvent):RecordItem|null {this.mouse.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);this.ray.setFromCamera(this.mouse,(this.globe.camera() as THREE.PerspectiveCamera));this.ray.params.Points={threshold:1.5};const camera=(this.globe.camera() as THREE.PerspectiveCamera).position;const hit=this.ray.intersectObject(this.dataPoints).find(h=>h.point.dot(camera.clone().sub(h.point))>0);return hit?.index===undefined?null:this.plotted[hit.index]??null;}
-  private pointerMove=(e:PointerEvent)=>{if(this.mode!=='intro'){if(this.dragging)return;if(performance.now()-this.lastPick>100){this.lastPick=performance.now();this.onPreview(this.pick(e));}return;}if(!this.dragging)return;this.activeModel.rotation.y+=(e.clientX-this.lastX)*.006;this.activeModel.rotation.x+=(e.clientY-this.lastY)*.006;this.lastX=e.clientX;this.lastY=e.clientY;this.host.dataset.rotation=this.activeModel.rotation.y.toFixed(3);};
-  private pointerUp=(e:PointerEvent)=>{this.dragging=false;if(this.mode!=='explore'||Math.hypot(e.clientX-this.downX,e.clientY-this.downY)>6)return;
-    this.mouse.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);this.ray.setFromCamera(this.mouse,(this.globe.camera() as THREE.PerspectiveCamera));this.ray.params.Points={threshold:1.8};
-    const camera=(this.globe.camera() as THREE.PerspectiveCamera).position;
-    const hit=this.ray.intersectObject(this.dataPoints).find(h=>{const v=h.point;return v.dot(camera.clone().sub(v))>0;});
-    if(hit?.index!==undefined){const r=this.plotted[hit.index];if(r){this.onSelect(r);this.onPreview(r);}}
+  private layout(){const camera=(this.globe.camera() as THREE.PerspectiveCamera);if (innerWidth < 700) {
+      const offset = this.mode === 'explore' ? .2 : this.mode === 'story' ? .24 : .24 * smooth(2.72, 4, this.progress);
+      camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight * offset, innerWidth, innerHeight);
+    } else camera.clearViewOffset();this.rig.position.set(0,0,-4.7); if(this.mode==='story'){this.rig.position.x=innerWidth<700?0:1.1;this.rig.position.y=innerWidth<700?.78:0;}}
+  private pointerDown = (event: PointerEvent) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    this.pressedPointer = event.pointerId;
+    this.pointerDragged = false;
+    this.downX = this.lastX = event.clientX;
+    this.downY = this.lastY = event.clientY;
+    this.dragging = true;
+    if (this.mode !== 'intro') {
+      this.cameraMove?.kill();
+      if (this.mode === 'explore') this.onPreview(null);
+    } else if (event.pointerType === 'mouse') {
+      this.host.setPointerCapture(event.pointerId);
+    }
   };
-  private controls(explore:boolean) {const c=this.globe.controls();c.enabled=explore||this.mode==='story';c.enableZoom=explore;c.enableRotate=explore||this.mode==='story';c.enablePan=false;c.autoRotate=false;c.minDistance=125;c.maxDistance=700;this.host.dataset.controls=explore?'explore':'story';this.host.style.touchAction=explore?'none':'pan-y';}
-  setIntro(p:number){if(this.reduced)p=p<.45?0:p<1.9?1.6:p<2.95?2.9:4;this.mode='intro';this.progress=p;this.controls(false);this.layout();
-    const join=smooth(.35,1.45,p),leave=smooth(1.8,2.8,p),handoff=smooth(2.3,2.95,p),earth=smooth(2.95,3.8,p);
-    const mobile=innerWidth<700;const unit=mobile?.73:1;
-    this.main.scale.setScalar(unit*THREE.MathUtils.lerp(1.0,.002,handoff));this.main.position.set(0,0,0);setOpacity(this.main,1-smooth(2.8,2.95,p));
-    const side=mobile?1.08:1.65;
-    this.companion.group.position.set(-side*join-(mobile?3:6)*leave,.22*join,-3*(1-join));
-    this.hoba.position.set(side*join+(mobile?3:6)*leave,-.05*join,-3*(1-join));
-    const sideScale=unit*(.2+.48*join);this.companion.group.scale.setScalar(sideScale);this.hoba.scale.setScalar(sideScale*.83);
-    setOpacity(this.companion.group,join*(1-smooth(2.55,2.9,p)));setOpacity(this.hoba,join*(1-smooth(2.55,2.9,p)));
-    this.companion.cut.visible=join>.01;this.companion.exterior.visible=false;
-    this.globe.showGlobe(earth>.002).showAtmosphere(earth>.01);
-    this.globe.pointOfView({lat:heroes.chelyabinsk.lat,lng:heroes.chelyabinsk.lng,altitude:THREE.MathUtils.lerp(12,innerWidth<700?4.1:1.95,earth)},0);
-    this.dataPoints.material.uniforms.uOpacity.value=earth*.76;
-    this.highlight(earth>.3?heroes.chelyabinsk:null,false);
-    this.activeModel=this.main;this.host.dataset.phase=String(Math.min(3,Math.floor(p)));this.host.dataset.intro=p.toFixed(3);
+
+  private pick(event: PointerEvent): RecordItem | null {
+    const rect = this.globe.renderer().domElement.getBoundingClientRect();
+    const camera = this.globe.camera() as THREE.PerspectiveCamera;
+    camera.updateMatrixWorld();
+    this.viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    const { x: cx, y: cy, z: cz } = camera.position;
+    const positions = this.dataPoints.geometry.getAttribute('position');
+    if (!positions) return null;
+    const pointerX = event.clientX - rect.left;
+    const pointerY = event.clientY - rect.top;
+    const radius = event.pointerType === 'touch' ? 22 : 10;
+    let nearest = radius * radius;
+    let record: RecordItem | null = null;
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
+      if (x * (cx - x) + y * (cy - y) + z * (cz - z) <= 0) continue;
+      const p = this.projected.set(x, y, z).applyMatrix4(this.viewProjection);
+      if (p.z < -1 || p.z > 1 || Math.abs(p.x) > 1 || Math.abs(p.y) > 1) continue;
+      const dx = (p.x + 1) * rect.width / 2 - pointerX;
+      const dy = (1 - p.y) * rect.height / 2 - pointerY;
+      const distance = dx * dx + dy * dy;
+      if (distance < nearest) {
+        nearest = distance;
+        record = this.plotted[i] ?? null;
+      }
+    }
+    return record;
   }
-  setChapter(index:number){this.mode='story';this.previewId='__reset';this.preview(null);this.controls(false);this.layout();this.globe.showGlobe(true).showAtmosphere(true);this.dataPoints.material.uniforms.uOpacity.value=.72;
+
+  private pointerMove = (event: PointerEvent) => {
+    if (this.dragging && event.pointerId === this.pressedPointer) {
+      if (Math.hypot(event.clientX - this.downX, event.clientY - this.downY) > 6) this.pointerDragged = true;
+      const horizontal = Math.abs(event.clientX - this.downX) > Math.abs(event.clientY - this.downY);
+      if (this.mode === 'intro' && this.main.visible && (event.pointerType !== 'touch' || horizontal)) {
+        this.main.rotation.y += (event.clientX - this.lastX) * .006;
+        this.main.rotation.x += (event.clientY - this.lastY) * .006;
+        this.lastX = event.clientX;
+        this.lastY = event.clientY;
+        this.host.dataset.rotation = this.main.rotation.y.toFixed(3);
+      }
+      return;
+    }
+    if (this.mode === 'explore' && event.pointerType === 'mouse' && performance.now() - this.lastPick > 75) {
+      this.lastPick = performance.now();
+      this.onPreview(this.pick(event));
+    }
+  };
+
+  private pointerUp = (event: PointerEvent) => {
+    if (event.pointerId !== this.pressedPointer) return;
+    this.cancelPointer();
+    if (this.mode !== 'explore' || this.pointerDragged ||
+        Math.hypot(event.clientX - this.downX, event.clientY - this.downY) > 6) return;
+    const record = this.pick(event);
+    if (!record) return;
+    this.onSelect(record);
+    this.confirmSelection();
+  };
+
+  private cancelPointer = () => {
+    this.pressedPointer = null;
+    this.dragging = false;
+  };
+
+  private releaseOutside = (event: PointerEvent) => {
+    if (event.pointerId === this.pressedPointer) this.cancelPointer();
+  };
+
+  private controls(explore:boolean) {const c=this.globe.controls();c.enabled=explore||this.mode==='story';c.enableZoom=explore;c.enableRotate=explore||this.mode==='story';c.enablePan=false;c.autoRotate=false;c.minDistance=125;c.maxDistance=700;this.host.dataset.controls=explore?'explore':'story';this.host.style.touchAction=explore?'none':'pan-y';}
+  setIntro(progress: number) {
+    const p = this.reduced ? (progress < 2.75 ? 0 : 4) : progress;
+    this.mode = 'intro';
+    this.progress = p;
+    this.cameraMove?.kill();
+    this.catalogFade?.kill();
+    this.controls(false);
+    this.layout();
+    this.globe.controls().enableRotate = false;
+    const approach = smooth(.65, 2.72, p);
+    const earth = smooth(2.72, 4, p);
+    const mobile = innerWidth < 700;
+    this.main.position.set(0, 0, 0);
+    this.main.scale.setScalar((mobile ? .73 : 1) * THREE.MathUtils.lerp(1, .022, approach));
+    setOpacity(this.main, 1 - smooth(2.55, 2.72, p));
+    setOpacity(this.companion.group, 0);
+    setOpacity(this.hoba, 0);
+    // A camera aimed at the catalog coordinates projects the pin to the fragment's center.
+    const reveal = smooth(2.72, 3.12, p);
+    this.globe.showGlobe(reveal > 0).showAtmosphere(reveal >= .95);
+    this.setEarthOpacity(reveal);
+    this.globe.pointOfView({
+      lat: heroes.chelyabinsk.lat,
+      lng: heroes.chelyabinsk.lng,
+      altitude: THREE.MathUtils.lerp(12, mobile ? 5.1 : chapters[0].altitude, earth),
+    }, 0);
+    this.dataPoints.material.uniforms.uOpacity.value = 0;
+    this.highlight(p >= 2.63 ? heroes.chelyabinsk : null, false);
+    this.marker.material.uniforms.uOpacity.value = smooth(2.63, 2.78, p);
+    this.activeModel = this.main;
+    this.host.dataset.intro = p.toFixed(3);
+    this.host.dataset.phase = p < 2.63 ? 'fragment' : p < 2.72 ? 'handoff' : 'earth';
+    this.host.dataset.preview = '';
+  }
+
+  private setEarthOpacity(opacity: number) {
+    this.earthOpacity = opacity;
+    const material = this.globe.globeMaterial();
+    const transparent = opacity < 1;
+    if (material.transparent !== transparent) {
+      material.transparent = transparent;
+      material.needsUpdate = true;
+    }
+    material.opacity = opacity;
+    material.depthWrite = !transparent;
+  }
+
+  setChapter(index: number, immediate = false) {
+    const previousMode = this.mode;
+    this.mode = 'story';
+    this.previewId = '__reset';
+    this.preview(null);
+    this.controls(false);
+    this.layout();
+    this.globe.showGlobe(true).showAtmosphere(true);
+    this.setEarthOpacity(1);
+    this.catalogFade?.kill();
+    const opacity = this.dataPoints.material.uniforms.uOpacity;
+    if (index === 0 || this.reduced || immediate) opacity.value = index === 0 ? 0 : .72;
+    else this.catalogFade = gsap.to(opacity, { value: .72, duration: .5, ease: 'power2.out' });
     const chapter = chapters[index] ?? chapters[3];
     const hero = chapter.hero ? heroes[chapter.hero] : null;
     const { lat, lng } = hero ?? { lat: 22, lng: 30 };
-    this.globe.pointOfView({ lat, lng, altitude: innerWidth < 700 ? 4.1 : chapter.altitude }, 0);
+    this.moveCamera({ lat, lng, altitude: innerWidth < 700 ? 5.1 : chapter.altitude },
+      !immediate && previousMode !== 'intro');
     this.highlight(hero, false);
     this.host.dataset.chapter = String(index);
+  }
+
+  private moveCamera(target: { lat: number; lng: number; altitude: number }, animate: boolean) {
+    this.cameraMove?.kill();
+    if (this.reduced || !animate) {
+      this.globe.pointOfView(target, 0);
+      return;
+    }
+    const start = this.globe.pointOfView();
+    const longitude = start.lng ?? target.lng;
+    const delta = ((target.lng - longitude + 540) % 360) - 180;
+    const progress = { value: 0 };
+    this.cameraMove = gsap.to(progress, {
+      value: 1, duration: .52, ease: 'power2.inOut',
+      onUpdate: () => {
+        const t = progress.value;
+        this.globe.pointOfView({
+          lat: THREE.MathUtils.lerp(start.lat ?? target.lat, target.lat, t),
+          lng: longitude + delta * t,
+          altitude: THREE.MathUtils.lerp(start.altitude ?? target.altitude, target.altitude, t),
+        }, 0);
+      },
+    });
   }
   preview(record:RecordItem|null){if(this.mode==='intro')return;const id=record?.id??'';if(this.previewId===id)return;this.previewId=id;[this.main,this.companion.group,this.hoba].forEach(x=>setOpacity(x,0));this.host.dataset.preview='';
     const object=id===heroes.chelyabinsk.id?this.main:id===heroes.fukang.id?this.companion.group:id===heroes.hoba.id?this.hoba:null;
@@ -167,29 +337,53 @@ export class SpaceScene {
     if(id===heroes.fukang.id)this.setCut(true);
   }
   setCut(cut:boolean){this.host.dataset.cut=String(cut);this.companion.cut.visible=cut;this.companion.exterior.visible=!cut;}
-  explore(){this.mode='explore';this.previewId='';this.preview(null);this.controls(true);this.layout();[this.main,this.companion.group,this.hoba].forEach(x=>setOpacity(x,0));this.globe.showGlobe(true).showAtmosphere(true);this.dataPoints.material.uniforms.uOpacity.value=.82;this.globe.pointOfView({lat:20,lng:20,altitude:innerWidth<700?4.2:2.3},0);}
+  explore(){this.mode='explore';this.cameraMove?.kill();this.catalogFade?.kill();this.previewId='__reset';this.preview(null);this.controls(true);this.layout();[this.main,this.companion.group,this.hoba].forEach(x=>setOpacity(x,0));this.globe.showGlobe(true).showAtmosphere(true);this.setEarthOpacity(1);this.dataPoints.material.uniforms.uOpacity.value=.82;this.globe.pointOfView({lat:20,lng:20,altitude:innerWidth<700?4.2:2.3},0);}
   setRecords(records:RecordItem[],layer:Layer){this.plotted=records.filter(hasLocation);const positions=[],sizes=[];
     for(const r of this.plotted){const c=this.globe.getCoords(r.lat,r.lng,.006);positions.push(c.x,c.y,c.z);const value=isMeteorite(r)?r.massG:r.energyKt;sizes.push(value===null?1.4:1.5+Math.min(4,Math.log10(1+value)*.48));}
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('pointSize',new THREE.Float32BufferAttribute(sizes,1));this.dataPoints.geometry.dispose();this.dataPoints.geometry=g;
     this.dataPoints.material.uniforms.uColor.value.set(layer==='meteorites'?'#dbd5c6':'#b7c9d5');this.host.dataset.plotted=String(this.plotted.length);
   }
-  highlight(record: { lat: number | null; lng: number | null } | null, fly = true) {
-    const ring = this.highlightRing;
-    ring.visible = record !== null && record.lat !== null && record.lng !== null;
+  highlight(record: { lat: number | null; lng: number | null } | null, fly = true, fireball = false) {
+    this.sparkStarted = -Infinity;
+    this.marker.material.uniforms.uSpark.value = 1;
+    this.marker.material.uniforms.uOpacity.value = 1;
+    this.marker.material.uniforms.uFireball.value = fireball;
+    this.marker.material.uniforms.uColor.value.set(fireball ? '#d0e0ea' : '#e3d2ac');
+    this.marker.visible = record !== null && record.lat !== null && record.lng !== null;
     if (!record || record.lat === null || record.lng === null) return;
     const { lat, lng } = record;
-    const { x, y, z } = this.globe.getCoords(lat, lng, .008);
-    ring.position.set(x, y, z);
-    ring.lookAt(x * 2, y * 2, z * 2);
-    if (fly) this.globe.pointOfView({ lat, lng, altitude: innerWidth < 700 ? 4.1 : 1.9 }, this.reduced ? 0 : 700);
+    const { x, y, z } = this.globe.getCoords(lat, lng, .009);
+    this.marker.position.set(x, y, z);
+    if (fly) this.moveCamera({ lat, lng, altitude: innerWidth < 700 ? 4.1 : 1.9 }, true);
   }
-  zoom(factor:number){const p=this.globe.pointOfView();this.globe.pointOfView({altitude:THREE.MathUtils.clamp((p.altitude??2)*factor,.25,6)},this.reduced?0:180);}
-  private tick=()=>{if(!this.reduced&&!this.dragging&&this.mode==='intro'&&this.progress<.1)this.main.rotation.y+=.0012;
-    if (this.highlightRing.visible) {
-      const phase = this.reduced ? .55 : (performance.now() % 1500) / 1500;
-      this.highlightRing.scale.setScalar(1.75 + phase * 1.02);
-      this.highlightRing.material.uniforms.uOpacity.value = .9 - phase * .45;
+
+  confirmSelection() {
+    if (!this.reduced && this.marker.visible) this.sparkStarted = performance.now();
+  }
+  zoom(factor:number){
+    const p = this.globe.pointOfView();
+    this.moveCamera({ lat: p.lat ?? 0, lng: p.lng ?? 0,
+      altitude: THREE.MathUtils.clamp((p.altitude ?? 2) * factor, .25, 6) }, true);
+  }
+  private tick = () => {
+    if (!this.reduced && !this.dragging && this.mode === 'intro' && this.progress < .65) {
+      this.main.rotation.y += .0012;
     }
-    this.animationId=requestAnimationFrame(this.tick);};
-  destroy(){cancelAnimationFrame(this.animationId);this.resizeObserver.disconnect();this.highlightRing.geometry.dispose();this.highlightRing.material.dispose();this.globe.pauseAnimation();this.globe.renderer().dispose();}
+    if (this.marker.visible) {
+      this.marker.material.uniforms.uSpark.value = clamp((performance.now() - this.sparkStarted) / 260);
+    }
+    this.animationId = requestAnimationFrame(this.tick);
+  };
+
+  destroy() {
+    cancelAnimationFrame(this.animationId);
+    this.cameraMove?.kill();
+    this.catalogFade?.kill();
+    window.removeEventListener('pointerup', this.releaseOutside);
+    this.resizeObserver.disconnect();
+    this.marker.geometry.dispose();
+    this.marker.material.dispose();
+    this.globe.pauseAnimation();
+    this.globe.renderer().dispose();
+  }
 }

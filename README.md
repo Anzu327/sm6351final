@@ -1,7 +1,7 @@
 # Traces from Space
 An English, scroll-driven 3D meteorite story and source-backed global atlas for SM6351. Team: SpaceUHK.
 
-The opening contains **one meteorite and a small Scroll hint only**. Two companions join as you scroll, then move apart. The central fragment recedes before Earth appears. Once Earth is visible, the specimen models stay hidden until a featured record is hovered (or selected on touch).
+The opening contains **one meteorite and a small Scroll hint only**. The fragment shrinks into the first point on Earth. Chelyabinsk compares two records before the wider catalog appears. Fukang and Hoba debut in their own chapters through on-demand model previews.
 
 ## Start here
 - [Agent instructions](AGENTS.md)
