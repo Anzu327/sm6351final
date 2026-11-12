@@ -23,8 +23,33 @@ export class SpaceScene {
   private resizeObserver:ResizeObserver;
   private animationId=0;
   private highlightRing = new THREE.Mesh(
-    new THREE.RingGeometry(.89, 1, 64),
-    new THREE.MeshBasicMaterial({ color: '#d3c3a0', transparent: true, depthWrite: false })
+    new THREE.PlaneGeometry(2, 2),
+    new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      uniforms: { uColor: { value: new THREE.Color('#d3c3a0') }, uOpacity: { value: .75 } },
+      vertexShader: `
+        varying vec2 vRingPosition;
+        void main() {
+          vRingPosition = position.xy;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vRingPosition;
+        uniform vec3 uColor;
+        uniform float uOpacity;
+        void main() {
+          float signedDistance = length(vRingPosition) - .72;
+          float distanceToRing = abs(signedDistance);
+          // Approximate pixel coverage for a 0.6-pixel stroke at every zoom.
+          float pixelSize = max(fwidth(signedDistance), .0001);
+          float coverage = 1.0 - smoothstep(.0, .8, distanceToRing / pixelSize);
+          gl_FragColor = vec4(uColor, coverage * .6 * uOpacity);
+          #include <colorspace_fragment>
+        }
+      `
+    })
   );
   constructor(private host:HTMLElement,private onIssue:(s:string)=>void) {
     this.globe=new Globe(host,{animateIn:false}).backgroundColor('#030509')
@@ -140,8 +165,8 @@ export class SpaceScene {
   private tick=()=>{if(!this.reduced&&!this.dragging&&this.mode==='intro'&&this.progress<.1)this.main.rotation.y+=.0012;
     if (this.highlightRing.visible) {
       const phase = this.reduced ? .55 : (performance.now() % 1500) / 1500;
-      this.highlightRing.scale.setScalar(1.25 + phase * .75);
-      this.highlightRing.material.opacity = .78 - phase * .44;
+      this.highlightRing.scale.setScalar(1.75 + phase * 1.02);
+      this.highlightRing.material.uniforms.uOpacity.value = .9 - phase * .45;
     }
     this.animationId=requestAnimationFrame(this.tick);};
   destroy(){cancelAnimationFrame(this.animationId);this.resizeObserver.disconnect();this.highlightRing.geometry.dispose();this.highlightRing.material.dispose();this.globe.pauseAnimation();this.globe.renderer().dispose();}
