@@ -10,24 +10,45 @@ import { hasLocation, isMeteorite, type DataBundle, type Filters, type Layer, ty
 gsap.registerPlugin(ScrollTrigger);
 const root=document.querySelector<HTMLDivElement>('#app')!;
 root.innerHTML=`
-<a class="skip" href="#story">Skip opening</a>
+<a class="skip" href="#many">Skip opening</a>
 <div id="space" aria-label="Interactive three-dimensional meteorites and Earth"></div>
 <div id="scene-warning" role="status" hidden></div>
 <header id="header" hidden><a class="wordmark" href="#story">TRACES <span>FROM SPACE</span></a><nav aria-label="Story chapters">${chapters.map((c,i)=>'<a href="#'+c.slug+'" data-chapter="'+i+'">'+c.short+'</a>').join('')}</nav><button class="text-button" data-enter>Explore the atlas</button></header>
 <main id="story">
-<section id="intro" aria-label="A fragment from space. Scroll to reveal two companions, then Earth.">
+<section id="intro" aria-label="A fragment from space. Scroll to follow it to Earth.">
   <button id="scroll-hint" aria-label="Scroll down to begin"><i data-lucide="chevron-down"></i><span>Scroll</span></button>
 </section>
-<div id="chapters">${chapters.map((c,i)=>`<section class="chapter" id="${c.slug}" data-step="${i}"><article><span class="chapter-number">0${i+1} / 04</span><h1>${c.title}</h1><p>${c.text}</p><p class="note">${c.note}</p>${c.hero ? `<a class="source-link" href="${heroes[c.hero].source}" target="_blank" rel="noopener noreferrer">Read the evidence <i data-lucide="external-link"></i></a>` : ''}${c.hero==='chelyabinsk'?`<div class="arrival-records" role="group" aria-label="Chelyabinsk observations">
-  <button data-arrival-layer="meteorites" aria-pressed="true" disabled>Recovered fragments</button>
-  <button data-arrival-layer="fireballs" aria-pressed="false" disabled>Fireball</button>
-</div>
-<p id="arrival-location" class="inspect-note" aria-live="polite">The meteorite catalog represents recovered fragments on the ground.</p>
-<a class="source-link" href="https://ssd-api.jpl.nasa.gov/doc/fireball.html" target="_blank" rel="noopener noreferrer">Fireball field definitions</a>`:''}${c.hero==='hoba'?`<figure class="hoba-scale">
-  <figcaption>Hoba width compared with human height</figcaption>
-  <div><span class="hoba-scale-bar" style="--length:100%"></span><span>Hoba · 2.95 m</span></div>
-  <div><span class="hoba-scale-bar" style="--length:59.32%"></span><span>Person · 1.75 m</span></div>
-</figure>`:''}${i===1?'<p class="inspect-note">Hover Fukang below to inspect its cut surface.</p>':''}${i===3?'<button class="primary" data-enter>Enter the atlas</button>':''}</article></section>`).join('')}</div>
+<div id="chapters">${chapters.map((c,i)=>`
+  <section class="chapter" id="${c.slug}" data-step="${i}">
+    <article>
+      <h1 data-reveal>${c.title}</h1>
+      <div data-reveal>
+        <p>${c.text}</p>
+        ${i===0?`<p>One record catalogs fragments on the ground. The other marks where the fireball shone brightest in the atmosphere, about 23.3 km up.</p>`:`<p class="note">${c.note}</p>`}
+      </div>
+      <div data-reveal class="chapter-actions">
+        ${c.hero==='chelyabinsk'?`
+        <div class="arrival-records" role="group" aria-label="Chelyabinsk observations">
+          <button data-arrival-layer="meteorites" aria-pressed="true" disabled><span class="ground-symbol" aria-hidden="true"></span>Ground record</button>
+          <button data-arrival-layer="fireballs" aria-pressed="false" disabled><span class="air-symbol" aria-hidden="true"></span>Peak brightness</button>
+        </div>
+        <p id="arrival-location" class="inspect-note" aria-live="polite">Meteorite catalog location · 54.817° N, 61.117° E</p>
+        <div class="arrival-sources">
+          <a class="source-link" href="${heroes.chelyabinsk.source}" target="_blank" rel="noopener noreferrer">Meteorite catalog</a>
+          <a class="source-link" href="https://cneos.jpl.nasa.gov/news/fireball_130301.html" target="_blank" rel="noopener noreferrer">NASA/JPL event report</a>
+        </div>`:''}
+        ${c.hero==='fukang'?`<button class="surface-toggle" data-story-preview="fukang" aria-pressed="false">Inspect the cut</button>`:''}
+        ${c.hero==='hoba'?`<button class="surface-toggle" data-story-preview="hoba" aria-expanded="false" aria-controls="hoba-scale">Compare the scale</button>
+        <figure id="hoba-scale" class="hoba-scale" hidden>
+          <figcaption>Hoba width compared with human height</figcaption>
+          <div><span class="hoba-scale-bar" style="--length:100%"></span><span>Hoba · 2.95 m</span></div>
+          <div><span class="hoba-scale-bar" style="--length:59.32%"></span><span>Person · 1.75 m</span></div>
+        </figure>`:''}
+        ${c.hero==='fukang'||c.hero==='hoba'?`<a class="source-link" href="${heroes[c.hero].source}" target="_blank" rel="noopener noreferrer">Read the evidence <i data-lucide="external-link"></i></a>`:''}
+        ${i===3?'<button class="primary" data-enter>Enter the atlas</button>':''}
+      </div>
+    </article>
+  </section>`).join('')}</div>
 <footer id="story-footer"><p>Some are witnessed. Most are found.<br>Every record is a beginning.</p><div class="source-list">${sources.map(([name,url])=>'<a target="_blank" rel="noopener noreferrer" href="'+url+'">'+name+'</a>').join('')}</div><p class="small">An information visualization project · SpaceUHK</p></footer>
 </main>
 <div id="story-heroes" hidden aria-label="Featured meteorites">${Object.entries(heroes).map(([key,h])=>'<button data-hero="'+key+'">'+h.name+'</button>').join('')}</div>
@@ -62,49 +83,140 @@ const issue=(message:string)=>{el('scene-warning').textContent=message;el('scene
 try{scene=new SpaceScene(el('space'),issue);}catch(error){document.body.classList.add('no-webgl');issue('3D is unavailable in this browser. The story and searchable records remain available.');console.warn('3D unavailable',error);}
 function hidePreview(){scene?.preview(null);el('hover-preview').hidden=true;}
 function preview(r:RecordItem|null){scene?.preview(r);if(!r||!Object.values(heroes).some(h=>h.id===r.id)){el('hover-preview').hidden=true;return;}el('hover-preview').hidden=false;el('hover-name').textContent=r.name;el('hover-meta').textContent=isMeteorite(r)?r.classification:'';}
-if(scene){scene.onSelect=r=>{selectRecord(r,false);if(matchMedia('(hover: none)').matches)preview(r);};scene.onPreview=preview;}
-ScrollTrigger.create({trigger:'#intro',start:'top top',end:'bottom bottom',onUpdate:self=>{
-  if(mode==='explore')return;
-  if (storyLayer === 'fireballs') setArrivalLayer('meteorites');
-  scene?.setIntro(self.progress*4);
-  el('scroll-hint').style.opacity=String(1-Math.min(1,self.progress*7));
-  el('header').hidden=self.progress<.995;el('story-heroes').hidden=self.progress<.995;
+if (scene) {
+  scene.onSelect = record => {
+    selectRecord(record, false);
+    if (matchMedia('(hover: none)').matches) preview(record);
+  };
+  scene.onPreview = preview;
+}
+
+function closeStoryPreview() {
+  document.querySelector('[data-story-preview="fukang"]')?.setAttribute('aria-pressed', 'false');
+  document.querySelector('[data-story-preview="hoba"]')?.setAttribute('aria-expanded', 'false');
+  el('hoba-scale').hidden = true;
   hidePreview();
-}});
-for(let i=0;i<chapters.length;i++)ScrollTrigger.create({trigger:'#'+chapters[i].slug,start:'top 65%',end:'bottom 65%',onEnter:()=>activate(i),onEnterBack:()=>activate(i)});
-function activate(i:number){if(mode==='explore')return;activeChapter=i;if(storyLayer==='fireballs')setArrivalLayer('meteorites');scene?.setChapter(i);el('header').hidden=false;el('story-heroes').hidden=false;hidePreview();document.querySelectorAll('[data-chapter]').forEach(n=>n.setAttribute('aria-current',Number((n as HTMLElement).dataset.chapter)===i?'step':'false'));}
-function setArrivalLayer(next: Layer) {
+}
+
+ScrollTrigger.create({
+  trigger: '#intro', start: 'top top', end: 'bottom bottom',
+  onUpdate: self => {
+    if (mode === 'explore' || self.scroll() > self.end) return;
+    if (storyLayer === 'fireballs') setArrivalLayer('meteorites');
+    scene?.setIntro(self.progress * 4);
+    const hint = el<HTMLButtonElement>('scroll-hint');
+    hint.style.opacity = String(1 - Math.min(1, self.progress * 5));
+    hint.hidden = self.progress >= .2;
+    el('header').hidden = self.progress < .995;
+    closeStoryPreview();
+  },
+});
+
+for (const [i, chapter] of chapters.entries()) {
+  const section = el(chapter.slug);
+  ScrollTrigger.create({
+    trigger: section, start: 'top 65%', end: i === chapters.length - 1 ? 'max' : 'bottom 65%',
+    onToggle: self => { if (self.isActive) activate(i); },
+  });
+}
+const motion = gsap.matchMedia();
+motion.add('(prefers-reduced-motion: no-preference)', () => {
+  for (const chapter of chapters) {
+    const groups = el(chapter.slug).querySelectorAll('[data-reveal]');
+    ScrollTrigger.create({
+      trigger: groups[0], start: 'top 85%', once: true,
+      onEnter: () => {
+        if (mode === 'explore' || groups[0].getBoundingClientRect().bottom < 0) return;
+        gsap.fromTo(groups, { y: 8, opacity: 0 }, {
+          y: 0, opacity: 1, duration: .2, stagger: .05, ease: 'power3.out', clearProps: 'transform,opacity',
+        });
+      },
+    });
+  }
+});
+
+function activate(index: number, immediate = false) {
+  if (mode === 'explore') return;
+  closeStoryPreview();
+  activeChapter = index;
+  if (storyLayer === 'fireballs') setArrivalLayer('meteorites');
+  scene?.setChapter(index, immediate);
+  el('header').hidden = false;
+  el('scroll-hint').hidden = true;
+  document.querySelectorAll<HTMLElement>('[data-chapter]').forEach(link => {
+    if (Number(link.dataset.chapter) === index) link.setAttribute('aria-current', 'step');
+    else link.removeAttribute('aria-current');
+  });
+}
+
+function setArrivalLayer(next: Layer, confirmed = false) {
   if (!bundle) return;
   const record = next === 'fireballs'
     ? bundle.fireballs.find(r => r.id === chelyabinskFireballId)
     : bundle.meteorites.find(r => r.id === heroes.chelyabinsk.id);
   if (!record || !hasLocation(record)) return;
 
+  if (storyLayer !== next) scene?.setRecords(bundle[next], next);
   storyLayer = next;
-  scene?.setRecords(bundle[next], next);
-  scene?.highlight(record, false);
-  hidePreview();
+  scene?.highlight(record, false, next === 'fireballs');
+  if (confirmed) scene?.confirmSelection();
   document.querySelectorAll<HTMLButtonElement>('[data-arrival-layer]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.arrivalLayer === next));
   });
   const coordinates = `${record.lat.toFixed(3)}° N, ${record.lng.toFixed(3)}° E`;
   el('arrival-location').textContent = isMeteorite(record)
-    ? `Meteorite catalog location · ${coordinates}. This ground record represents recovered fragments.`
-    : `Fireball at peak brightness · ${coordinates}. Altitude: ${record.altitudeKm ?? 'unknown'} km. The point is the location of an observation in the atmosphere.`;
+    ? `Meteorite catalog location · ${coordinates}`
+    : `Peak brightness · ${coordinates}. Altitude: ${record.altitudeKm ?? 'unknown'} km.`;
 }
 document.querySelectorAll<HTMLButtonElement>('[data-arrival-layer]').forEach(button => {
-  button.addEventListener('click', () => setArrivalLayer(button.dataset.arrivalLayer as Layer));
+  button.addEventListener('click', event => setArrivalLayer(button.dataset.arrivalLayer as Layer, event.detail > 0));
 });
-el('scroll-hint').addEventListener('click',()=>window.scrollTo({top:innerHeight*.95,behavior:scene?.reduced?'instant':'smooth'}));
+
+document.querySelectorAll<HTMLButtonElement>('[data-story-preview]').forEach(button => {
+  button.addEventListener('click', () => {
+    const hero = button.dataset.storyPreview === 'hoba' ? 'hoba' : 'fukang';
+    const attribute = hero === 'hoba' ? 'aria-expanded' : 'aria-pressed';
+    const open = button.getAttribute(attribute) === 'true';
+    closeStoryPreview();
+    if (open) return;
+    button.setAttribute(attribute, 'true');
+    if (hero === 'hoba') el('hoba-scale').hidden = false;
+    const record = bundle?.meteorites.find(r => r.id === heroes[hero].id);
+    if (scene && record) {
+      preview(record);
+      if (hero === 'fukang') scene.setCut(true);
+    }
+  });
+});
+
+el('scroll-hint').addEventListener('click', event => {
+  el('many').scrollIntoView({ behavior: event.detail === 0 || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+});
 document.querySelectorAll<HTMLElement>('[data-hero]').forEach(button=>{
   const hero=heroes[button.dataset.hero as keyof typeof heroes];
   const record=()=>bundle?.meteorites.find(r=>r.id===hero.id)??null;
   button.addEventListener('mouseenter',()=>preview(record()));button.addEventListener('mouseleave',hidePreview);button.addEventListener('focus',()=>preview(record()));button.addEventListener('blur',hidePreview);
   button.addEventListener('click',()=>{const r=record();if(!r)return;if(mode!=='explore')enterAtlas();if(layer!=='meteorites')document.querySelector<HTMLButtonElement>('[data-layer="meteorites"]')?.click();selectRecord(r,true);if(matchMedia('(hover: none)').matches)preview(r);});
 });
-function enterAtlas(){returnY=scrollY;mode='explore';document.body.classList.add('exploring');el('story').hidden=true;el('header').hidden=true;el('atlas').hidden=false;el('story-heroes').hidden=false;scene?.explore();hidePreview();update();el('return-story').focus();}
+function enterAtlas(){closeStoryPreview();returnY=scrollY;mode='explore';document.body.classList.add('exploring');el('story').hidden=true;el('header').hidden=true;el('atlas').hidden=false;el('story-heroes').hidden=false;scene?.explore();hidePreview();update();el('return-story').focus();}
 document.querySelectorAll('[data-enter]').forEach(b=>b.addEventListener('click',enterAtlas));
-el('return-story').addEventListener('click',()=>{mode='story';document.body.classList.remove('exploring');el('story').hidden=false;el('atlas').hidden=true;hidePreview();window.scrollTo({top:returnY,behavior:'instant'});ScrollTrigger.refresh();if(bundle)scene?.setRecords(bundle.meteorites,'meteorites');if(returnY<el('intro').offsetHeight-innerHeight)scene?.setIntro(Math.min(4,returnY/(el('intro').offsetHeight-innerHeight)*4));else activate(activeChapter);});
+el('return-story').addEventListener('click', () => {
+  mode = 'story';
+  document.body.classList.remove('exploring');
+  el('story').hidden = false;
+  el('atlas').hidden = true;
+  el('story-heroes').hidden = true;
+  closeStoryPreview();
+  window.scrollTo({ top: returnY, behavior: 'instant' });
+  ScrollTrigger.refresh();
+  if (bundle) scene?.setRecords(bundle.meteorites, 'meteorites');
+  const introEnd = el('intro').offsetHeight - innerHeight;
+  if (returnY < introEnd) scene?.setIntro(Math.min(4, 4 * returnY / introEnd));
+  else {
+    activate(activeChapter, true);
+    if (activeChapter === 0) setArrivalLayer('meteorites');
+  }
+});
 el('zoom-in').addEventListener('click',()=>scene?.zoom(.8));el('zoom-out').addEventListener('click',()=>scene?.zoom(1.25));
 function numberInput(id:string){const v=(el<HTMLInputElement>(id).value).trim();return v===''?null:Number(v);}
 function filters():Filters{return {query:el<HTMLInputElement>('search').value,from:numberInput('from'),to:numberInput('to'),status:el<HTMLSelectElement>('status').value,classification:el<HTMLSelectElement>('classification').value,includeUndated:el<HTMLInputElement>('undated').checked};}
@@ -141,12 +253,12 @@ function selectRecord(r:RecordItem,fly:boolean){const host=el('details');host.re
   for(const [label,value] of fields){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}host.append(dl);
   if(r.id===heroes.fukang.id){let cut=true;const inspect=document.createElement('button');inspect.className='surface-toggle';inspect.textContent='View exterior';const show=()=>{preview(r);scene?.setCut(cut);};inspect.addEventListener('mouseenter',show);inspect.addEventListener('mouseleave',hidePreview);inspect.addEventListener('focus',show);inspect.addEventListener('blur',hidePreview);inspect.addEventListener('click',()=>{cut=!cut;show();inspect.textContent=cut?'View exterior':'View cut surface';});host.append(inspect);}
   if(isMeteorite(r)){const p=document.createElement('p');p.className='small';p.textContent='Catalog mass can represent recovered material from multiple fragments; it is not necessarily the mass of the displayed specimen.';host.append(p);}
-  const anchor=document.createElement('a');anchor.className='source-link';anchor.target='_blank';anchor.rel='noopener noreferrer';anchor.textContent='View source record';anchor.href=isMeteorite(r)?'https://www.lpi.usra.edu/meteor/metbull.php?code='+encodeURIComponent(r.sourceId):'https://cneos.jpl.nasa.gov/fireballs/';host.append(anchor);scene?.highlight(r,fly);
+  const anchor=document.createElement('a');anchor.className='source-link';anchor.target='_blank';anchor.rel='noopener noreferrer';anchor.textContent='View source record';anchor.href=isMeteorite(r)?'https://www.lpi.usra.edu/meteor/metbull.php?code='+encodeURIComponent(r.sourceId):'https://cneos.jpl.nasa.gov/fireballs/';host.append(anchor);scene?.highlight(r,fly,!isMeteorite(r));
 }
 async function initializeData(){el('data-error').hidden=true;el('load-status').textContent='Loading the archive.';
   try{bundle=await loadData();const classifications=[...new Set(bundle.meteorites.map(r=>r.classification))].sort();const select=el<HTMLSelectElement>('classification');select.replaceChildren(new Option('All classifications',''));for(const name of classifications)select.add(new Option(name,name));el('snapshot-info').textContent='Acquired '+bundle.manifest.acquiredAt.slice(0,10)+'. Meteorites: '+bundle.meteorites.length.toLocaleString('en')+' records. Fireballs: '+bundle.fireballs.length.toLocaleString('en')+' events. Time coverage differs between layers.';el('load-status').textContent='Archive loaded.';document.body.dataset.data='ready';scene?.setRecords(bundle.meteorites,'meteorites');update();
     document.querySelectorAll<HTMLButtonElement>('[data-arrival-layer]').forEach(button => {
-      button.disabled = !scene || (button.dataset.arrivalLayer === 'fireballs'
+      button.disabled = (button.dataset.arrivalLayer === 'fireballs'
         ? !bundle?.fireballs.some(r => r.id === chelyabinskFireballId && hasLocation(r))
         : !bundle?.meteorites.some(r => r.id === heroes.chelyabinsk.id && hasLocation(r)));
     });
@@ -156,4 +268,8 @@ async function initializeData(){el('data-error').hidden=true;el('load-status').t
 }
 el('retry').addEventListener('click',initializeData);
 void initializeData();
-document.addEventListener('keydown',e=>{if(e.key==='Escape')hidePreview();});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (mode === 'story') closeStoryPreview();
+  else hidePreview();
+});
