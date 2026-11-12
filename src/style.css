@@ -35,5 +35,8 @@
 .air-symbol { transform: rotate(45deg); background: #d0e0ea; }
 @media (max-width: 700px) {
   #many h1 { max-width: none; }
-  #many { padding-top: 39svh; }
+  #many { min-height: 100svh; align-items: flex-start; padding-top: 33svh; padding-bottom: 8svh; }
+  #many article { width: 100%; }
+  #many [data-reveal] > p { margin-bottom: 0; }
+  #many .chapter-actions { margin-top: 12px; }
 }

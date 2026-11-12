@@ -148,7 +148,10 @@ export class SpaceScene {
     this.setIntro(0);this.tick();host.dataset.ready='true';
   }
   private resize() {const w=innerWidth,h=innerHeight;this.globe.width(w).height(h);(this.globe.camera() as THREE.PerspectiveCamera).updateProjectionMatrix();this.layout();}
-  private layout(){const camera=(this.globe.camera() as THREE.PerspectiveCamera);if(this.mode==='explore'&&innerWidth<700)camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*.2,innerWidth,innerHeight);else camera.clearViewOffset();this.rig.position.set(0,0,-4.7); if(this.mode==='story'){this.rig.position.x=innerWidth<700?0:1.1;this.rig.position.y=innerWidth<700?.78:0;}}
+  private layout(){const camera=(this.globe.camera() as THREE.PerspectiveCamera);if (innerWidth < 700) {
+      const offset = this.mode === 'explore' ? .2 : this.mode === 'story' ? .24 : .24 * smooth(2.72, 4, this.progress);
+      camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight * offset, innerWidth, innerHeight);
+    } else camera.clearViewOffset();this.rig.position.set(0,0,-4.7); if(this.mode==='story'){this.rig.position.x=innerWidth<700?0:1.1;this.rig.position.y=innerWidth<700?.78:0;}}
   private pointerDown = (event: PointerEvent) => {
     if (!event.isPrimary || event.button !== 0) return;
     this.pressedPointer = event.pointerId;
@@ -257,7 +260,7 @@ export class SpaceScene {
     this.globe.pointOfView({
       lat: heroes.chelyabinsk.lat,
       lng: heroes.chelyabinsk.lng,
-      altitude: THREE.MathUtils.lerp(12, mobile ? 4.1 : chapters[0].altitude, earth),
+      altitude: THREE.MathUtils.lerp(12, mobile ? 5.1 : chapters[0].altitude, earth),
     }, 0);
     this.dataPoints.material.uniforms.uOpacity.value = 0;
     this.highlight(p >= 2.63 ? heroes.chelyabinsk : null, false);
@@ -296,7 +299,7 @@ export class SpaceScene {
     const chapter = chapters[index] ?? chapters[3];
     const hero = chapter.hero ? heroes[chapter.hero] : null;
     const { lat, lng } = hero ?? { lat: 22, lng: 30 };
-    this.moveCamera({ lat, lng, altitude: innerWidth < 700 ? 4.1 : chapter.altitude },
+    this.moveCamera({ lat, lng, altitude: innerWidth < 700 ? 5.1 : chapter.altitude },
       !immediate && previousMode !== 'intro');
     this.highlight(hero, false);
     this.host.dataset.chapter = String(index);

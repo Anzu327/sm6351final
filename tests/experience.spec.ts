@@ -68,7 +68,10 @@ test.describe('recorded story walkthroughs', () => {
    await ready(page);
    await screenshot(page, 'opening-mobile');
    await page.locator('#scroll-hint').tap();
+   await expect(page.locator('#space')).toHaveAttribute('data-chapter', '0');
+   await expect(page.getByRole('button', {name: 'Peak brightness'})).toBeInViewport();
    await page.getByRole('button', {name: 'Peak brightness'}).tap();
+   await page.locator('#many').evaluate(section => section.scrollIntoView({behavior: 'instant'}));
    await expect(page.locator('#arrival-location')).toContainText('23.3 km');
    await screenshot(page, 'chelyabinsk-mobile');
    await page.locator('#header [data-enter]').tap();
