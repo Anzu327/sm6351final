@@ -27,6 +27,7 @@ export class SpaceScene {
   private sparkStarted = -Infinity;
   private pressedPointer: number | null = null;
   private pointerDragged = false;
+  private earthOpacity = 1;
   private resizeObserver:ResizeObserver;
   private animationId=0;
   private marker = new THREE.Points(
@@ -40,6 +41,7 @@ export class SpaceScene {
         uSpark: { value: 1 },
         uFireball: { value: false },
         uColor: { value: new THREE.Color('#e3d2ac') },
+        uSparkColor: { value: new THREE.Color('#e3d2ac') },
       },
       vertexShader: `
         uniform float uRatio;
@@ -53,6 +55,7 @@ export class SpaceScene {
         uniform float uSpark;
         uniform bool uFireball;
         uniform vec3 uColor;
+        uniform vec3 uSparkColor;
         void main() {
           vec2 p = (gl_PointCoord - .5) * 48.;
           float r = length(p);
@@ -65,7 +68,7 @@ export class SpaceScene {
           float distance = 10. + 10. * (1. - pow(1. - uSpark, 2.));
           float spark = rays * (1. - smoothstep(.6, 3., abs(r - distance))) * (1. - uSpark);
           float alpha = max(max(core, ring * .65), spark);
-          gl_FragColor = vec4(uColor, alpha * uOpacity);
+          gl_FragColor = vec4(mix(uColor, uSparkColor, spark), alpha * uOpacity);
           #include <colorspace_fragment>
         }
       `,
@@ -84,6 +87,7 @@ export class SpaceScene {
       const earthMaterial=new THREE.MeshPhongMaterial({map:texture,color:0x98a6b4,shininess:2,specular:0x080c13});
       earthMaterial.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\nfloat earthGray=dot(diffuseColor.rgb,vec3(0.2126,0.7152,0.0722));\ndiffuseColor.rgb=mix(vec3(earthGray),diffuseColor.rgb,0.10)*vec3(0.37,0.49,0.65);');};
       this.globe.globeMaterial(earthMaterial);
+      this.setEarthOpacity(this.earthOpacity);
       host.dataset.texture='ready';
     },undefined,()=>{host.dataset.texture='failed';onIssue('Earth texture unavailable. Locations and record lists remain usable.');});
     this.globe.lights([new THREE.AmbientLight(0x9ba9bc,.28),new THREE.DirectionalLight(0xe8edf4,.9)]);
@@ -192,7 +196,8 @@ export class SpaceScene {
   private pointerMove = (event: PointerEvent) => {
     if (this.dragging && event.pointerId === this.pressedPointer) {
       if (Math.hypot(event.clientX - this.downX, event.clientY - this.downY) > 6) this.pointerDragged = true;
-      if (this.mode === 'intro' && event.pointerType === 'mouse' && this.main.visible) {
+      const horizontal = Math.abs(event.clientX - this.downX) > Math.abs(event.clientY - this.downY);
+      if (this.mode === 'intro' && this.main.visible && (event.pointerType !== 'touch' || horizontal)) {
         this.main.rotation.y += (event.clientX - this.lastX) * .006;
         this.main.rotation.x += (event.clientY - this.lastY) * .006;
         this.lastX = event.clientX;
@@ -246,7 +251,9 @@ export class SpaceScene {
     setOpacity(this.companion.group, 0);
     setOpacity(this.hoba, 0);
     // A camera aimed at the catalog coordinates projects the pin to the fragment's center.
-    this.globe.showGlobe(p >= 2.72).showAtmosphere(p >= 2.72);
+    const reveal = smooth(2.72, 3.12, p);
+    this.globe.showGlobe(reveal > 0).showAtmosphere(reveal >= .95);
+    this.setEarthOpacity(reveal);
     this.globe.pointOfView({
       lat: heroes.chelyabinsk.lat,
       lng: heroes.chelyabinsk.lng,
@@ -261,6 +268,18 @@ export class SpaceScene {
     this.host.dataset.preview = '';
   }
 
+  private setEarthOpacity(opacity: number) {
+    this.earthOpacity = opacity;
+    const material = this.globe.globeMaterial();
+    const transparent = opacity < 1;
+    if (material.transparent !== transparent) {
+      material.transparent = transparent;
+      material.needsUpdate = true;
+    }
+    material.opacity = opacity;
+    material.depthWrite = !transparent;
+  }
+
   setChapter(index: number, immediate = false) {
     const previousMode = this.mode;
     this.mode = 'story';
@@ -269,6 +288,7 @@ export class SpaceScene {
     this.controls(false);
     this.layout();
     this.globe.showGlobe(true).showAtmosphere(true);
+    this.setEarthOpacity(1);
     this.catalogFade?.kill();
     const opacity = this.dataPoints.material.uniforms.uOpacity;
     if (index === 0 || this.reduced || immediate) opacity.value = index === 0 ? 0 : .72;
@@ -314,7 +334,7 @@ export class SpaceScene {
     if(id===heroes.fukang.id)this.setCut(true);
   }
   setCut(cut:boolean){this.host.dataset.cut=String(cut);this.companion.cut.visible=cut;this.companion.exterior.visible=!cut;}
-  explore(){this.mode='explore';this.cameraMove?.kill();this.catalogFade?.kill();this.previewId='__reset';this.preview(null);this.controls(true);this.layout();[this.main,this.companion.group,this.hoba].forEach(x=>setOpacity(x,0));this.globe.showGlobe(true).showAtmosphere(true);this.dataPoints.material.uniforms.uOpacity.value=.82;this.globe.pointOfView({lat:20,lng:20,altitude:innerWidth<700?4.2:2.3},0);}
+  explore(){this.mode='explore';this.cameraMove?.kill();this.catalogFade?.kill();this.previewId='__reset';this.preview(null);this.controls(true);this.layout();[this.main,this.companion.group,this.hoba].forEach(x=>setOpacity(x,0));this.globe.showGlobe(true).showAtmosphere(true);this.setEarthOpacity(1);this.dataPoints.material.uniforms.uOpacity.value=.82;this.globe.pointOfView({lat:20,lng:20,altitude:innerWidth<700?4.2:2.3},0);}
   setRecords(records:RecordItem[],layer:Layer){this.plotted=records.filter(hasLocation);const positions=[],sizes=[];
     for(const r of this.plotted){const c=this.globe.getCoords(r.lat,r.lng,.006);positions.push(c.x,c.y,c.z);const value=isMeteorite(r)?r.massG:r.energyKt;sizes.push(value===null?1.4:1.5+Math.min(4,Math.log10(1+value)*.48));}
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('pointSize',new THREE.Float32BufferAttribute(sizes,1));this.dataPoints.geometry.dispose();this.dataPoints.geometry=g;
