@@ -1,5 +1,6 @@
 import type { DataBundle, Filters, Manifest, RecordItem } from './types';
 import { isMeteorite } from './types';
+import { blackBeautyId } from './story';
 async function json<T>(path: string): Promise<T> {
   const response = await fetch(import.meta.env.BASE_URL + path);
   if (!response.ok) throw new Error('Could not load ' + path + ' (' + response.status + ')');
@@ -19,7 +20,7 @@ export async function loadData(): Promise<DataBundle> {
 export function filterRecords(rows: RecordItem[], f: Filters): RecordItem[] {
   const q=f.query.trim().toLowerCase();
   return rows.filter(r => {
-    const match = (r.name + ' ' + r.id + ' ' + (r.id==='nasa:54831'?'Black Beauty':'')).toLowerCase().includes(q);
+    const match = (r.name + ' ' + r.id + ' ' + (r.id===blackBeautyId?'Black Beauty':'')).toLowerCase().includes(q);
     const time = r.year === null ? f.includeUndated : (f.from===null || r.year>=f.from) && (f.to===null || r.year<=f.to);
     return match && time && (!isMeteorite(r) || ((!f.status || r.status===f.status) && (!f.classification || r.classification===f.classification)));
   });

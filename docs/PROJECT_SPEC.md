@@ -9,8 +9,8 @@
 
 ## 镜头时序与鼠标
 开场滚动段默认 500svh，其中实际受控距离为 400svh，进度统一为 0–4：
-- 0–0.35：只有 Sikhote-Alin，小幅慢转，可用鼠标拖拽旋转。
-- 0.35–1.45：Fukang 与 Black Beauty 从后方靠近两侧。
+- 0–0.35：只有 Chelyabinsk，小幅慢转，可用鼠标拖拽旋转。
+- 0.35–1.45：Fukang 与 Hoba 从后方靠近两侧。
 - 1.45–1.8：三颗同框，保留观察时间。
 - 1.8–2.8：两颗同伴分别向左右远离。
 - 2.3–2.95：主角缩小并隐藏。
@@ -21,12 +21,12 @@
 
 地球叙事阶段可拖拽旋转，滚轮继续推进故事。进入 atlas 后滚轮缩放，页面不滚动；Return to story 恢复原滚动位置。加减按钮供触屏与键盘用户缩放。
 
-**地球可见后，陨石模型仅在 hover 预览中出现。** 三位主角可从数据点或底部姓名入口唤起；Black Beauty 没有地图坐标，因此从姓名/搜索列表进入。普通记录显示真实字段与详情，不将三位主角的模型冒充任意记录的外形。离开目标或按 Escape 收起预览，手机以点按选择代替 hover。
+**地球可见后，陨石模型仅在 hover 预览中出现。** 三位主角可从数据点或底部姓名入口唤起。Black Beauty 仍可从搜索列表查到，目录没有可用坐标。普通记录显示真实字段与详情，不将三位主角的模型冒充任意记录的外形。离开目标或按 Escape 收起预览，手机以点按选择代替 hover。
 
 ## 四段英文叙事
-1. **One among many.** Sikhote-Alin: observed fall on 12 February 1947 in eastern Russia. One event produced fragments. The map point is a catalog record, not the precise location of the displayed fragment.
+1. **One among many.** Chelyabinsk: observed fall on 15 February 2013. Compare the ground catalog record with the JPL peak-brightness observation by switching layers. The two locations have different meanings and the map does not infer a flight path.
 2. **A window inside.** Fukang: found near Fukang, China in 2000. Its pallasite cut face exposes olivine crystals within iron-nickel metal. Crystal effects belong to the polished section, not a glowing natural crust.
-3. **Black Beauty.** NWA 7034: a Martian basaltic breccia, found in 2011. A memorable nickname leads to a scientific origin story. Do not invent a precise recovery location.
+3. **A change of scale.** Hoba: an iron meteorite discovered in Namibia in 1920. Compare the documented 2.95 m width with a 1.75 m human-height reference. The three models in the opening are sized for composition.
 4. **Follow your curiosity.** Transition from three protagonists into the atlas. Conclude that a discovery map reflects both visitors and human discovery/recording effort.
 
 Each chapter exposes an authoritative source link. There is no narration audio or autoplay sound.
@@ -48,9 +48,9 @@ Fireball:
 Units are grams, UTC ISO timestamps, degrees, kilotons TNT, joules, and kilometers. Every displayed count derives from the current filtered records. Header filters apply to a complete layer, not a random sample. The record list is paginated in batches of 30; the map and charts use the full filtered layer.
 
 Stable protagonists:
-- nasa:23593 — Sikhote-Alin, 46.16 / 134.65333.
+- nasa:57165 — Chelyabinsk, 54.81667 / 61.11667. JPL peak-brightness record: `jpl:2013-02-15 03:20:26`.
 - nasa:34491 — Fukang, 44.43333 / 87.63333.
-- nasa:54831 — Northwest Africa 7034 / Black Beauty, coordinates unavailable.
+- nasa:11890 — Hoba, −19.58333 / 17.91667.
 
 Meteorites: NASA historical catalog, fetched through the preserved CSV in stef molin's pandas-workshop at commit 45e34fb30ffcecc9fe0b4d71b83fd991a69ccde1. Its documentation identifies NASA as the source. Primary NASA download failed in this environment; the transport is recorded transparently in the manifest. The original Git blob SHA is 76b222ef72144595b2d4692d0c965e7934264451.
 
@@ -72,6 +72,6 @@ GitHub API writes to main only for this delivery. Local project cloning/editing 
 Tests cover scrolling in both directions, model rotation, hover-only previews, search/filters, Black Beauty without a pin, layer-specific units, missing data, failed-load retry, mobile layout, reduced motion and WebGL failure. Browser screenshots require human/agent visual review; test success alone is insufficient.
 
 ## Model realism and material assets
-Geometry uses a dense indexed smooth mesh, explicit concave pit intersections for the iron specimen, physically based material response and authored mineral albedo textures. Texture maps use filtering and mipmaps; avoid nearest-neighbor pixel noise or unlit white faceted placeholders. The pallasite cut face and crust can be toggled from its atlas detail while previewing; the model still hides when hover/focus ends.
+Geometry uses a dense indexed smooth mesh, explicit concave pit intersections for the procedural specimens, physically based material response and authored mineral albedo textures. Texture maps use filtering and mipmaps; avoid nearest-neighbor pixel noise or unlit white faceted placeholders. The pallasite cut face and crust can be toggled from its atlas detail while previewing; the model still hides when hover/focus ends.
 
-The exact Sikhote-Alin scan found at Museum Wales / Sketchfab (8eaab162b9144299ad42104c386ac5b5) reports isDownloadable=false. It was not copied, scraped or mislabeled as a bundled model. Current geometries remain authored approximations, with no visible scan disclaimer requested by the owner. A future licensed specimen scan must match the actual hero identity; do not substitute a different meteorite while keeping its name.
+An earlier Sikhote-Alin scan found at Museum Wales / Sketchfab (8eaab162b9144299ad42104c386ac5b5) reports isDownloadable=false. It was not copied, scraped or mislabeled as a bundled model. Current geometries remain authored approximations, with no visible scan disclaimer requested by the owner. A future licensed specimen scan must match the actual hero identity; do not substitute a different meteorite while keeping its name.

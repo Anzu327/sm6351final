@@ -1,12 +1,20 @@
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 function random(seed: number) { return () => { seed|=0; seed=seed+0x6d2b79f5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-export function rock(kind: 'iron'|'basalt'): THREE.Group {
-  const rng=random(kind==='iron'?1947:7034);
+export function rock(kind: 'iron'|'chelyabinsk'|'hoba'): THREE.Group {
+  const slab = kind === 'hoba';
+  const metallic = kind !== 'chelyabinsk';
+  const rng=random(slab?1920:metallic?1947:2013);
   const geometry=new THREE.IcosahedronGeometry(1,48);
   const p=geometry.attributes.position;
-  const radial=(n:THREE.Vector3)=>1+.095*Math.sin(n.x*5+n.y*3)+.07*Math.cos(n.z*7-n.y*4);
-  const craters=Array.from({length:kind==='iron'?64:11},()=>{const direction=new THREE.Vector3(rng()*2-1,rng()*2-1,rng()*2-1).normalize();const pitRadius=.12+rng()*.18,depth=kind==='iron'?.045+rng()*.12:.018+rng()*.025;return {center:direction.multiplyScalar(radial(direction)+pitRadius-depth),radius:pitRadius};});
+  const radial = (n: THREE.Vector3) => {
+    const irregularity = .095 * Math.sin(n.x * 5 + n.y * 3) + .07 * Math.cos(n.z * 7 - n.y * 4);
+    if (!slab) return 1 + irregularity;
+    // A rounded square slab, before flattening its vertical axis.
+    const boxRadius = 1 / Math.pow(n.x ** 8 + n.y ** 8 + n.z ** 8, 1 / 8);
+    return boxRadius + irregularity * .35;
+  };
+  const craters=Array.from({length:slab?18:metallic?64:11},()=>{const direction=new THREE.Vector3(rng()*2-1,rng()*2-1,rng()*2-1).normalize();const pitRadius=.12+rng()*.18,depth=slab?.012+rng()*.035:metallic?.045+rng()*.12:.018+rng()*.025;return {center:direction.multiplyScalar(radial(direction)+pitRadius-depth),radius:pitRadius};});
   const colors=[]; const v=new THREE.Vector3();
   for(let i=0;i<p.count;i++){
     v.fromBufferAttribute(p,i).normalize(); let radius=radial(v);
@@ -14,9 +22,10 @@ export function rock(kind: 'iron'|'basalt'): THREE.Group {
     const rough=Math.sin(v.x*49+Math.sin(v.z*27))*Math.sin(v.y*51+v.z*11);
     radius+=rough*.004;
     const x=v.x,y=v.y,z=v.z;
-    p.setXYZ(i,x*radius*1.02,y*radius*1.16,z*radius*.87);
-    const shade=kind==='iron'?.24+rough*.055:.075+rough*.023;
-    colors.push(shade*(kind==='iron'?1.06:1),shade,shade*.94);
+    p.setXYZ(i,x*radius*1.02,y*radius*(slab?.34:metallic?1.16:.93),z*radius*(slab?.97:.87));
+    const exposedStone = Math.sin(x*8+y*6) + Math.cos(z*9-y*4) > 1.02;
+    const shade=metallic?.24+rough*.055:(exposedStone?.67:.23)+rough*.04;
+    colors.push(shade*(metallic?1.06:1.02),shade,shade*.94);
   }
   geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.deleteAttribute('normal');geometry.deleteAttribute('uv');
   const smooth=mergeVertices(geometry,1e-5);smooth.computeVertexNormals();
@@ -33,9 +42,9 @@ export function rock(kind: 'iron'|'basalt'): THREE.Group {
   }
   const texture=new THREE.DataTexture(pixels,size,size);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;
   const bump=new THREE.DataTexture(bumps,size,size);bump.wrapS=bump.wrapT=THREE.RepeatWrapping;bump.magFilter=THREE.LinearFilter;bump.minFilter=THREE.LinearMipmapLinearFilter;bump.generateMipmaps=true;bump.needsUpdate=true;
-  const material=new THREE.MeshStandardMaterial({color:kind==='iron'?0xaaa49a:0x393a39,map:texture,bumpMap:bump,bumpScale:kind==='iron'?.065:.04,metalness:kind==='iron'?.88:.12,roughness:kind==='iron'?.56:.91,envMapIntensity:kind==='iron'?.32:.2});
+  const material=new THREE.MeshStandardMaterial({color:metallic?0xaaa49a:0xb9b6ae,map:texture,bumpMap:bump,bumpScale:metallic?.065:.04,vertexColors:!metallic,metalness:metallic?.88:.07,roughness:metallic?.56:.84,envMapIntensity:metallic?.32:.2});
   const group=new THREE.Group(); group.add(new THREE.Mesh(smooth,material));
-  group.rotation.set(.12,-.5,.18); return group;
+  group.rotation.set(slab?.48:.12,-.5,slab?-.16:.18); return group;
 }
 export function pallasite(): {group:THREE.Group;cut:THREE.Group;exterior:THREE.Group} {
   const group=new THREE.Group(),cut=new THREE.Group(),exterior=rock('iron');

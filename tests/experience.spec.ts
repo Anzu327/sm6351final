@@ -14,12 +14,22 @@ test('silent opening, reversible companions, Earth handoff, hover-only featured 
  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*3.9);await expect(page.locator('#space')).toHaveAttribute('data-phase','3');await screenshot(page,'earth-handoff');
  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await expect(page.locator('#space')).toHaveAttribute('data-intro','0.000');await expect(page.locator('#header')).toBeHidden();
  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*5.2);await expect(page.locator('#story-heroes')).toBeVisible();await expect(page.locator('#space')).toHaveAttribute('data-preview','');
+ await expect(page.locator('[data-hero]')).toHaveText(['Chelyabinsk','Fukang','Hoba']);
+ await page.locator('[data-arrival-layer=fireballs]').click();
+ await expect(page.locator('#arrival-location')).toContainText('Altitude: 23.3 km');
+ await expect(page.locator('#space')).toHaveAttribute('data-plotted','888');
+ await page.locator('[data-arrival-layer=meteorites]').click();
+ await expect(page.locator('#arrival-location')).toContainText('54.817° N, 61.117° E');
+ await expect(page.locator('#space')).toHaveAttribute('data-plotted','32186');
+ await page.locator('[data-hero=hoba]').hover();
+ await expect(page.locator('#space')).toHaveAttribute('data-preview','nasa:11890');
+ await screenshot(page,'hover-hoba');
  await page.locator('[data-hero=fukang]').hover();await expect(page.locator('#space')).toHaveAttribute('data-preview','nasa:34491');await screenshot(page,'hover-fukang');await page.mouse.move(20,100);await expect(page.locator('#hover-preview')).toBeHidden();
  expect(errors).toEqual([]);
 });
 test('atlas search, missing location, filters, independent fireball units, and story return',async({page})=>{
  await ready(page);await page.evaluate(()=>scrollTo({top:innerHeight*8.5,behavior:'instant'}));await page.locator('[data-enter]').first().click();await expect(page.locator('#atlas')).toBeVisible();await expect(page.locator('#counts')).toHaveText('45,716 matching records');
- await page.locator('#search').fill('Black Beauty');await expect(page.locator('#counts')).toHaveText('1 matching records');await expect(page.locator('#map-count')).toHaveText('0 mapped · 1 without usable coordinates');await page.locator('#record-list button').click();await expect(page.locator('#details')).toContainText('Unavailable · not mapped');await page.locator('#record-list button').hover();await expect(page.locator('#space')).toHaveAttribute('data-preview','nasa:54831');await screenshot(page,'black-beauty-unmapped');
+ await page.locator('#search').fill('Black Beauty');await expect(page.locator('#counts')).toHaveText('1 matching records');await expect(page.locator('#map-count')).toHaveText('0 mapped · 1 without usable coordinates');await page.locator('#record-list button').click();await expect(page.locator('#details')).toContainText('Unavailable · not mapped');await page.locator('#record-list button').hover();await expect(page.locator('#space')).toHaveAttribute('data-preview','');await screenshot(page,'black-beauty-unmapped');
  await page.locator('#reset').click();await page.locator('#status').selectOption('Fell');await expect(page.locator('#counts')).not.toHaveText('45,716 matching records');await page.locator('#from').fill('2000');await page.locator('#to').fill('1900');await expect(page.locator('#range-error')).toBeVisible();await expect(page.locator('#counts')).toHaveText('0 matching records');
  await page.locator('#reset').click();await page.locator('#search').fill('not-a-real-meteorite-xyz');await expect(page.locator('#record-list')).toContainText('No matching records');
  await page.locator('[data-layer=fireballs]').click();await expect(page.locator('#meteorite-filters')).toBeHidden();await expect(page.locator('#counts')).toHaveText('1,074 matching records');await expect(page.locator('#size-legend')).toContainText('kt TNT');await page.locator('#record-list button').first().click();await expect(page.locator('#details')).toContainText('Peak brightness (UTC)');await screenshot(page,'fireball-atlas');await page.locator('[data-hero=fukang]').click();await expect(page.locator('[data-layer=meteorites]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#details')).toContainText('Pallasite, PMG');

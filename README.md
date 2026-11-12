@@ -34,7 +34,8 @@ The owner requested GitHub API-only edits for this delivery; no local checkout o
 - 1,074 NASA/JPL fireball events acquired on 2026-10-29; 888 have locations.
 - All records remain searchable, including those without coordinates. The 2026 acquisition date is **not** the meteorite catalog's coverage end.
 - Masses and energy use separate units and legends. A catalog meteorite mass can include many recovered fragments.
-- NWA 7034 / Black Beauty has a 0,0 placeholder in the original catalog. It has **no map pin**.
+- The story follows Chelyabinsk, Fukang and Hoba. Chelyabinsk compares the meteorite catalog location with the fireball's peak-brightness observation.
+- NWA 7034 / Black Beauty remains searchable and has a 0,0 placeholder in the original catalog. It has **no map pin**.
 
 Raw source files are in `data/raw/`; normalized browser shards are in `public/data/`. `npm run check:data` reproduces normalization from the raw files and compares every record. See [credits](docs/CREDITS.md).
 
