@@ -1,3 +1,59 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080b10"><meta name="description" content="Three extraordinary meteorites. One shared planet. An interactive journey from a recovered fragment to the global record of visitors from space."><title>Traces from Space — Stories written in stone</title></head>
-<body><div id="app"></div><noscript><p>This interactive story needs JavaScript. Chelyabinsk connects a witnessed fall with recovered fragments; Fukang reveals olivine crystals in metal; Hoba shows the scale of a nearly three-metre iron meteorite. The downloadable data and source notes are available in the project repository.</p></noscript><script type="module" src="/src/main.ts"></script></body></html>
+<html lang="en" class="specimen-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#465e60">
+  <link rel="icon" type="image/png" href="./spark.png">
+
+  <title>Chelyabinsk</title>
+  <script type="module" src="./src/main.js"></script>
+</head>
+<body>
+  <main id="experience" aria-label="Chelyabinsk meteorite">
+    <canvas id="sky" aria-hidden="true"></canvas>
+    <canvas id="stage" aria-hidden="true"></canvas>
+    <canvas id="leaders" aria-hidden="true"></canvas>
+
+    <header class="masthead"><button id="home" type="button">CHELYABINSK</button></header>
+
+    <div id="annotations" aria-label="Specimen annotations">
+      <div id="sample" class="annotation specimen"><small>SPECIMEN_01</small><strong>CHELYABINSK</strong></div>
+      <div id="classify" class="annotation reading"><small>CLASS</small><strong>LL5</strong></div>
+      <button id="explore" class="annotation explore" type="button" disabled>
+        <small>15 FEB 2013</small><strong>CLICK TO EXPLORE <span aria-hidden="true">↗</span></strong>
+      </button>
+    </div>
+    <button id="hit-target" type="button" tabindex="-1" aria-label="Explore the meteorite" disabled></button>
+
+    <footer id="controls">
+      <button id="scroll-cue" type="button"><span id="cue-text">SCROLL</span> <span class="arrow" aria-hidden="true">↓</span></button>
+    </footer>
+    <p id="specimen-status" role="status">LOADING SPECIMEN…</p>
+  </main>
+
+  <dialog id="detail" aria-labelledby="detail-title">
+    <button id="close-detail" type="button" autofocus>RETURN TO SPECIMEN <span aria-hidden="true">×</span></button>
+    <div id="detail-model" tabindex="0" role="group" aria-label="Meteorite model. Drag or use the arrow keys to rotate.">
+      <span aria-hidden="true">DRAG TO ROTATE</span>
+    </div>
+    <div id="detail-scroll" tabindex="0" aria-label="Specimen record">
+      <article>
+        <p class="record-number">SPECIMEN_01</p>
+        <h2 id="detail-title">Chelyabinsk</h2>
+        <p class="translation" lang="zh-Hans">车里雅宾斯克陨石</p>
+        <p>On 15 February 2013, a fireball crossed the sky over the southern Urals. The meteorite’s main mass fell into Lake Chebarkul, west of Chelyabinsk.</p>
+        <dl>
+          <div><dt>Official name</dt><dd>Chelyabinsk</dd></div>
+          <div><dt>Classification</dt><dd>LL5 ordinary chondrite</dd></div>
+          <div><dt>Fall date</dt><dd>15 February 2013</dd></div>
+          <div><dt>Main mass site</dt><dd>Lake Chebarkul, Russia</dd></div>
+        </dl>
+        <h3>Surface and interior</h3>
+        <p>Many recovered stones have a fresh black or brown fusion crust. Inside the fragments, researchers found both light rock with visible chondrules and dark, fine-grained rock melted by an impact.</p>
+        <p class="archive-source"><a href="https://www.lpi.usra.edu/meteor/metbull.php?code=57165" target="_blank" rel="noopener">Meteoritical Bulletin record ↗</a></p>
+      </article>
+    </div>
+  </dialog>
+</body>
+</html>
