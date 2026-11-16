@@ -1,6 +1,6 @@
 import {
   BackSide, Color, CylinderGeometry, DoubleSide, Euler,
-  Group, IcosahedronGeometry, Mesh, MeshBasicMaterial,
+  Group, IcosahedronGeometry, LinearFilter, Mesh, MeshBasicMaterial,
   PlaneGeometry, Quaternion, RepeatWrapping, RingGeometry, ShaderMaterial,
   SphereGeometry, SRGBColorSpace, TextureLoader, Vector3,
 } from 'three';
@@ -51,15 +51,23 @@ const bodyVertex = `
   }
 `;
 
+const earthGeography = `
+  // Match the atlas: +Y is north, +X is Greenwich, and east points toward -Z.
+  vec2 earthUV(vec3 point) {
+    vec3 direction = normalize(point);
+    return vec2(atan(-direction.z,direction.x)/6.2831853+.5,
+      acos(clamp(direction.y,-1.,1.))/3.14159265);
+  }
+`;
+
 function makeSolarMaterial(ink, {
-  map = null, kind = 'albedo', mask = null, depth = null, waterNormal = null, base = ink,
+  map = null, kind = 'albedo', geography = null, waterNormal = null, base = ink,
   clock, distortion = .2,
 }) {
   return new ShaderMaterial({
     uniforms: {
       albedo: { value: map },
-      seaMask: { value: mask },
-      seaDepth: { value: depth },
+      geography: { value: geography },
       normalMap: { value: waterNormal },
       base: { value: new Color(base) },
       hasMap: { value: Boolean(map) },
@@ -73,9 +81,10 @@ function makeSolarMaterial(ink, {
       varying vec2 texCoord;
       uniform vec3 base;
       uniform float time;
-      uniform sampler2D albedo, seaMask, seaDepth, normalMap;
+      uniform sampler2D albedo, geography, normalMap;
       uniform bool hasMap;
       uniform int kind;
+      ${earthGeography}
 
       vec3 waterBump(vec3 eye, vec3 normal, vec2 uv) {
         vec3 dx = dFdx(eye), dy = dFdy(eye);
@@ -107,7 +116,9 @@ function makeSolarMaterial(ink, {
           float fresnel = 1.-max(0.,dot(normal,-viewRay));
           color = mix(color,vec3(1.,.698,.525),fresnel*fresnel);
         } else if (kind == 2) {
-          float shade = (color.r-.5)*.4+.5;
+          float coast = texture2D(geography,earthUV(surface)).r;
+          if (coast < .5) discard;
+          float shade = mix(.48,.534,smoothstep(.5,.62,coast));
           vec3 tint = mix(vec3(.890,.871,.953),vec3(.698,.769,.902),surface.y);
           color = shade*tint*1.4;
         } else if (kind == 3) {
@@ -116,11 +127,12 @@ function makeSolarMaterial(ink, {
             +waterBump(viewRay,normal,uv*1.5-time*.005))*.5;
           vec3 waterDirection = (bump+normal)*.5;
           float rippleOffset = abs(dot(waterDirection,reflect(viewRay,waterDirection)))*.05;
-          vec2 coastUV = (uv-.5)/(1.+rippleOffset*.25)+.5;
-          float land = texture2D(seaMask,coastUV).r;
+          // Red is signed shore distance, green drives waves, blue is shelf shading.
+          vec3 coast = texture2D(geography,earthUV(surface)).rgb;
+          float land = coast.g;
           float ripple = fract(land*.5-time*.2);
           ripple *= smoothstep(0.,.5,ripple)*(1.-smoothstep(.95,1.,ripple))*smoothstep(0.,1.,land);
-          float depth = floor(fract(texture2D(seaDepth,uv+rippleOffset).r)*5.+.5)/5.;
+          float depth = floor(coast.b*5.+.5)/5.;
           color = mix(vec3(.612,.745,.855),vec3(.678,.588,.796),surface.y);
           color = mix(color,color*mix(1.,depth,.7)+ripple+rippleOffset,.5);
         }
@@ -147,18 +159,27 @@ function makeOutlinedMesh(geometry, ink, options) {
       ink: { value: new Color(ink) },
       time: options.clock,
       distortion: { value: options.distortion ?? .2 },
+      clipToLand: { value: options.kind === 'land' },
+      geography: { value: options.geography ?? null },
     },
     vertexShader: `
       ${deformVertex}
+      varying vec3 surface;
       void main(){
+        surface = position;
         float rough = sin(151.*position.x+74.*position.y+36.*position.z);
         gl_Position = projectionMatrix*modelViewMatrix*vec4(deform(position)+normal*(.005+rough*.002),1.);
       }
     `,
     fragmentShader: `
       uniform vec3 ink;
+      uniform bool clipToLand;
+      uniform sampler2D geography;
+      varying vec3 surface;
+      ${earthGeography}
       ${noise}
       void main(){
+        if (clipToLand && texture2D(geography,earthUV(surface)).r < .5) discard;
         gl_FragColor = vec4(ink*(.58+.54*hash(vec3(gl_FragCoord.xy,1.))),1.);
         #include <colorspace_fragment>
       }
@@ -263,17 +284,11 @@ function makeSunGlow() {
 
 const visualFiles = [
   'sun', 'venus', 'mercury', 'mars', 'jupiter', 'saturn', 'outer-planet',
-  'earth-land', 'earth-clouds', 'earth-sea-mask', 'earth-sea-depth',
+  'earth-geography', 'earth-clouds',
   'asteroids', 'orbit-noise', 'solar-glow', 'comet-noise', 'ember', 'earth-flare', 'earth-water-normal',
 ];
 
 const solarAssets = import.meta.env.BASE_URL + 'visitors/solar/';
-
-export async function loadSolarPaper() {
-  const texture = await new TextureLoader().loadAsync(solarAssets + 'paper-grain.webp');
-  texture.wrapS = texture.wrapT = RepeatWrapping;
-  return texture;
-}
 
 async function loadSolarArt() {
   const textures = new TextureLoader();
@@ -283,9 +298,16 @@ async function loadSolarArt() {
       const texture = await textures.loadAsync(solarAssets + name + '.webp');
       texture.flipY = false;
       const isNoise = name.endsWith('-noise') || name === 'earth-water-normal';
-      const data = name.startsWith('earth-sea-') || isNoise || name === 'solar-glow';
+      const isGeography = name === 'earth-geography';
+      const data = isGeography || isNoise || name === 'solar-glow';
       if (!data) texture.colorSpace = SRGBColorSpace;
       if (isNoise) texture.wrapS = texture.wrapT = RepeatWrapping;
+      if (isGeography) {
+        texture.wrapS = RepeatWrapping;
+        // Sample the same coastline on both sides of the longitude seam.
+        texture.generateMipmaps = false;
+        texture.minFilter = LinearFilter;
+      }
       return [name, texture];
     })),
   ]);
@@ -355,13 +377,16 @@ export function createSolarScene(scene, camera) {
         planet.body.add(makeOutlinedMesh(sphere, planet.ink, { base: planet.base, map: maps?.get(planet.texture), clock }));
         continue;
       }
-      const water = makeOutlinedMesh(meshes.get('cubeSea'), planet.ink, {
-        kind: 'sea', mask: maps.get('earth-sea-mask'), depth: maps.get('earth-sea-depth'),
+      const seaSphere = meshes.get('cubeSea');
+      const geography = maps.get('earth-geography');
+      const water = makeOutlinedMesh(seaSphere, planet.ink, {
+        kind: 'sea', geography,
         waterNormal: maps.get('earth-water-normal'), clock, distortion: 0,
       });
-      const continent = makeOutlinedMesh(meshes.get('LandsRemeshed'), planet.ink, {
-        kind: 'land', map: maps.get('earth-land'), clock, distortion: 0,
+      const continent = makeOutlinedMesh(seaSphere, planet.ink, {
+        kind: 'land', geography, clock, distortion: 0,
       });
+      continent.scale.setScalar(1.015);
       const cloud = makeOutlinedMesh(meshes.get('Retopo_Cube007'), planet.ink, {
         map: maps.get('earth-clouds'), clock, distortion: .4,
       });
@@ -375,7 +400,7 @@ export function createSolarScene(scene, camera) {
   let rocks = makeSolarBelt([placeholderRock, placeholderRock, placeholderRock], null);
   belt.add(rocks.group);
   loadSolarArt().then(({ meshes, maps }) => {
-    if (!['BaseModel', 'LandsRemeshed', 'Retopo_Cube007', 'cubeSea', 'rock006', 'rock010', 'rock003']
+    if (!['BaseModel', 'Retopo_Cube007', 'cubeSea', 'rock006', 'rock010', 'rock003']
       .every(name => meshes.has(name))) throw new Error('Missing mesh in the solar geometry pack');
     for (const body of [sun, ...planets.map(planet => planet.body)]) {
       body.traverse(object => {

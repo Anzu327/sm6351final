@@ -9,17 +9,9 @@
 - 点击陨石或 **CLICK TO EXPLORE**，镜头在画面中心完成 1.25 秒的放大，短暂停顿后，陨石才移到详情左侧。拖动模型可旋转，右侧档案可以独立滚动。点击关闭、按 Esc 或浏览器返回会恢复原来的滚动位置。
 - 键盘可用 ↑、↓、Page Up / Down，Home 返回空白开场，End 到穿环结尾。需要 WebGL 2，使用桌面 Chrome 查看。
 
-## GitHub Pages
-
-- [VISITORS · 现行版本](https://anzu327.github.io/sm6351final/)
-- [独立陨石 Demo](https://anzu327.github.io/sm6351final/specimen.html)
-- [老版本 · Traces from Space（已封存）](https://github.com/Anzu327/sm6351final/tree/archive/old-version)
-
-GitHub Actions 构建并发布 `.pages/`。运行 `npm run build && node scripts/prepare-pages.mjs` 可复现部署目录。
-
 ## 开发
 
-运行 `npm ci` 和 `npm run dev`，访问 `/visitors.html` 查看整合版，访问 `/index.html` 查看独立 Demo。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。
+运行 `npm ci` 和 `npm run dev`，访问 `/visitors.html` 查看整合版，访问 `/index.html` 查看独立 Demo。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
 
 ## 参考范围
 
@@ -29,7 +21,9 @@ GitHub Actions 构建并发布 `.pages/`。运行 `npm run build && node scripts
 
 表面效果的参考贴图来自 Igloo 公开资源 [advect.png](https://www.igloo.inc/assets/images/cubes/advect.png) 和 [triangles_tiling.ktx2](https://www.igloo.inc/assets/images/igloo/triangles_tiling.ktx2)。两张贴图都随构建保存在本地。三角纹理由 KTX2 转为 PNG，材质用同一套纸面色调着色。
 
-VISITORS 的太阳系章节参考 [Monolith 的公开发布脚本](https://themonolithproject.net/assets/index-Dqw2FXdk.js)中的 `SceneSolar`、`GasLineMaterial` 和 `Earth`。太阳、行星、地球陆地与云层、碎石复用原站公开加载的模型和手绘纹理，并转换为本地 GLB 和 WebP。轨道依据原站圆柱几何、噪声贴图和双面着色实现。模型与纹理创作归属 [The Monolith Project 团队](https://themonolithproject.net/)。
+VISITORS 的太阳系章节参考 [Monolith 的公开发布脚本](https://themonolithproject.net/assets/index-Dqw2FXdk.js)中的 `SceneSolar`、`GasLineMaterial` 和 `Earth`。太阳、行星、地球海面与云层、碎石复用原站公开加载的模型和手绘纹理，并转换为本地 GLB 和 WebP。轨道依据原站圆柱几何、噪声贴图和双面着色实现。原始模型与纹理创作归属 [The Monolith Project 团队](https://themonolithproject.net/)。
+
+太阳系地球的海陆分布采用 [Natural Earth 1:10m Land v5.1.1](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-land/)。本地 `earth-geography.webp` 是 4096 × 2048 等经纬贴图，红通道用于裁切凸起的陆地层，绿、蓝通道由海岸距离生成，分别驱动近岸水纹和深浅色带。
 
 开场镜头使用 30° 视角和 −13° 横滚，滚动通过太阳和地球两组镜头姿态插值，末段沿镜头轴推进并擦入 VISITORS 的地球档案。整张画布使用原站纸纹，轮廓根据深度和色差做笔边扰动。按住画面拖动可绕太阳查看。松手保留角度，继续滚动回到故事镜头，RESET VIEW 恢复视角。
 

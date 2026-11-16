@@ -1,8 +1,11 @@
+import { printPaper } from './print-paper.js';
+
 export const visitorsComposite = `
 varying vec2 vUv;
-uniform sampler2D a, b, solarDepth, paperGrain;
+uniform sampler2D a, b, solarDepth;
 uniform vec2 pixelSize;
-uniform float blend, aspect, portal, solarWeight, solarTime, grainReady;
+uniform float blend, aspect, portal, solarWeight, solarTime;
+${printPaper}
 
 float hash(vec2 p) {
   return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
@@ -78,14 +81,8 @@ void main() {
   vec3 outgoing = texture2D(a,vUv).rgb;
   float grain = fine*.035;
   if (solarWeight > 0.) {
-    vec2 paperUV = pixel/vec2(1024.,512.);
-    float tooth = grainReady > .5 ? texture2D(paperGrain,paperUV).r : .48;
-    float fiber = grainReady > .5 ? texture2D(paperGrain,paperUV*.54+.23).r : .48;
-    outgoing = drawSolar(vUv,tooth);
-    // Break up flat fills while preserving their colors and the fine ink edges.
-    float paper = (tooth-.48)*.34+(fiber-.48)*.16+fine*.017;
-    float luma = dot(outgoing,vec3(.2126,.7152,.0722));
-    outgoing += paper*(.45+.65*smoothstep(.02,.52,luma));
+    float tooth = paperTooth(pixel);
+    outgoing = applyPaper(drawSolar(vUv,tooth),pixel,tooth,fine);
     grain *= t;
   }
 

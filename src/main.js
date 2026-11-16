@@ -76,7 +76,7 @@ function resize() {
   leaders.height = Math.round(height * dpr);
   pen.setTransform(leaders.width / width, 0, 0, leaders.height / height, 0, 0);
   if (stage) stage.resize(width, height);
-  else paintSky(sky, width, height);
+  else paintSky(sky, width, height, false, embedded);
 }
 
 function setView(value, isInput = false) {
@@ -343,11 +343,12 @@ function updateLabels() {
   const { points, bounds, center } = stage.getLabelsGeometry();
   const compact = width <= 760;
   const sampleX = center.x - width * (compact ? .34 : .177);
+  const sampleY = center.y - height * .366;
   const classX = center.x + width * .107;
   const exploreX = center.x + width * (compact ? .07 : .058);
 
   const labelBoxes = [
-    labelPosition(sample, sampleX, center.y - height * .366),
+    labelPosition(sample, sampleX, embedded && compact ? Math.max(sampleY, 88) : sampleY),
     labelPosition(classification, classX, center.y - height * .229),
     labelPosition(action, exploreX, center.y + height * .12),
   ];

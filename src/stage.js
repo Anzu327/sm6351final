@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { paintSky } from './sky.js';
+import { loadPrintPaper, printPaper } from './print-paper.js';
 
 import { createRingLight, illustrate } from './illustration.js';
 import { archivePose, clamp, ease, mix, passagePose, passageSpan } from './motion.js';
@@ -28,6 +29,10 @@ const compositeShader = {
     uniform vec2 drift;
     uniform float aspectRatio;
     varying vec2 vUv;
+    #ifdef PRINT_INK
+      ${printPaper}
+      uniform vec2 pixelSize;
+    #endif
 
     float hash(vec2 p) {
       p = fract(p * vec2(123.34, 456.21));
@@ -44,10 +49,49 @@ const compositeShader = {
       float edge = mix(-width, limit, p);
       return 1. - clamp((value - edge) / width, 0., 1.);
     }
-    vec3 layer(sampler2D model, sampler2D sky, vec2 uv, vec2 offset) {
+    #ifdef PRINT_INK
+      float ringCoverage(sampler2D model, vec2 uv) {
+        return smoothstep(.62,.97,texture2D(model,clamp(uv,0.,1.)).a);
+      }
+
+      vec3 printRingOutline(sampler2D model, vec2 uv, vec3 color) {
+        vec2 pixel = uv / pixelSize;
+        float grain = hash(floor(pixel));
+        float pressure = noise(pixel * .34);
+        vec2 offset = vec2(noise(pixel * .52),noise(pixel * .52 + 19.3)) - .5;
+        // Shift the contour lookup before detecting the edge, as in a rough print.
+        vec2 point = uv + offset * (3.2 + grain * 1.6) * pixelSize;
+        vec2 sampleStep = pixelSize * mix(.75,2.15,pressure);
+        float left = ringCoverage(model,point - vec2(sampleStep.x,0.));
+        float right = ringCoverage(model,point + vec2(sampleStep.x,0.));
+        float above = ringCoverage(model,point + vec2(0.,sampleStep.y));
+        float below = ringCoverage(model,point - vec2(0.,sampleStep.y));
+        float edge = length(vec2(right - left,above - below));
+        float stroke = smoothstep(.20,.74,edge);
+        float deposit = smoothstep(.25,.67,pressure*.59 + grain*.41);
+        vec3 ink = mix(vec3(.032,.027,.086),vec3(.097,.092,.21),pressure);
+        return mix(color,ink,stroke * deposit * .93);
+      }
+    #endif
+
+    vec3 layer(sampler2D model, sampler2D sky, vec2 uv, vec2 offset, bool rings) {
       vec3 background = texture2D(sky, (uv - .5) * .88 + .5 + offset).rgb;
       vec4 foreground = texture2D(model, clamp(uv, 0., 1.));
-      return background * (1. - foreground.a) + foreground.rgb;
+      vec3 color = background * (1. - foreground.a) + foreground.rgb;
+      #ifdef PRINT_INK
+        if (rings) return printRingOutline(model,uv,color);
+        // Sample either side of the silhouette to offset the colored inks.
+        float tooth = hash(floor(uv / pixelSize));
+        vec2 shift = pixelSize * vec2(1.4, -.72) * (.65 + tooth);
+        vec4 leftInk = texture2D(model, clamp(uv-shift,0.,1.));
+        vec4 rightInk = texture2D(model, clamp(uv+shift,0.,1.));
+        float outside = max(leftInk.a,rightInk.a) * (1.-foreground.a);
+        vec3 fringe = mix(vec3(.075,.42,.48),vec3(.42,.10,.47),step(leftInk.a,rightInk.a));
+        color = mix(color,fringe,outside * .72);
+        float edge = foreground.a * (1.-min(leftInk.a,rightInk.a));
+        color = mix(color,vec3(.035,.027,.092),edge * (.42 + tooth*.20));
+      #endif
+      return color;
     }
     vec2 portalDistort(vec2 uv, float grain) {
       vec2 p = (uv - .5) * vec2(aspectRatio, 1.);
@@ -63,12 +107,12 @@ const compositeShader = {
       float green = 1. - abs(2. * clamp((t - 1./6.) * 1.5, 0., 1.) - 1.);
       return pow(vec3(t <= .5 ? 1. - green : 0., green, t > .5 ? 1. - green : 0.), vec3(.4545));
     }
-    vec3 refractLayer(sampler2D model, sampler2D sky, vec2 uv, vec2 driftUV, float bend) {
+    vec3 refractLayer(sampler2D model, sampler2D sky, vec2 uv, vec2 driftUV, float bend, bool rings) {
       vec3 sum = vec3(0.), weight = vec3(0.);
       for (int i = 0; i < 5; i++) {
         float t = float(i) / 5.;
         vec3 w = spectrum(t);
-        sum += w * layer(model, sky, splitUV(uv, bend, t), driftUV);
+        sum += w * layer(model, sky, splitUV(uv, bend, t), driftUV, rings);
         weight += w;
       }
       return sum / max(weight, .001);
@@ -80,10 +124,10 @@ const compositeShader = {
       vec3 color;
       float alpha = 1.;
       if (curtain <= 0.) {
-        color = layer(specimen, paperA, uv, drift);
+        color = layer(specimen, paperA, uv, drift, false);
         if (transparentOpening) alpha = 0.;
       } else if (curtain >= 1.) {
-        color = layer(passage, paperB, portalDistort(uv, grain), paperDrift);
+        color = layer(passage, paperB, portalDistort(uv, grain), paperDrift, true);
       } else {
         vec2 field = (uv - .5) * vec2(aspectRatio, 1.) + .5;
         float blocks = noise(floor(field * vec2(24., 42.)));
@@ -102,8 +146,8 @@ const compositeShader = {
         float center = 1. - smoothstep(.7, 1., abs(uv.x * 2. - 1.));
         center *= 1. - smoothstep(.7, 1., abs(uv.y * 2. - 1.));
         vec3 a = vec3(0.), b = vec3(0.);
-        if (!transparentOpening && cut < 1.) a = refractLayer(specimen, paperA, outgoing, drift, 12. * center * colorEdge * grain);
-        if (cut > 0.) b = refractLayer(passage, paperB, incoming, paperDrift, 12. * center * (1. - colorEdge) * (1. - grain));
+        if (!transparentOpening && cut < 1.) a = refractLayer(specimen, paperA, outgoing, drift, 12. * center * colorEdge * grain, false);
+        if (cut > 0.) b = refractLayer(passage, paperB, incoming, paperDrift, 12. * center * (1. - colorEdge) * (1. - grain), !transparentOpening);
         color = transparentOpening ? b : mix(a, b, cut);
         if (transparentOpening) alpha = cut;
       }
@@ -114,10 +158,16 @@ const compositeShader = {
         float edge = mix(-.14, 1.14, portal);
         alpha *= (1. - .35 * portal) * smoothstep(edge - .14, edge + .14, distance);
       }
-      color = mix(color, vec3(.81,.65,.50), ringPulse * .075);
-      vec2 pos = vUv - vec2(.53, .53);
-      color *= 1. - dot(pos, pos) * .17;
-      color = max(color + (grain - .5) * .034, 0.);
+      #ifdef PRINT_INK
+        color = mix(color, vec3(.82,.53,.68), ringPulse * .045);
+        color = applyPaper(color,gl_FragCoord.xy,paperTooth(gl_FragCoord.xy),grain-.5);
+      #else
+        color = mix(color, vec3(.81,.65,.50), ringPulse * .075);
+        vec2 pos = vUv - vec2(.53, .53);
+        color *= 1. - dot(pos, pos) * .17;
+        color += (grain - .5) * .034;
+      #endif
+      color = max(color, 0.);
       gl_FragColor = vec4(color, alpha);
       #include <colorspace_fragment>
     }
@@ -154,6 +204,7 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
 
   const composite = new THREE.ShaderMaterial({
     ...compositeShader,
+    defines: embedded ? { PRINT_INK: 1 } : {},
     uniforms: {
       specimen: { value: specimenTarget.texture },
       passage: { value: passageTarget.texture },
@@ -166,10 +217,21 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
       portal: { value: 0 },
       drift: { value: new THREE.Vector2() },
       aspectRatio: { value: 1 },
+      ...(embedded && {
+        pixelSize: { value: new THREE.Vector2(1, 1) },
+        paperGrain: { value: null },
+        grainReady: { value: 0 },
+      }),
     },
     depthTest: false,
     depthWrite: false,
   });
+  if (embedded) {
+    loadPrintPaper().then(texture => {
+      composite.uniforms.paperGrain.value = texture;
+      composite.uniforms.grainReady.value = 1;
+    }).catch(error => console.error('Could not load the specimen paper texture', error));
+  }
   const screen = new THREE.Scene();
   screen.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), composite));
   const screenCamera = new THREE.Camera();
@@ -200,7 +262,7 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
     node.userData.wakeCenter = localCenter;
     node.material = illustrate(node.material, {
       field: wake.field, facets, center: localCenter, patternScale: wakeScale,
-    });
+    }, embedded ? 'stone' : null);
   });
   meteorite.scene.position.copy(center).multiplyScalar(-1);
   const specimenTilt = new THREE.Group();
@@ -233,15 +295,16 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
     ring.position.set(0, -1.65 - index * 2.5, 0);
     ringRig.add(ring);
     const arcs = ring.children.map((mesh, arcIndex) => {
-      mesh.material = illustrate(mesh.material);
+      const rest = mesh.position.clone();
+      mesh.material = illustrate(mesh.material, null, embedded ? 'rings' : null, embedded ? rest : null);
       const seed = (arcIndex + 1) * 92.671 + index * 147.53;
       return {
-        mesh, rest: mesh.position.clone(),
+        mesh, rest,
         axis: new THREE.Vector3(Math.sin(seed), Math.sin(seed * 2.17), Math.cos(seed * 1.43)).normalize(),
         variation: (Math.sin(seed * .47) + 1) / 2,
       };
     });
-    const light = new THREE.Mesh(lightGeometry, createRingLight());
+    const light = new THREE.Mesh(lightGeometry, createRingLight(embedded));
     light.position.y = .062;
     light.rotation.x = -Math.PI * .5;
     ring.add(light);
@@ -292,6 +355,7 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
     plexus.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
     const targetSize = renderer.getDrawingBufferSize(new THREE.Vector2());
+    if (embedded) composite.uniforms.pixelSize.value.set(1 / targetSize.x, 1 / targetSize.y);
     wakeScale.value = 9 * Math.min(1, targetSize.y / 1300);
     specimenTarget.setSize(targetSize.x, targetSize.y);
     passageTarget.setSize(targetSize.x, targetSize.y);
@@ -299,8 +363,8 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
       camera.aspect = aspect;
       camera.updateProjectionMatrix();
     }
-    paintSky(fallbackSky, w, h);
-    paintSky(paperCanvasB, w, h, true);
+    paintSky(fallbackSky, w, h, false, embedded);
+    paintSky(paperCanvasB, w, h, true, embedded);
     paperA.needsUpdate = paperB.needsUpdate = true;
   }
 
