@@ -827,12 +827,7 @@ summary {
 /* Keep the chapter controls available while the canvas changes hands. */
 body.specimen-visible .scene-caption { visibility: hidden; }
 body.specimen-visible .paper-border { opacity: 0; }
-body.specimen-visible footer {
-  color: #262a3b;
-  background: linear-gradient(transparent, #f2ede1c9);
-}
-body.specimen-visible footer nav button { opacity: .85; }
-body.specimen-visible footer nav [aria-current=step] { opacity: 1; }
+body.specimen-visible footer { background: none; }
 body.specimen-archive-lock :is(header, footer, #progress) { visibility: hidden; }
 #world.specimen-covered { pointer-events: none; }
 
@@ -841,28 +836,28 @@ body[data-chapter="2"] .scene-caption {
   top: 17vh;
   bottom: auto;
 }
-body[data-chapter="2"] :is(header, footer, .scene-caption, .scene-tools, #planet-labels) {
+body:is([data-chapter="1"], [data-chapter="2"]) :is(header, footer, .scene-caption, .scene-tools, #planet-labels) {
   color: #fff0c8;
   text-shadow: 0 1px 2px #354958, 0 0 1px #263e53;
 }
-body[data-chapter="2"] :is(header, footer, .scene-tools) button {
+body:is([data-chapter="1"], [data-chapter="2"]) :is(header, footer, .scene-tools) button {
   text-shadow: inherit;
 }
-body[data-chapter="2"] :is(header, footer, .scene-tools) button:hover {
+body:is([data-chapter="1"], [data-chapter="2"]) :is(header, footer, .scene-tools) button:hover {
   color: #fff8e6;
 }
-body[data-chapter="2"] :is(.explore-steps, footer nav) button {
+body:is([data-chapter="1"], [data-chapter="2"]) :is(.explore-steps, footer nav) button {
   opacity: .8;
 }
-body[data-chapter="2"] :is(.explore-steps [aria-pressed=true], footer nav [aria-current=step]) {
+body:is([data-chapter="1"], [data-chapter="2"]) :is(.explore-steps [aria-pressed=true], footer nav [aria-current=step]) {
   opacity: 1;
 }
-body[data-chapter="2"] footer nav button {
+body:is([data-chapter="1"], [data-chapter="2"]) footer nav button {
   position: relative;
   padding-bottom: 9px;
   border: 0;
 }
-body[data-chapter="2"] footer nav button::after {
+body:is([data-chapter="1"], [data-chapter="2"]) footer nav button::after {
   content: "";
   position: absolute;
   inset: auto 0 0;
@@ -871,7 +866,7 @@ body[data-chapter="2"] footer nav button::after {
   opacity: .5;
   box-shadow: 0 1px 2px #35495860;
 }
-body[data-chapter="2"] footer nav [aria-current=step]::after { opacity: 1; }
+body:is([data-chapter="1"], [data-chapter="2"]) footer nav [aria-current=step]::after { opacity: 1; }
 body[data-chapter="2"] .hotspot { color: #263e53; }
 body[data-chapter="2"] .hotspot span {
   background: #f7efcbdb;
