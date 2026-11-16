@@ -835,3 +835,58 @@ body.specimen-visible footer nav button { opacity: .85; }
 body.specimen-visible footer nav [aria-current=step] { opacity: 1; }
 body.specimen-archive-lock :is(header, footer, #progress) { visibility: hidden; }
 #world.specimen-covered { pointer-events: none; }
+
+body[data-chapter="2"] .paper-border { opacity: 0; }
+body[data-chapter="2"] .scene-caption {
+  top: 17vh;
+  bottom: auto;
+}
+body[data-chapter="2"] :is(header, footer, .scene-caption, .scene-tools, #planet-labels) {
+  color: #fff0c8;
+  text-shadow: 0 1px 2px #354958, 0 0 1px #263e53;
+}
+body[data-chapter="2"] :is(header, footer, .scene-tools) button {
+  text-shadow: inherit;
+}
+body[data-chapter="2"] :is(header, footer, .scene-tools) button:hover {
+  color: #fff8e6;
+}
+body[data-chapter="2"] :is(.explore-steps, footer nav) button {
+  opacity: .8;
+}
+body[data-chapter="2"] :is(.explore-steps [aria-pressed=true], footer nav [aria-current=step]) {
+  opacity: 1;
+}
+body[data-chapter="2"] footer nav button {
+  position: relative;
+  padding-bottom: 9px;
+  border: 0;
+}
+body[data-chapter="2"] footer nav button::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: currentColor;
+  opacity: .5;
+  box-shadow: 0 1px 2px #35495860;
+}
+body[data-chapter="2"] footer nav [aria-current=step]::after { opacity: 1; }
+body[data-chapter="2"] .hotspot { color: #263e53; }
+body[data-chapter="2"] .hotspot span {
+  background: #f7efcbdb;
+  border-color: #567b99;
+}
+body[data-chapter="2"] .hotspot small {
+  color: #fff0c8;
+  text-shadow: 0 1px 2px #263e53, 0 0 1px #263e53;
+}
+body[data-chapter="2"] #explore-note {
+  color: #263e53;
+  background: #c1d2cde8;
+  border-color: #567b99;
+  padding: 9px 13px;
+}
+
+body[data-chapter="2"] #world { cursor: grab; }
+body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
