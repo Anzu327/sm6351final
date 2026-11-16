@@ -28,3 +28,9 @@ GitHub Actions 构建并发布 `.pages/`。运行 `npm run build && node scripts
 背景和模型的纸面颗粒、暖色高光、蓝紫色阴影和绘制轮廓参考 [The Monolith Project](https://themonolithproject.net/)。模型来自用户提供的 `chelyabinsk-main-mass.glb` 和 `igloo-transition-rings.glb`，样本资料来自 [Meteoritical Bulletin](https://www.lpi.usra.edu/meteor/metbull.php?code=57165)。
 
 表面效果的参考贴图来自 Igloo 公开资源 [advect.png](https://www.igloo.inc/assets/images/cubes/advect.png) 和 [triangles_tiling.ktx2](https://www.igloo.inc/assets/images/igloo/triangles_tiling.ktx2)。两张贴图都随构建保存在本地。三角纹理由 KTX2 转为 PNG，材质用同一套纸面色调着色。
+
+VISITORS 的太阳系章节参考 [Monolith 的公开发布脚本](https://themonolithproject.net/assets/index-Dqw2FXdk.js)中的 `SceneSolar`、`GasLineMaterial` 和 `Earth`。太阳、行星、地球陆地与云层、碎石复用原站公开加载的模型和手绘纹理，并转换为本地 GLB 和 WebP。轨道依据原站圆柱几何、噪声贴图和双面着色实现。模型与纹理创作归属 [The Monolith Project 团队](https://themonolithproject.net/)。
+
+开场镜头使用 30° 视角和 −13° 横滚，滚动通过太阳和地球两组镜头姿态插值，末段沿镜头轴推进并擦入 VISITORS 的地球档案。整张画布使用原站纸纹，轮廓根据深度和色差做笔边扰动。按住画面拖动可绕太阳查看。松手保留角度，继续滚动回到故事镜头，RESET VIEW 恢复视角。
+
+太阳系的星点寿命、太阳粒子发射、碎石闭合样条和自转依据发布包中的 `Stars`、`Sun`、`AsteroidBelt` 与 `PositionSetSpline` 移植。彗尾使用原站噪声贴图、12 fps 色带更新和 20 秒横掠加 2 秒间隔，后期参考同一包中的三次径向色散、4 fps 轮廓扰动和 `MixTextureLine` 擦入。VISITORS 仍使用自己的场景渲染器、太阳环绕交互和地球档案。
