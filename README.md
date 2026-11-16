@@ -1,45 +1,30 @@
-# Traces from Space
-An English, scroll-driven 3D meteorite story and source-backed global atlas for SM6351. Team: SpaceUHK.
+# Chelyabinsk · 车里雅宾斯克陨石
 
-The opening contains **one meteorite and a small Scroll hint only**. Two companions join as you scroll, then move apart. The central fragment recedes before Earth appears. Once Earth is visible, the specimen models stay hidden until a featured record is hovered (or selected on touch).
+在 Finder 双击 **打开 Demo.command** 启动 VISITORS 本地预览。脚本使用 Python 3，关闭终端或按 Ctrl+C 停止。VISITORS 从俄罗斯开场进入陨石与穿环，最后一道环中直接揭开太阳系，再进入地球档案。底部 **STONE** 到达陨石展示，继续下滚穿环。
 
-## Start here
-- [Agent instructions](AGENTS.md)
-- [Story, design, interaction and data contract](docs/PROJECT_SPEC.md)
-- [Team handoff and verification ledger](docs/HANDOFF.md)
-- [Material asset provenance](docs/ASSETS.md)
-- [Selected motion storyboard](docs/design-target.jpg)
-- [Snapshot manifest](public/data/manifest.json)
-- [Verification workflow](.github/workflows/verify.yml)
-- [GitHub Actions](https://github.com/Anzu327/sm6351final/actions)
+同一预览地址的 `/index.html` 可打开独立陨石 Demo。下列操作说明针对独立 Demo。构建后的 `dist/` 包含两个页面、模型和运行所需的资源。
 
-## Running
-Node 22.12 or newer is required.
-```sh
-npm install
-npm run dev
-```
-After the first CI run records package-lock.json, use `npm ci`.
-```sh
-npm run typecheck
-npm run check:data
-npm run build
-npx playwright install chromium
-npm test
-```
-The owner requested GitHub API-only edits for this delivery; no local checkout or project edits were used. Running commands above is for teammates who choose to work locally. GitHub Pages deployment is configured in `.github/workflows/deploy-pages.yml`. Repository Pages settings must use **GitHub Actions**. See [deployment status and recovery](docs/DEPLOYMENT.md).
+- 从空白开场下滚，斜向切换揭开陨石场景。继续下滚时镜头下降，陨石从画面上方离开，随后穿过三道圆环。向上滚可反向重走。
+- 陨石周围的线网随三维节点漂移和重连。光标划过模型表面时，暖奶油色和淡紫色的柔光会沿石面扩散后逐步衰减。
+- 点击陨石或 **CLICK TO EXPLORE**，镜头在画面中心完成 1.25 秒的放大，短暂停顿后，陨石才移到详情左侧。拖动模型可旋转，右侧档案可以独立滚动。点击关闭、按 Esc 或浏览器返回会恢复原来的滚动位置。
+- 键盘可用 ↑、↓、Page Up / Down，Home 返回空白开场，End 到穿环结尾。需要 WebGL 2，使用桌面 Chrome 查看。
 
-## Real data, bundled with the site
-- 45,716 meteorite records from the historical NASA Meteorite Landings catalog; 32,186 have usable locations.
-- 1,074 NASA/JPL fireball events acquired on 2026-10-29; 888 have locations.
-- All records remain searchable, including those without coordinates. The 2026 acquisition date is **not** the meteorite catalog's coverage end.
-- Masses and energy use separate units and legends. A catalog meteorite mass can include many recovered fragments.
-- The story follows Chelyabinsk, Fukang and Hoba. Chelyabinsk compares the meteorite catalog location with the fireball's peak-brightness observation.
-- NWA 7034 / Black Beauty remains searchable and has a 0,0 placeholder in the original catalog. It has **no map pin**.
+## GitHub Pages
 
-Raw source files are in `data/raw/`; normalized browser shards are in `public/data/`. `npm run check:data` reproduces normalization from the raw files and compares every record. See [credits](docs/CREDITS.md).
+- [VISITORS · 现行版本](https://anzu327.github.io/sm6351final/)
+- [独立陨石 Demo](https://anzu327.github.io/sm6351final/specimen.html)
+- [老版本 · Traces from Space（已封存）](https://github.com/Anzu327/sm6351final/tree/archive/old-version)
 
-## Verification evidence
-The workflow checks types, complete datasets, production build, and Playwright browser behavior on a remote GitHub runner. It saves screenshots and the build as artifacts. For main pushes, it records screenshots, the npm lockfile and `docs/qa/run.json` through the GitHub API, provided main has not advanced. The evidence JSON identifies the **source commit actually tested**. A green build alone does not establish visual fidelity.
+GitHub Actions 构建并发布 `.pages/`。运行 `npm run build && node scripts/prepare-pages.mjs` 可复现部署目录。
 
-Latest checked source: `71d3fe2999fa8b6fbae189677db3b92921909a05`. [Verification run](https://github.com/Anzu327/sm6351final/actions/runs/40818270037) succeeded: type/data/build checks passed; Playwright recorded four direct passes and one capture case passing on retry. The visual comparison and remaining scope limits are in [design-qa.md](design-qa.md).
+## 开发
+
+运行 `npm ci` 和 `npm run dev`，访问 `/visitors.html` 查看整合版，访问 `/index.html` 查看独立 Demo。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。
+
+## 参考范围
+
+滚轮换算、两级缓动、展品的垂直镜头路径、转场视差、穿环镜头关键帧和三次畸变节点依据 [Igloo](https://www.igloo.inc/) 的公开前端代码重建。开场采用占位空景，之后衔接一个本地展品和三道圆环。陨石周围的线网依据原站的 18 点、每点最多 3 条连接及 0.35 秒伸缩逻辑，表面采用原站的 UV 轨迹注入和双缓冲扩散机制。遮罩、扰动和着色按本地模型与插画风格重建。
+
+背景和模型的纸面颗粒、暖色高光、蓝紫色阴影和绘制轮廓参考 [The Monolith Project](https://themonolithproject.net/)。模型来自用户提供的 `chelyabinsk-main-mass.glb` 和 `igloo-transition-rings.glb`，样本资料来自 [Meteoritical Bulletin](https://www.lpi.usra.edu/meteor/metbull.php?code=57165)。
+
+表面效果的参考贴图来自 Igloo 公开资源 [advect.png](https://www.igloo.inc/assets/images/cubes/advect.png) 和 [triangles_tiling.ktx2](https://www.igloo.inc/assets/images/igloo/triangles_tiling.ktx2)。两张贴图都随构建保存在本地。三角纹理由 KTX2 转为 PNG，材质用同一套纸面色调着色。
