@@ -1,3 +1,7 @@
+# 老版本 · Traces from Space（已封存）
+
+> 此分支保留更新前的完整项目、数据和文档，供查阅。现行版本请见 [main](https://github.com/Anzu327/sm6351final/tree/main)。
+
 # Traces from Space
 An English, scroll-driven 3D meteorite story and source-backed global atlas for SM6351. Team: SpaceUHK.
 
