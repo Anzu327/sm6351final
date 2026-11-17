@@ -61,15 +61,9 @@ void main() {
   float fine = hash(floor(pixel))-.5;
   float t;
   if (solarWeight > 0. && blend > 0.) {
-    // MixTextureLine moves a full-screen strip from y=-2 to 0. The
-    // leading edge rotates by up to 12 degrees at mid-transition.
-    float halfway = 1.-abs(blend*2.-1.);
-    float turn = radians(12.)*(1.-pow(1.-halfway,3.));
-    vec2 screen = vUv*2.-1.;
-    screen.y += 2.*(1.-blend);
-    float localY = -sin(turn)*screen.x+cos(turn)*screen.y;
-    float edge = max(fwidth(localY),.003);
-    t = 1.-smoothstep(1.-edge,1.+edge,localY);
+    // Both globe surfaces cover the viewport here. Change their paint as a
+    // single image, then pull back in the archive; there is no screen wipe.
+    t = blend;
   } else if (portal > .5) {
     t = 1.-smoothstep(blend*1.6-.04,blend*1.6+.04,d);
   } else {

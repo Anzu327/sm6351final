@@ -9,7 +9,7 @@ const stone = {
 };
 const finalRingEntry = .42 * passageSpan;
 const finalRingExit = .52 * passageSpan;
-const chapterStops = [0, stone.display, 2.50, 3.92];
+const chapterStops = [0, stone.display, 2.50, 3.98];
 
 function timeline() {
   const height = window.innerHeight;
@@ -24,7 +24,7 @@ function timeline() {
     [2.95, system + 2.8 * height],
     [3.58, system + 6.2 * height],
     [3.82, system + 7.4 * height],
-    [4, system + 7.6475 * height],
+    [4, system + 8.8 * height],
   ];
 }
 

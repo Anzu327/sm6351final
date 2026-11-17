@@ -5,7 +5,7 @@ import {
   SphereGeometry, SRGBColorSpace, TextureLoader, Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { clamp, ease, powerInOut } from './motion.js';
+import { clamp, earthArrivalPose, powerInOut } from './motion.js';
 import { makeSolarBelt, makeSolarComet, makeSolarParticles } from './solar-atmosphere.js';
 
 const radians = Math.PI / 180;
@@ -427,8 +427,7 @@ export function createSolarScene(scene, camera) {
     }
   }).catch(error => console.error('Solar artwork failed to load', error));
 
-  // SceneSolar in Monolith's public bundle. Its camera interpolates from a Sun
-  // anchor to an Earth anchor, then moves three units along its own viewing axis.
+  // Keep the Sun-to-Earth flight, then orbit into a centered, full-frame Earth.
   const openingPosition = new Vector3(0, 1.65, 16);
   const arrivalOffset = new Vector3(3, 1.1, 1.86);
   const openingRotation = orientation(-6, -.5, -13);
@@ -445,8 +444,9 @@ export function createSolarScene(scene, camera) {
   let exploration = 0;
   const oldRotation = new Quaternion();
   const arrivalPosition = new Vector3();
-  const atlasPosition = new Vector3();
-  const forwardPush = new Vector3();
+  const arrivalDirection = arrivalOffset.clone().normalize();
+  const closeDirection = new Vector3();
+  const frontDirection = new Vector3(0, 0, 1);
   const earthTarget = new Vector3();
   const earth = planets[1];
   const flareOffset = new Vector3();
@@ -477,9 +477,10 @@ export function createSolarScene(scene, camera) {
     // reveal and atlas handoff. The scene stays fully scrub-able in reverse.
     exploration += (Number(orbit.active) - exploration) * (1 - Math.exp(-dt / .115));
     const storyWeight = 1 - exploration;
-    const flight = powerInOut(clamp((p - 2.55) / (3.57 - 2.55)), 3) * storyWeight;
-    const push = ease(3.57, 3.82, p) * storyWeight;
-    const handoff = ease(3.64, 3.82, p) * storyWeight;
+    const flight = powerInOut(clamp((p - 2.55) / (3.34 - 2.55)), 3) * storyWeight;
+    const arrival = earthArrivalPose(p, camera.aspect);
+    const center = arrival.center * storyWeight;
+    const approach = arrival.approach * storyWeight;
     earthTarget.copy(earth.body.position);
     arrivalPosition.copy(arrivalOffset).add(earthTarget);
     const hoverEase = 1 - Math.exp(-dt / .25);
@@ -500,23 +501,21 @@ export function createSolarScene(scene, camera) {
     hoverPose.copy(hoverFrame).multiply(openingRotation);
     camera.position.lerpVectors(hoverPosition, arrivalPosition, flight);
     shotRotation.slerpQuaternions(hoverPose, arrivalRotation, flight);
-    camera.position.add(forwardPush.set(0, 0, -3 * push).applyQuaternion(shotRotation));
 
-    // Ease the local Earth into the same projected size and orientation as
-    // chapter 04 while the line wipe reveals its interactive atlas.
-    const globeRadius = mobile ? 1.18 : 1.55;
-    const globeDistance = mobile ? 7.4 : 7.6;
-    const matchDistance = earth.size * globeDistance / globeRadius
-      * Math.tan(20 * radians) / Math.tan(15 * radians);
-    atlasPosition.copy(earthTarget).add(new Vector3(0, 0, matchDistance));
-    camera.position.lerp(atlasPosition, handoff);
+    // Stay outside the surface. The projected sphere exceeds the diagonal;
+    // no background or second globe is exposed during the material handoff.
+    const coverDistance = earth.size * Math.sqrt(1 + 1 / (Math.tan(15 * radians) * arrival.cover) ** 2);
+    const distance = arrivalOffset.length() * (coverDistance / arrivalOffset.length()) ** approach;
+    closeDirection.copy(arrivalDirection).lerp(frontDirection, center).normalize();
+    arrivalPosition.copy(earthTarget).addScaledVector(closeDirection, distance);
+    camera.position.lerp(arrivalPosition, center);
     camera.lookAt(earthTarget);
     oldRotation.copy(camera.quaternion);
-    camera.quaternion.copy(shotRotation).slerp(oldRotation, handoff);
+    camera.quaternion.copy(shotRotation).slerp(oldRotation, center);
 
-    earth.body.rotation.x += (.15 + pitch - earth.body.rotation.x) * handoff;
-    earth.body.rotation.y += (-2.6 + yaw - earth.body.rotation.y) * handoff;
-    earth.body.rotation.z *= 1 - handoff;
+    earth.body.rotation.x += (.15 + pitch - earth.body.rotation.x) * center;
+    earth.body.rotation.y += (-2.6 + yaw + arrival.turn - earth.body.rotation.y) * center;
+    earth.body.rotation.z *= 1 - center;
     camera.updateMatrixWorld();
 
     // Monolith's LensFlare follows a two-second cycle sampled in 24 steps.
