@@ -13,9 +13,13 @@
 
 运行 `npm ci` 和 `npm run dev`，访问 `/visitors.html` 查看整合版，访问 `/index.html` 查看独立 Demo。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
 
-地球拉远后会持续播放暖橙色短拖尾坠落：位置取自现有数据中有坐标的 1,096 条 `Fell` 记录，落地时短暂闪光并留下小点。亮点大小（3–7.8 CSS px）、拖尾长度、亮度和落点闪光按目录质量以固定 10 g–1 t 对数域变化，大质量记录附带轻微扩散光环；缺失质量使用中性灰色。回收质量不能代表入射质量或撞击能量，落点光效仅作视觉区分；飞入方向、速度和播放顺序均为示意，不代表实测轨迹或历史时间线。`PAUSE` 冻结动画，打开档案可查看完整目录，切到 `FIREBALLS` 保留原有大气观测图层。效果参考 [Mappa Animated Meteorite Landings](https://mappa.js.org/docs/animated-meteorite-landings.html)，在现有 Three.js 场景里实现，不需要 Mapbox 密钥。
+地球章节采用新的 MetBull 2024-10 公开镜像：82,854 条陨石目录记录，其中 50,951 条有可用坐标，31,903 条无坐标仍可搜索。包括 76,372 条 Official、6,385 条 Provisional、97 条 Relict*；伪陨石、陨石坑等 771 条原始档案不参与统计。选中记录可查看命名状态。数据来源、固定版本和清理规则见 [目录来源说明](src/data/README.md)。
 
-区域聚集柱参考 [globe.gl World Population](https://globe.gl/example/world-population/) 的六棱柱视觉，在现有渲染器中绘制。18 个等 sin(latitude) 纬带 × 72 个经度带组成等面积统计区域；每条目击坠落记录首次落地时计入所属区域，柱高按数量线性增长（10 条 = 地球半径的 0.16），淡金到橙红表示由少到多。循环播放不会重复计数，重新筛选会重建统计。这是历史记录的聚集分布，不是全球实际坠落率。
+飞行动画抽样展示各批次的代表记录，所有可定位记录均计入区域柱，约 30 秒播放时间完成一轮目录揭示。流星大小、拖尾与落点闪光仍按回收质量区分；空中路径、顺序和落点光效为示意，Found 记录并非目击事件。SHOW ALL COUNTS 可立即展示当前选择的完整区域分布。暂停可冻结动画和柱高，循环不重复计数，关闭档案会保留当前筛选。
+
+区域柱延续 [globe.gl World Population](https://globe.gl/example/world-population/) 的六棱柱视觉。18 个等 sin(latitude) 纬带 × 72 个经度带组成等面积区域；柱高为地球半径的 0.075 × ln(1 + 区域记录数)，颜色也随对数数量从淡金变为橙红。该比例使南极的大型采集区与较小聚集区能同时看清。统计反映目录采集/发现分布，并不代表独立撞击次数或全球坠落率。
+
+用 `node scripts/check-earth-catalogue.mjs` 核对目录条数、坐标、质量单位、区域总数、柱高范围、完整揭示、暂停和循环计数。
 
 ## 参考范围
 

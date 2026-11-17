@@ -893,13 +893,14 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
   line-height: 1.7;
   letter-spacing: 1px;
 }
+#complete-density { margin-right: 16px; }
 #arrival-note small {
   display: block;
   color: #eee1cb;
   font-size: 9px;
   letter-spacing: .4px;
 }
-body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 165px); }
+body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 185px); }
 @media (max-width:760px) {
-  body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 165px); }
+  body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }
 }

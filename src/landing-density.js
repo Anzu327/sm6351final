@@ -20,6 +20,7 @@ export function createLandingDensity(parent, pointOnSphere) {
   let cells = [];
   let recordCells = [];
   let counted = new Uint8Array(0);
+  let landedCount = 0;
   const transform = new Object3D();
   const up = new Vector3(0, 1, 0);
   const low = new Color('#ffe3a0');
@@ -41,6 +42,7 @@ export function createLandingDensity(parent, pointOnSphere) {
     });
     cells = [...bins.values()];
     counted = new Uint8Array(records.length);
+    landedCount = 0;
     parent.remove(columns);
     columns.dispose();
     columns = new InstancedMesh(geometry, material, cells.length);
@@ -55,25 +57,27 @@ export function createLandingDensity(parent, pointOnSphere) {
     if (!counted[index] && recordCells[index]) {
       counted[index] = 1;
       recordCells[index].count++;
+      landedCount++;
     }
   }
 
   function update(dt) {
     const follow = 1 - Math.exp(-dt * 7);
     cells.forEach((cell, index) => {
-      // A fixed, linear scale: 10 falls = .16 globe radii, 20 = .32.
-      cell.height += (cell.count * .016 - cell.height) * follow;
+      // Fixed log scale keeps Antarctic recovery clusters in view while
+      // preserving a strictly increasing height for every additional record.
+      cell.height += (.075 * Math.log1p(cell.count) - cell.height) * follow;
       transform.position.copy(cell.normal).multiplyScalar(1.006 + cell.height / 2);
       transform.quaternion.setFromUnitVectors(up, cell.normal);
       transform.scale.set(cell.count ? 1 : 0, cell.height, cell.count ? 1 : 0);
       transform.updateMatrix();
       columns.setMatrixAt(index, transform.matrix);
-      color.copy(low).lerp(high, Math.min(1, cell.count / 41));
+      color.copy(low).lerp(high, Math.min(1, Math.log1p(cell.count) / Math.log1p(10000)));
       columns.setColorAt(index, color);
     });
     columns.instanceMatrix.needsUpdate = true;
     if (columns.instanceColor) columns.instanceColor.needsUpdate = true;
   }
 
-  return {setRecords, land, update};
+  return {setRecords, land, update, get landedCount() { return landedCount; }};
 }

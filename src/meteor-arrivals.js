@@ -75,12 +75,16 @@ export function createMeteorArrivals(earth, pointOnSphere) {
   group.add(impacts);
   const density = createLandingDensity(group, pointOnSphere);
   let records = [];
+  let batchSize = 1;
+  let eventCount = 0;
+  let samples = [];
+  let countedBatches = new Uint8Array(0);
   let elapsed = 2.8;
   let previousTime = null;
   const point = new Vector3();
 
   function setRecords(rows) {
-    records = rows.filter(row => row.layer === 'meteorites' && row.status === 'Fell'
+    records = rows.filter(row => row.layer === 'meteorites'
       && Number.isFinite(row.lat) && Math.abs(row.lat) <= 90
       && Number.isFinite(row.lon) && Math.abs(row.lon) <= 180
       && (row.lat !== 0 || row.lon !== 0));
@@ -112,19 +116,25 @@ export function createMeteorArrivals(earth, pointOnSphere) {
           flashSeconds: .28 + strength * .65,
         };
       });
+    // Reveal the entire catalogue in about 30 seconds. One flying trail is a
+    // representative of a batch; every located record still enters the counts.
+    batchSize = Math.max(1, Math.ceil(records.length / 260));
+    eventCount = Math.ceil(records.length / batchSize);
+    samples = Array.from({length: eventCount}, (_, index) => records[index * batchSize]);
+    countedBatches = new Uint8Array(eventCount);
     for (const particles of [landings, impacts]) {
       group.remove(particles);
       particles.geometry.dispose();
       particles.material.dispose();
     }
-    landings = makeParticles(records.length);
+    landings = makeParticles(eventCount);
     landings.name = 'Landed catalogue points';
     group.add(landings);
-    impacts = makeParticles(records.length);
+    impacts = makeParticles(eventCount);
     impacts.name = 'Mass-scaled landing halos';
     impacts.geometry.attributes.ring.array.fill(1);
     group.add(impacts);
-    records.forEach((record, index) => {
+    samples.forEach((record, index) => {
       record.end.toArray(landings.geometry.attributes.position.array, index * 3);
       record.end.toArray(impacts.geometry.attributes.position.array, index * 3);
     });
@@ -145,7 +155,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     const flight = flights.geometry.attributes;
     const landed = landings.geometry.attributes;
     const impact = impacts.geometry.attributes;
-    const cycleSlots = records.length + Math.ceil(3.5 / interval);
+    const cycleSlots = eventCount + Math.ceil(3.5 / interval);
     const cycle = cycleSlots * interval;
     const lastEvent = Math.floor(elapsed / interval);
     let count = 0;
@@ -153,7 +163,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     // in seconds (not frames) to keep the short tail consistent at any FPS.
     for (let event = Math.max(0, lastEvent - flightSlots + 1); event <= lastEvent; event++) {
       const launch = event * interval;
-      const index = event % cycleSlots;
+      const index = (event % cycleSlots) * batchSize;
       if (index >= records.length) continue;
       const record = records[index];
       const age = elapsed - launch;
@@ -172,11 +182,14 @@ export function createMeteorArrivals(earth, pointOnSphere) {
       }
     }
     flights.geometry.setDrawRange(0, count);
-    for (let index = 0; index < records.length; index++) {
-      const record = records[index];
+    for (let index = 0; index < samples.length; index++) {
+      const record = samples[index];
       const firstLanding = index * interval + record.duration;
       const sinceFirst = elapsed - firstLanding;
-      if (sinceFirst >= 0) density.land(index);
+      if (sinceFirst >= 0 && !countedBatches[index]) {
+        countedBatches[index] = 1;
+        for (let row = index * batchSize; row < Math.min(records.length, (index + 1) * batchSize); row++) density.land(row);
+      }
       const age = ((elapsed % cycle) - firstLanding + cycle) % cycle;
       const flash = sinceFirst >= 0 ? Math.max(0, 1 - age / record.flashSeconds) : 0;
       landed.alpha.array[index] = sinceFirst >= 0 ? .4 + record.strength * .25 + flash * .3 : 0;
@@ -195,5 +208,13 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     density.update(dt);
   }
 
-  return { setRecords, update, get count() { return records.length; } };
+  function complete() {
+    records.forEach((_, index) => density.land(index));
+    countedBatches.fill(1);
+    elapsed = Math.max(elapsed, eventCount * interval + 3.5);
+    density.update(1);
+  }
+
+  return { setRecords, update, complete, get count() { return records.length; },
+    get revealedCount() { return density.landedCount; } };
 }
