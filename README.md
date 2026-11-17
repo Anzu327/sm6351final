@@ -13,6 +13,8 @@
 
 运行 `npm ci` 和 `npm run dev`，访问 `/visitors.html` 查看整合版，访问 `/index.html` 查看独立 Demo。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
 
+地球拉远后会持续播放暖橙色短拖尾坠落：位置取自现有数据中有坐标的 1,096 条 `Fell` 记录，落地时短暂闪光并留下小点。大小以目录质量做对数压缩，仅作视觉区分；飞入方向、速度和播放顺序均为示意，不代表实测轨迹或历史时间线。`PAUSE` 冻结动画，打开档案可查看完整目录，切到 `FIREBALLS` 保留原有大气观测图层。效果参考 [Mappa Animated Meteorite Landings](https://mappa.js.org/docs/animated-meteorite-landings.html)，在现有 Three.js 场景里实现，不需要 Mapbox 密钥。
+
 ## 参考范围
 
 滚轮换算、两级缓动、展品的垂直镜头路径、转场视差、穿环镜头关键帧和三次畸变节点依据 [Igloo](https://www.igloo.inc/) 的公开前端代码重建。开场采用占位空景，之后衔接一个本地展品和三道圆环。陨石周围的线网依据原站的 18 点、每点最多 3 条连接及 0.35 秒伸缩逻辑，表面采用原站的 UV 轨迹注入和双缓冲扩散机制。遮罩、扰动和着色按本地模型与插画风格重建。
