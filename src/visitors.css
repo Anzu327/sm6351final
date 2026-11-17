@@ -899,7 +899,7 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
   font-size: 9px;
   letter-spacing: .4px;
 }
-body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 145px); }
+body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 165px); }
 @media (max-width:760px) {
-  body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 145px); }
+  body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 165px); }
 }

@@ -1,4 +1,5 @@
 import { BufferAttribute, BufferGeometry, Color, Group, Points, ShaderMaterial, Vector3 } from 'three';
+import { createLandingDensity } from './landing-density.js';
 
 // Motion reference: https://mappa.js.org/docs/animated-meteorite-landings.html
 // Catalogue coordinates determine the endpoints. Incoming paths and playback
@@ -72,6 +73,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
   let impacts = makeParticles(0);
   impacts.name = 'Mass-scaled landing halos';
   group.add(impacts);
+  const density = createLandingDensity(group, pointOnSphere);
   let records = [];
   let elapsed = 2.8;
   let previousTime = null;
@@ -102,7 +104,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
         // Recovered mass controls a visual accent, not physical impact energy.
         const strength = hasMass ? Math.max(0, Math.min(1, (Math.log10(row.value) - 1) / 5)) : .25;
         return {
-          end, start, strength, hasMass,
+          end, start, strength, hasMass, lat: row.lat, lon: row.lon,
           duration: 2.05 + noise(index + 109) * .7,
           diameter: 3 + strength * 4.8,
           tailSeconds: .1 + strength * .22,
@@ -128,11 +130,13 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     });
     elapsed = 2.8;
     previousTime = null;
+    density.setRecords(records);
   }
 
   function update({ time, visible, pixelRatio }) {
     group.visible = visible && records.length > 0;
-    if (group.visible && previousTime !== null) elapsed += Math.max(0, Math.min(.05, time - previousTime));
+    const dt = group.visible && previousTime !== null ? Math.max(0, Math.min(.05, time - previousTime)) : 0;
+    elapsed += dt;
     previousTime = time;
     if (!group.visible) return;
     flights.material.uniforms.pixelRatio.value = pixelRatio;
@@ -172,6 +176,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
       const record = records[index];
       const firstLanding = index * interval + record.duration;
       const sinceFirst = elapsed - firstLanding;
+      if (sinceFirst >= 0) density.land(index);
       const age = ((elapsed % cycle) - firstLanding + cycle) % cycle;
       const flash = sinceFirst >= 0 ? Math.max(0, 1 - age / record.flashSeconds) : 0;
       landed.alpha.array[index] = sinceFirst >= 0 ? .4 + record.strength * .25 + flash * .3 : 0;
@@ -187,6 +192,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     for (const attribute of Object.values(flight)) attribute.needsUpdate = true;
     for (const name of ['alpha', 'diameter', 'heat']) landed[name].needsUpdate = true;
     for (const name of ['alpha', 'diameter', 'heat']) impact[name].needsUpdate = true;
+    density.update(dt);
   }
 
   return { setRecords, update, get count() { return records.length; } };
