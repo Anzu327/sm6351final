@@ -21,7 +21,7 @@
 
 用 `node scripts/check-earth-catalogue.mjs` 核对目录条数、坐标、质量单位、区域总数、柱高范围、完整揭示、暂停和循环计数。
 
-从 **04 EARTH** 继续下滚，地球转正、柱子退回表面，球面热力层随地球展开成 **05 MAP** 的 Equal Earth 等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核、0.9° 带宽，色带采用与地球和区域柱一致的青蓝及粉紫。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
+从 **04 EARTH** 继续下滚，地球转正、柱子退回表面，球面热力层随地球展开成 **05 MAP** 的 Equal Earth 等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核、0.9° 带宽和 Turbo 色带。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
 
 ## 参考范围
 

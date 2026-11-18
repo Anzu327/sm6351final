@@ -1,6 +1,6 @@
 import { Color, Mesh, PlaneGeometry, RepeatWrapping, ShaderMaterial, TextureLoader } from 'three';
 import { clamp, ease, mix } from './motion.js';
-import { densityInk, earthLatitudePaint } from './earth-palette.js';
+import { earthLatitudePaint, heatmapInk } from './earth-palette.js';
 
 // Full projected spans at the equator and between the poles, for a unit sphere.
 const equalEarthWidth = 5.41326;
@@ -32,7 +32,7 @@ export function createEarthHeatmap(baseMap, geography) {
   };
   const uniforms = {
     ...paint, density: { value: density },
-    colors: { value: densityInk.map(color => new Color(color)) },
+    colors: { value: heatmapInk.map(color => new Color(color)) },
     morph: { value: 0 }, heat: { value: 0 }, radius: { value: 1 },
     mapScale: { value: 1 },
   };

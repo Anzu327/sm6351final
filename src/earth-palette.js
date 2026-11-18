@@ -4,6 +4,11 @@ export const densityInk = [
   '#aba6d8', '#c697d0', '#e19ecb', '#ffd4e8',
 ];
 
+export const heatmapInk = [
+  '#30123b', '#4662d7', '#28bbeb', '#48f18b', '#a4fc3c',
+  '#f4e435', '#fb9a27', '#df4220', '#a01101',
+];
+
 // Monolith's Earth uses local model Y to mix sRGB pigments before lighting.
 export const earthLatitudePaint = `
   vec3 earthSeaPigment(float height) {
