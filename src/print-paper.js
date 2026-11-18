@@ -1,9 +1,9 @@
 import { RepeatWrapping, TextureLoader } from 'three';
 
 let paper;
-export function loadPrintPaper() {
+export function loadPrintPaper(assetRoot = import.meta.env.BASE_URL) {
   paper ??= new TextureLoader().loadAsync(
-    import.meta.env.BASE_URL + 'visitors/solar/paper-grain.webp',
+    assetRoot + 'visitors/solar/paper-grain.webp',
   ).then(texture => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
     return texture;
