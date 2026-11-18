@@ -9,7 +9,7 @@ const stone = {
 };
 const finalRingEntry = .42 * passageSpan;
 const finalRingExit = .52 * passageSpan;
-const chapterStops = [0, stone.display, 2.50, 3.98];
+const chapterStops = [0, stone.display, 2.50, 3.98, 5.32];
 
 function timeline() {
   const height = window.innerHeight;
@@ -25,6 +25,8 @@ function timeline() {
     [3.58, system + 6.2 * height],
     [3.82, system + 7.4 * height],
     [4, system + 8.8 * height],
+    [4.19, system + 9.45 * height],
+    [5.32, system + 11.25 * height],
   ];
 }
 
@@ -59,5 +61,5 @@ export function specimenView(position, paused) {
 }
 
 export function resizeStory() {
-  document.getElementById('scroll-story').style.height = `${storyTop(4) + innerHeight}px`;
+  document.getElementById('scroll-story').style.height = `${storyTop(chapterStops.at(-1)) + innerHeight}px`;
 }

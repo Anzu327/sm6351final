@@ -21,6 +21,8 @@
 
 用 `node scripts/check-earth-catalogue.mjs` 核对目录条数、坐标、质量单位、区域总数、柱高范围、完整揭示、暂停和循环计数。
 
+从 **04 EARTH** 继续下滚，地球转正、柱子退回表面，球面热力层随地球展开成 **05 MAP** 的圆柱等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核、0.9° 带宽和 Turbo 色带。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
+
 ## 参考范围
 
 滚轮换算、两级缓动、展品的垂直镜头路径、转场视差、穿环镜头关键帧和三次畸变节点依据 [Igloo](https://www.igloo.inc/) 的公开前端代码重建。开场采用占位空景，之后衔接一个本地展品和三道圆环。陨石周围的线网依据原站的 18 点、每点最多 3 条连接及 0.35 秒伸缩逻辑，表面采用原站的 UV 轨迹注入和双缓冲扩散机制。遮罩、扰动和着色按本地模型与插画风格重建。

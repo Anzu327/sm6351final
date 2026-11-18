@@ -61,15 +61,17 @@ export function createLandingDensity(parent, pointOnSphere) {
     }
   }
 
-  function update(dt) {
+  function update(dt, heightFactor = 1) {
     const follow = 1 - Math.exp(-dt * 7);
     cells.forEach((cell, index) => {
       // Fixed log scale keeps Antarctic recovery clusters in view while
       // preserving a strictly increasing height for every additional record.
       cell.height += (.075 * Math.log1p(cell.count) - cell.height) * follow;
-      transform.position.copy(cell.normal).multiplyScalar(1.006 + cell.height / 2);
+      const height = cell.height * heightFactor;
+      transform.position.copy(cell.normal).multiplyScalar(1.006 + height / 2);
       transform.quaternion.setFromUnitVectors(up, cell.normal);
-      transform.scale.set(cell.count ? 1 : 0, cell.height, cell.count ? 1 : 0);
+      const width = height > .0001 ? 1 : 0;
+      transform.scale.set(width, height, width);
       transform.updateMatrix();
       columns.setMatrixAt(index, transform.matrix);
       color.copy(low).lerp(high, Math.min(1, Math.log1p(cell.count) / Math.log1p(10000)));

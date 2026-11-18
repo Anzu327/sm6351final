@@ -19,5 +19,6 @@ for (const path of [
   'effects/surface-flow.png',
   'effects/surface-facets.png',
   'visitors/scene-atlas.png',
+  'visitors/meteorite-heatmap.png',
   'visitors/display.ttf',
 ]) await stat('.pages/' + path);

@@ -22,6 +22,7 @@ function makeParticles(capacity) {
     depthWrite: false,
     uniforms: {
       pixelRatio: { value: 1 },
+      visibility: { value: 1 },
       orange: { value: new Color('#ffae43') },
       cream: { value: new Color('#fff0bb') },
     },
@@ -39,6 +40,7 @@ function makeParticles(capacity) {
     `,
     fragmentShader: `
       uniform vec3 orange, cream;
+      uniform float visibility;
       varying float opacity, warmth, halo;
       void main() {
         float radius = length(gl_PointCoord - .5);
@@ -48,7 +50,7 @@ function makeParticles(capacity) {
         // Negative heat identifies records without a measured catalogue mass.
         vec3 ink = warmth < 0. ? vec3(.49, .55, .58)
           : mix(orange, cream, warmth * (1. - radius));
-        gl_FragColor = vec4(ink, opacity * mix(edge, annulus, halo));
+        gl_FragColor = vec4(ink, visibility * opacity * mix(edge, annulus, halo));
         #include <colorspace_fragment>
       }
     `,
@@ -143,7 +145,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     density.setRecords(records);
   }
 
-  function update({ time, visible, pixelRatio }) {
+  function update({ time, visible, pixelRatio, visibility = 1 }) {
     group.visible = visible && records.length > 0;
     const dt = group.visible && previousTime !== null ? Math.max(0, Math.min(.05, time - previousTime)) : 0;
     elapsed += dt;
@@ -152,6 +154,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     flights.material.uniforms.pixelRatio.value = pixelRatio;
     landings.material.uniforms.pixelRatio.value = pixelRatio;
     impacts.material.uniforms.pixelRatio.value = pixelRatio;
+    for (const points of [flights, landings, impacts]) points.material.uniforms.visibility.value = visibility;
     const flight = flights.geometry.attributes;
     const landed = landings.geometry.attributes;
     const impact = impacts.geometry.attributes;
@@ -205,7 +208,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     for (const attribute of Object.values(flight)) attribute.needsUpdate = true;
     for (const name of ['alpha', 'diameter', 'heat']) landed[name].needsUpdate = true;
     for (const name of ['alpha', 'diameter', 'heat']) impact[name].needsUpdate = true;
-    density.update(dt);
+    density.update(dt, visibility);
   }
 
   function complete() {
