@@ -40,7 +40,8 @@ function updateHandoff() {
   if (!visitorsReady || !height) return;
   const progress = Math.min(1, Math.max(0, (openingWindow.innerHeight - top) / height));
   const arrived = top + height <= openingWindow.innerHeight + 2;
-  visitors.style.opacity = String(arrived ? 1 : reduceMotion.matches ? 0 : progress);
+  const blend = progress * progress * (3 - 2 * progress);
+  visitors.style.opacity = String(arrived ? 1 : reduceMotion.matches ? 0 : blend);
   if (arrived) activate(visitors);
 }
 
@@ -65,6 +66,7 @@ function returnToOpening() {
 function connectVisitors() {
   const view = visitors.contentWindow;
   if (!view.document.querySelector('#world')) return;
+  visitorsReady = false;
   view.document.documentElement.style.overscrollBehaviorY = 'none';
 
   const canReturn = () => activeChapter === visitors && view.scrollY <= 1
@@ -92,11 +94,13 @@ function connectVisitors() {
     }
   });
 
-  // Give the incoming canvas a paint before it is composited over the opening.
-  view.requestAnimationFrame(() => view.requestAnimationFrame(() => {
+  // The tunnel may still be loading its models when the iframe finishes loading.
+  function revealPassage() {
     visitorsReady = true;
     updateHandoff();
-  }));
+  }
+  if (view.document.body.dataset.passageReady) revealPassage();
+  else view.addEventListener('passage-ready', revealPassage, { once: true });
 }
 
 visitors.addEventListener('load', connectVisitors);
