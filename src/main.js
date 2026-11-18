@@ -1,6 +1,7 @@
 import './style.css';
 import { paintSky } from './sky.js';
 import { createStage } from './stage.js';
+import { accent, ink, lightBlue, paper } from './palette.js';
 import { archiveArrival, archiveSlide, clamp, ease, mix, passageEnd, passageRest, passageSpan, powerInOut, scrollRate } from './motion.js';
 import { chapterTop, specimenView, storyAt } from './visitors-timeline.js';
 
@@ -306,7 +307,9 @@ function leader(label, point, right, hot) {
   const y = label.y + label.height - .5;
   const x = label.x + (right ? 0 : label.width);
   const elbow = x + (right ? -1 : 1) * 14;
-  pen.strokeStyle = hot ? '#9b4450' : '#394155a6';
+  pen.strokeStyle = embedded
+    ? (hot ? paper : lightBlue + 'c4')
+    : (hot ? accent : ink + 'a6');
   pen.lineWidth = hot ? 1.35 : .8;
   pen.beginPath();
   pen.moveTo(x, y);
@@ -325,9 +328,9 @@ function updateLabels() {
   const [sample, classification, action] = labels;
   const opacity = ease(-.30, -.13, progress) *
     (1 - ease(.21, visibleAnnotationLimit, progress)) * (1 - ease(0, .42, focus));
-  const showLabels = opacity > .01;
+  const showLabels = !embedded && opacity > .01;
   const canExplore = (ready || experience.classList.contains('fallback')) && showLabels &&
-    !detailRequested && !detail.open && (!embedded || storyView?.interactive);
+    !detailRequested && !detail.open;
   annotations.hidden = !showLabels;
   annotations.style.opacity = opacity;
   explore.disabled = !canExplore;
@@ -437,7 +440,7 @@ function frame(now) {
     pointer.y = mix(pointer.y, aim.y, follow);
     ambient += dt;
   }
-  const canTrace = Boolean(stage && motion && !detailRequested && !detail.open && Math.abs(progress) < .30);
+  const canTrace = Boolean(!embedded && stage && motion && !detailRequested && !detail.open && Math.abs(progress) < .30);
   if (pendingPointer || tracing !== canTrace) {
     const hit = stage?.tracePointer(surfacePointer?.x, surfacePointer?.y, Boolean(canTrace && surfacePointer));
     hitTarget.style.cursor = hit ? 'pointer' : 'default';
@@ -445,7 +448,8 @@ function frame(now) {
     pendingPointer = false;
     tracing = canTrace;
   }
-  stage?.render(progress, focus, pointer, ambient, motion, velocity, orbit, storyView?.portal);
+  const showSpecimen = !embedded || detailRequested || detail.open || focus > 0;
+  stage?.render(progress, focus, pointer, ambient, motion, velocity, orbit, storyView?.portal, showSpecimen);
   updateLabels();
   if (scrollCue) updateCue();
 }
@@ -473,6 +477,7 @@ function recoverArchiveView() {
     scrollTo({ top: chapterTop(1), behavior: 'instant' });
     setStoryView(specimenView(storyAt(scrollY), reducedMotion.matches));
   }
+  if (embedded) target = buffered = progress = 0;
 }
 
 function openInitialArchive() {

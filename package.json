@@ -3,7 +3,18 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": {"dev": "vite --host 127.0.0.1", "build": "vite build --base ./", "preview": "vite preview --host 127.0.0.1"},
-  "dependencies": {"three": "0.185.1"},
-  "devDependencies": {"vite": "6.4.3"}
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build --base ./",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "d3-delaunay": "^6.0.4",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "vite": "6.4.3"
+  }
 }

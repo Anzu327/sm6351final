@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         specimen: fileURLToPath(new URL('./index.html', import.meta.url)),
         visitors: fileURLToPath(new URL('./visitors.html', import.meta.url)),
+        opening: fileURLToPath(new URL('./sleep-well/opening.html', import.meta.url)),
       },
     },
   },

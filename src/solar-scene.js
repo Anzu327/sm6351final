@@ -1,3 +1,4 @@
+import { cobalt, lightBlue, paper } from './palette.js';
 import {
   BackSide, Color, CylinderGeometry, DoubleSide, Euler,
   Group, IcosahedronGeometry, LinearFilter, Mesh, MeshBasicMaterial,
@@ -199,9 +200,9 @@ function makeGasRing(radius, clock, { nearEarth = false } = {}) {
       noiseMap: { value: null },
       time: clock,
       ready: { value: false },
-      light: { value: new Color(nearEarth ? '#ffb69e' : '#f2e9c9') },
-      shadow: { value: new Color(nearEarth ? '#d679a5' : '#9ea8ca') },
-      ink: { value: new Color('#557d98') },
+      light: { value: new Color(nearEarth ? lightBlue : paper) },
+      shadow: { value: new Color(nearEarth ? '#658bdf' : '#7493d5') },
+      ink: { value: new Color('#314ca1') },
     },
     vertexShader: `
       varying vec2 track;
@@ -317,7 +318,7 @@ async function loadSolarArt() {
 }
 
 export function createSolarScene(scene, camera) {
-  scene.background = new Color('#a6bcb8');
+  scene.background = new Color(cobalt);
   camera.fov = 30;
   camera.near = .1;
   camera.far = 150;
