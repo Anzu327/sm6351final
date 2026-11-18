@@ -40,7 +40,7 @@ export function createPlexus(radius) {
         float cross = (1. - smoothstep(.045,.16,min(p.x,p.y))) *
                       (1. - smoothstep(.28,.49,max(p.x,p.y)));
         if (cross * amount < .01) discard;
-        gl_FragColor = vec4(.24,.23,.31, cross * amount * opacity * .68);
+        gl_FragColor = vec4(.065,.10,.37, cross * amount * opacity * .68);
         #include <colorspace_fragment>
       }
     `,
@@ -65,7 +65,7 @@ export function createPlexus(radius) {
                       sin(dot(inkPosition, vec3(8.,-11.,15.))) +
                       sin(dot(inkPosition, vec3(-17.,7.,8.)))) / 6. + .5;
         float amount = smoothstep(.34,.52,gaps) * smoothstep(.66,1.6,length(inkPosition));
-        gl_FragColor = vec4(.23,.24,.32,opacity * amount * .61);
+        gl_FragColor = vec4(.065,.10,.37,opacity * amount * .61);
         #include <colorspace_fragment>
       }
     `,

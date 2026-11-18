@@ -1,17 +1,17 @@
 # Chelyabinsk · 车里雅宾斯克陨石
 
-在 Finder 双击 **打开 Demo.command** 启动 VISITORS 本地预览。脚本使用 Python 3，关闭终端或按 Ctrl+C 停止。VISITORS 从俄罗斯开场进入陨石与穿环，最后一道环中直接揭开太阳系，再进入地球档案。底部 **STONE** 到达陨石展示，继续下滚穿环。
+在 Finder 双击 **打开 Demo.command** 启动本地预览。先点 **Enter Site**，下滚经过俄罗斯火球开场、钟表隧道、陨石科普和两段实拍。滚过原来的翻书页或点 **Enter the reconstruction** 即可进入同页的车里雅宾斯克事件重建。在重建开头向上滚可返回前半段。脚本使用 Python 3，关闭终端或按 Ctrl+C 停止。
 
-同一预览地址的 `/index.html` 可打开独立陨石 Demo。下列操作说明针对独立 Demo。构建后的 `dist/` 包含两个页面、模型和运行所需的资源。
+同一预览地址的 `/visitors.html` 可直接打开 VISITORS，底部 **STONE** 到达石环段，继续下滚即可穿环进入太阳系。整合版的材质分析圆框展示主陨石，重建页原档案可通过 `/visitors.html#specimen` 直达。`/index.html` 可打开独立陨石 Demo。下列操作说明针对独立 Demo。构建后的 `dist/` 包含整合入口、两个 Demo 页面和本地资源。
 
 - 从空白开场下滚，斜向切换揭开陨石场景。继续下滚时镜头下降，陨石从画面上方离开，随后穿过三道圆环。向上滚可反向重走。
-- 陨石周围的线网随三维节点漂移和重连。光标划过模型表面时，暖奶油色和淡紫色的柔光会沿石面扩散后逐步衰减。
+- 陨石周围的线网随三维节点漂移和重连。光标划过模型表面时，奶油色和浅蓝色的柔光会沿石面扩散后逐步衰减。
 - 点击陨石或 **CLICK TO EXPLORE**，镜头在画面中心完成 1.25 秒的放大，短暂停顿后，陨石才移到详情左侧。拖动模型可旋转，右侧档案可以独立滚动。点击关闭、按 Esc 或浏览器返回会恢复原来的滚动位置。
 - 键盘可用 ↑、↓、Page Up / Down，Home 返回空白开场，End 到穿环结尾。需要 WebGL 2，使用桌面 Chrome 查看。
 
 ## 开发
 
-运行 `npm ci` 和 `npm run dev`，访问 `/visitors.html` 查看整合版，访问 `/index.html` 查看独立 Demo。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
+运行 `npm ci` 和 `npm run dev`，访问 `/sleep-well/index.html` 从头查看整合版。开场页面从 `sleep-well/opening.html` 构建，公开素材及原滚动脚本位于 `public/sleep-well/`。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
 
 地球章节采用新的 MetBull 2024-10 公开镜像：82,854 条陨石目录记录，其中 50,951 条有可用坐标，31,903 条无坐标仍可搜索。包括 76,372 条 Official、6,385 条 Provisional、97 条 Relict*；伪陨石、陨石坑等 771 条原始档案不参与统计。选中记录可查看命名状态。数据来源、固定版本和清理规则见 [目录来源说明](src/data/README.md)。
 
@@ -25,9 +25,11 @@
 
 ## 参考范围
 
+整合入口在用户提供的 Sleep Well Creatives 本地参考结构上改编。钟表使用 Blender 建模并导出为 GLB。中央钟的表壳随滚动转动，两根指针按 12:1 的角速度倒走。档案视频来源和授权见网页各视频卡。原设计、开发及 3D 素材由 Victor Work / Victor Costa 创作，原站署名随本地副本保留。[Sleep Well Creatives 原站](https://sleep-well-creatives.com/)
+
 滚轮换算、两级缓动、展品的垂直镜头路径、转场视差、穿环镜头关键帧和三次畸变节点依据 [Igloo](https://www.igloo.inc/) 的公开前端代码重建。开场采用占位空景，之后衔接一个本地展品和三道圆环。陨石周围的线网依据原站的 18 点、每点最多 3 条连接及 0.35 秒伸缩逻辑，表面采用原站的 UV 轨迹注入和双缓冲扩散机制。遮罩、扰动和着色按本地模型与插画风格重建。
 
-背景和模型的纸面颗粒、暖色高光、蓝紫色阴影和绘制轮廓参考 [The Monolith Project](https://themonolithproject.net/)。模型来自用户提供的 `chelyabinsk-main-mass.glb` 和 `igloo-transition-rings.glb`，样本资料来自 [Meteoritical Bulletin](https://www.lpi.usra.edu/meteor/metbull.php?code=57165)。
+背景和模型的纸面颗粒、分层着色和绘制轮廓参考 [The Monolith Project](https://themonolithproject.net/)。模型来自用户提供的 `chelyabinsk-main-mass.glb` 和 `igloo-transition-rings.glb`，样本资料来自 [Meteoritical Bulletin](https://www.lpi.usra.edu/meteor/metbull.php?code=57165)。
 
 表面效果的参考贴图来自 Igloo 公开资源 [advect.png](https://www.igloo.inc/assets/images/cubes/advect.png) 和 [triangles_tiling.ktx2](https://www.igloo.inc/assets/images/igloo/triangles_tiling.ktx2)。两张贴图都随构建保存在本地。三角纹理由 KTX2 转为 PNG，材质用同一套纸面色调着色。
 

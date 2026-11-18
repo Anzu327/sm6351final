@@ -32,4 +32,3 @@ effect.setRecords(rows.filter(r=>r.status==='Found'));assert.equal(effect.count,
 effect.complete();assert.equal(effect.revealedCount,49706,'Complete distribution must include every filtered record');
 effect.setRecords([]);effect.update({time:76,visible:true,pixelRatio:1});assert.equal(earth.children[0].visible,false);
 console.log({result:'PASS',catalogue:rows.length,mapped:located.length,cells:bins.size,maxCell:Math.max(...bins.values()),checks:'mass units, unique IDs, eligibility, all-record counting, bounded columns/trails, complete reveal, pause, replay, Found filter, empty selection'});
-

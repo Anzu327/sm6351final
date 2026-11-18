@@ -73,14 +73,26 @@ void main() {
   if (blend > .999) t = 1.;
 
   vec3 outgoing = texture2D(a,vUv).rgb;
-  float paperWeight = clamp(solarWeight*(1.-t)+earthWeight,0.,1.);
+  vec3 incoming = texture2D(b,vUv).rgb;
   float tooth = paperTooth(pixel);
   if (solarWeight > 0.) {
-    outgoing = drawSolar(vUv,tooth);
+    vec3 pigment = drawSolar(vUv,tooth);
+    if (viewDepth(vUv) > 149.) {
+      // Modulate the dark paper so its blue does not wash out in linear light.
+      float fiber = paperTooth(pixel*.54+vec2(1024.,512.)*.23);
+      outgoing = pigment * (1. + (tooth-.48)*.92 + (fiber-.48)*.38 + fine*.12);
+    } else {
+      outgoing = applyPaper(pigment,pixel,tooth,fine);
+    }
+    if (earthWeight > 0.) incoming = applyPaper(incoming,pixel,tooth,fine);
+  } else if (earthWeight > 0.) {
+    outgoing = applyPaper(outgoing,pixel,tooth,fine);
+  } else {
+    float grain = fine*.035;
+    outgoing += grain*smoothstep(.015,.45,dot(outgoing,vec3(.2126,.7152,.0722)));
   }
 
-  vec3 color = mix(outgoing,texture2D(b,vUv).rgb,t);
-  color = mix(color+fine*.035,applyPaper(color,pixel,tooth,fine),paperWeight);
+  vec3 color = mix(outgoing,incoming,t);
   gl_FragColor = vec4(color,1.);
   #include <colorspace_fragment>
 }

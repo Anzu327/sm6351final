@@ -39,7 +39,7 @@ export function makeSolarParticles({ sun = false } = {}) {
     depthWrite: false,
     blending: sun ? AdditiveBlending : NormalBlending,
     uniforms: {
-      pigment: { value: new Color(sun ? 15559029 : 1312191) },
+      pigment: { value: new Color(sun ? 15559029 : '#b2c6f2') },
       sun: { value: sun },
       time: { value: 0 },
       viewportScale: { value: 1 },
@@ -109,7 +109,7 @@ export function makeSolarBelt(geometries, map) {
   const group = new Group();
   group.rotation.z = -30 * radians;
   group.position.y = -10;
-  const material = new MeshBasicMaterial({ color: 1312191, map });
+  const material = new MeshBasicMaterial({ color: '#6e90dd', map });
   const dimensions = 3;
   const maximumLife = 200;
   const rate = Math.floor((1024 / geometries.length) / maximumLife);
@@ -178,9 +178,9 @@ export function makeSolarComet() {
     uniforms: {
       time: { value: 0 },
       noiseMap: { value: null },
-      pink: { value: new Color('#e89cf7') },
+      ice: { value: new Color('#abbef6') },
       blue: { value: new Color('#86b6ff') },
-      peach: { value: new Color('#ffb286') },
+      cream: { value: new Color('#fceecd') },
     },
     vertexShader: `
       varying vec2 trail;
@@ -193,7 +193,7 @@ export function makeSolarComet() {
       varying vec2 trail;
       uniform float time;
       uniform sampler2D noiseMap;
-      uniform vec3 pink, blue, peach;
+      uniform vec3 ice, blue, cream;
       void main() {
         vec2 signedUV = trail*2.-1.;
         vec2 shape = abs(signedUV);
@@ -213,8 +213,8 @@ export function makeSolarComet() {
         if (flame < .1) discard;
 
         float band = floor(fract(flame*2.)*4.+.5)/4.;
-        vec3 color = mix(pink,blue,mix(flame,band,1.-trail.x));
-        gl_FragColor = vec4(mix(color,peach,(1.-taper)*(1.-taper)),1.);
+        vec3 color = mix(ice,blue,mix(flame,band,1.-trail.x));
+        gl_FragColor = vec4(mix(color,cream,(1.-taper)*(1.-taper)),1.);
         #include <colorspace_fragment>
       }
     `,

@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { paintSky } from './sky.js';
 import { loadPrintPaper, printPaper } from './print-paper.js';
+import { printSpecimenLayer } from './specimen-print.js';
+import { specimenCurtain } from './specimen-curtain.js';
 
 import { createRingLight, illustrate } from './illustration.js';
-import { archivePose, clamp, ease, mix, passagePose, passageSpan } from './motion.js';
-import { createPlexus } from './plexus.js';
-import { createSurfaceTrail } from './surface-trail.js';
+import { clamp, ease, mix, passagePose, passageSpan } from './motion.js';
+import { loadSpecimen, poseSpecimenCamera } from './specimen.js';
 
 const compositeShader = {
   vertexShader: `
@@ -31,24 +32,11 @@ const compositeShader = {
     varying vec2 vUv;
     #ifdef PRINT_INK
       ${printPaper}
+      ${printSpecimenLayer}
       uniform vec2 pixelSize;
     #endif
 
-    float hash(vec2 p) {
-      p = fract(p * vec2(123.34, 456.21));
-      p += dot(p, p + 45.32);
-      return fract(p.x * p.y);
-    }
-    float noise(vec2 p) {
-      vec2 i = floor(p), f = fract(p);
-      f = f * f * (3. - 2. * f);
-      return mix(mix(hash(i), hash(i + vec2(1., 0.)), f.x),
-                 mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), f.x), f.y);
-    }
-    float sweep(float value, float limit, float width, float p) {
-      float edge = mix(-width, limit, p);
-      return 1. - clamp((value - edge) / width, 0., 1.);
-    }
+    ${specimenCurtain}
     #ifdef PRINT_INK
       float ringCoverage(sampler2D model, vec2 uv) {
         return smoothstep(.62,.97,texture2D(model,clamp(uv,0.,1.)).a);
@@ -80,16 +68,7 @@ const compositeShader = {
       vec3 color = background * (1. - foreground.a) + foreground.rgb;
       #ifdef PRINT_INK
         if (rings) return printRingOutline(model,uv,color);
-        // Sample either side of the silhouette to offset the colored inks.
-        float tooth = hash(floor(uv / pixelSize));
-        vec2 shift = pixelSize * vec2(1.4, -.72) * (.65 + tooth);
-        vec4 leftInk = texture2D(model, clamp(uv-shift,0.,1.));
-        vec4 rightInk = texture2D(model, clamp(uv+shift,0.,1.));
-        float outside = max(leftInk.a,rightInk.a) * (1.-foreground.a);
-        vec3 fringe = mix(vec3(.075,.42,.48),vec3(.42,.10,.47),step(leftInk.a,rightInk.a));
-        color = mix(color,fringe,outside * .72);
-        float edge = foreground.a * (1.-min(leftInk.a,rightInk.a));
-        color = mix(color,vec3(.035,.027,.092),edge * (.42 + tooth*.20));
+        return drawSpecimenInk(model, uv, pixelSize, foreground, color).rgb;
       #endif
       return color;
     }
@@ -98,14 +77,6 @@ const compositeShader = {
       float angle = ringPulse * .3 * (grain - .5);
       p = mat2(cos(angle), sin(angle), -sin(angle), cos(angle)) * p;
       return p / vec2(aspectRatio, 1.) + .5;
-    }
-    vec2 splitUV(vec2 uv, float bend, float tap) {
-      vec2 radial = uv - .5;
-      return uv + radial * dot(radial, radial) * bend * tap;
-    }
-    vec3 spectrum(float t) {
-      float green = 1. - abs(2. * clamp((t - 1./6.) * 1.5, 0., 1.) - 1.);
-      return pow(vec3(t <= .5 ? 1. - green : 0., green, t > .5 ? 1. - green : 0.), vec3(.4545));
     }
     vec3 refractLayer(sampler2D model, sampler2D sky, vec2 uv, vec2 driftUV, float bend, bool rings) {
       vec3 sum = vec3(0.), weight = vec3(0.);
@@ -129,22 +100,10 @@ const compositeShader = {
       } else if (curtain >= 1.) {
         color = layer(passage, paperB, portalDistort(uv, grain), paperDrift, true);
       } else {
-        vec2 field = (uv - .5) * vec2(aspectRatio, 1.) + .5;
-        float blocks = noise(floor(field * vec2(24., 42.)));
-        float cracks = noise(field * 34.) * .35 + noise(field * 9.) * .65;
-        float warp = (noise(field * 13.) - .5) * .8;
-        float slope = .20 * aspectRatio;
-        float diagonal = uv.y + (uv.x + warp) * slope;
-        float limit = 1. + slope;
-        float colorEdge = sweep(diagonal, limit, 2., curtain);
-        float displacement = sweep(blocks, 1., 1., sweep(diagonal, limit, .9, curtain));
-        float cut = sweep(cracks, 1., 2., sweep(diagonal, limit, .2, curtain));
-        // The reference samples the outgoing and incoming layers on opposite vertical offsets.
-        vec2 outgoing = uv - vec2(0., .4 * pow(curtain, 3.) + .025 * displacement);
-        vec2 incoming = uv + vec2(0., .4 * pow(1. - curtain, 3.) + .025 * (1. - displacement));
+        vec2 outgoing, incoming;
+        float cut, center, colorEdge;
+        curtainLayers(uv, aspectRatio, curtain, outgoing, incoming, cut, center, colorEdge);
         incoming = portalDistort(incoming, grain);
-        float center = 1. - smoothstep(.7, 1., abs(uv.x * 2. - 1.));
-        center *= 1. - smoothstep(.7, 1., abs(uv.y * 2. - 1.));
         vec3 a = vec3(0.), b = vec3(0.);
         if (!transparentOpening && cut < 1.) a = refractLayer(specimen, paperA, outgoing, drift, 12. * center * colorEdge * grain, false);
         if (cut > 0.) b = refractLayer(passage, paperB, incoming, paperDrift, 12. * center * (1. - colorEdge) * (1. - grain), !transparentOpening);
@@ -159,10 +118,15 @@ const compositeShader = {
         alpha *= (1. - .35 * portal) * smoothstep(edge - .14, edge + .14, distance);
       }
       #ifdef PRINT_INK
-        color = mix(color, vec3(.82,.53,.68), ringPulse * .045);
-        color = applyPaper(color,gl_FragCoord.xy,paperTooth(gl_FragCoord.xy),grain-.5);
+        color = mix(color, vec3(.34,.47,.85), ringPulse * .045);
+        vec2 pixel = gl_FragCoord.xy;
+        float tooth = paperTooth(pixel);
+        float fiber = paperTooth(pixel*.54+vec2(1024.,512.)*.23);
+        float luma = dot(color,vec3(.2126,.7152,.0722));
+        vec3 darkPaper = color * (1. + (tooth-.48)*1.1 + (fiber-.48)*.48 + (grain-.5)*.15);
+        color = mix(darkPaper,applyPaper(color,pixel,tooth,grain-.5),smoothstep(.03,.13,luma));
       #else
-        color = mix(color, vec3(.81,.65,.50), ringPulse * .075);
+        color = mix(color, vec3(.34,.47,.85), ringPulse * .075);
         vec2 pos = vUv - vec2(.53, .53);
         color *= 1. - dot(pos, pos) * .17;
         color += (grain - .5) * .034;
@@ -237,42 +201,12 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
   const screenCamera = new THREE.Camera();
 
   const loader = new GLTFLoader();
-  const textureLoader = new THREE.TextureLoader();
-  const [meteorite, ringAsset, flow, facets] = await Promise.all([
-    loader.loadAsync(import.meta.env.BASE_URL + 'models/chelyabinsk-main-mass.glb'),
+  const [specimen, ringAsset] = await Promise.all([
+    loadSpecimen(renderer, embedded),
     loader.loadAsync(import.meta.env.BASE_URL + 'models/igloo-transition-rings.glb'),
-    textureLoader.loadAsync(import.meta.env.BASE_URL + 'effects/surface-flow.png'),
-    textureLoader.loadAsync(import.meta.env.BASE_URL + 'effects/surface-facets.png'),
   ]);
-  for (const texture of [flow, facets]) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  facets.colorSpace = THREE.SRGBColorSpace;
-  facets.flipY = false;
-
-  const rock = new THREE.Group();
-  const wake = createSurfaceTrail(renderer, flow);
-  const wakeScale = { value: 9 };
-  const surfacePoint = new THREE.Vector3();
-  const brushUV = new THREE.Vector2();
-  const box = new THREE.Box3().setFromObject(meteorite.scene);
-  const center = box.getCenter(new THREE.Vector3());
-  meteorite.scene.traverse(node => {
-    if (!node.isMesh) return;
-    node.geometry.computeBoundingBox();
-    const localCenter = node.geometry.boundingBox.getCenter(new THREE.Vector3());
-    node.userData.wakeCenter = localCenter;
-    node.material = illustrate(node.material, {
-      field: wake.field, facets, center: localCenter, patternScale: wakeScale,
-    }, embedded ? 'stone' : null);
-  });
-  meteorite.scene.position.copy(center).multiplyScalar(-1);
-  const specimenTilt = new THREE.Group();
-  specimenTilt.rotation.set(.02, .19, 1.10);
-  specimenTilt.add(meteorite.scene);
-  rock.add(specimenTilt);
-  specimenScene.add(rock);
-  const plexus = createPlexus(1.72);
-  specimenScene.add(plexus.group);
-  rock.updateMatrixWorld(true);
+  const { rock } = specimen;
+  specimenScene.add(rock, specimen.lines);
 
   const anchorCaster = new THREE.Raycaster();
   const anchors = [
@@ -315,15 +249,12 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
   const up = new THREE.Vector3(0, 1, 0);
   const ringTiltAxis = new THREE.Vector3(0, 0, -1);
   const ringTilt = new THREE.Quaternion();
-  const pointerTilt = new THREE.Euler(0, 0, 0, 'YXZ');
-  const pointerRotation = new THREE.Quaternion();
   let specimenParallax = 0;
 
   let width = 1;
   let height = 1;
   let aspect = 1;
   const world = new THREE.Vector3();
-  const cast = new THREE.Raycaster();
   const cursor = new THREE.Vector2();
   const local = tiltedBounds;
   const corners = [local.min.x, local.max.x].flatMap(x =>
@@ -352,11 +283,10 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
     composite.uniforms.aspectRatio.value = aspect;
     const dpr = Math.min(devicePixelRatio, 1.65, Math.sqrt(2600000 / (w * h)));
     renderer.setPixelRatio(dpr);
-    plexus.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
     const targetSize = renderer.getDrawingBufferSize(new THREE.Vector2());
     if (embedded) composite.uniforms.pixelSize.value.set(1 / targetSize.x, 1 / targetSize.y);
-    wakeScale.value = 9 * Math.min(1, targetSize.y / 1300);
+    specimen.resize(dpr, targetSize.y);
     specimenTarget.setSize(targetSize.x, targetSize.y);
     passageTarget.setSize(targetSize.x, targetSize.y);
     for (const camera of [specimenCamera, passageCamera]) {
@@ -369,41 +299,8 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
   }
 
   function poseSpecimen(scroll, focus, pointer, motion, velocity, orbit) {
-    // One original cube slot advances the camera by 5.75 world units.
-    const { center, approach, dock } = archivePose(focus);
-    const travel = -5.75 * mix(scroll, 0, center);
-    const distanceFromCenter = -scroll / 3;
-    const compact = width <= 720;
-    const zoom = Math.min(1, aspect * 1.25);
-    const detailDistance = compact ? Math.max(3.8, 7.8 * zoom) : Math.max(3.95, 5.08 / aspect);
-    const distance = mix(approach, detailDistance, dock);
-    const fov = 45 - 5 * velocity * (1 - center);
-    const screenHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(fov / 2)) / zoom;
-    const panX = compact ? 0 : screenHeight * aspect * .245 * dock;
-    const panY = compact ? -screenHeight * .235 * dock : 0;
-    specimenCamera.fov = fov;
-    specimenCamera.zoom = zoom;
-    specimenCamera.updateProjectionMatrix();
-    specimenCamera.position.set(panX, travel + panY, distance);
-    specimenCamera.lookAt(panX, travel + panY, 0);
-    specimenCamera.updateMatrixWorld(true);
-
-    const rotation = 1 - center;
-    rock.position.set(-.035, .055, 0);
-    rock.scale.setScalar(2.73);
-    rock.rotation.set(
-      11.2 * distanceFromCenter * rotation,
-      -9.35 * distanceFromCenter * rotation,
-      -4.95 * distanceFromCenter * rotation,
-    );
-    // Apply the pointer tilt about the view axes, including when the specimen
-    // already has a different pose along the scroll timeline.
-    const amount = motion * rotation * (1 - ease(0, .38, scroll));
-    pointerTilt.set(pointer.y * .094 * amount, -pointer.x * .128 * amount, 0);
-    rock.quaternion.premultiply(pointerRotation.setFromEuler(pointerTilt));
-    pointerTilt.set(orbit.pitch * dock, orbit.yaw * dock, 0);
-    rock.quaternion.premultiply(pointerRotation.setFromEuler(pointerTilt));
-    rock.updateMatrixWorld(true);
+    const { center, dock } = poseSpecimenCamera(specimenCamera, width, aspect, scroll, focus, velocity);
+    specimen.pose(scroll, pointer, motion, center, dock, orbit);
   }
 
   function posePassage(scroll, pointer, seconds, motion) {
@@ -443,7 +340,7 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
     composite.uniforms.paperTravel.value = progress;
   }
 
-  function render(scroll, focus, pointer, seconds, motion, velocity, orbit, portal = 0) {
+  function render(scroll, focus, pointer, seconds, motion, velocity, orbit, portal = 0, showSpecimen = true) {
     const sceneScroll = mix(scroll, 0, ease(0, .56, focus));
     const opening = sceneScroll < 0;
     const curtain = clamp(opening ? sceneScroll + 1 : sceneScroll);
@@ -452,19 +349,18 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
     effects.curtain.value = curtain;
     effects.transparentOpening.value = embedded && opening;
     effects.portal.value = portal;
-    effects.specimen.value = opening ? empty : specimenTarget.texture;
-    effects.passage.value = opening ? specimenTarget.texture : passageTarget.texture;
+    effects.specimen.value = opening || !showSpecimen ? empty : specimenTarget.texture;
+    effects.passage.value = opening ? (showSpecimen ? specimenTarget.texture : empty) : passageTarget.texture;
     effects.paperA.value = opening ? openingPaper : paperA;
     effects.paperB.value = opening ? paperA : paperB;
     effects.drift.value.set(pointer.x * .004 * motion * curtain, pointer.y * .005 * motion * curtain);
     effects.ringPulse.value = 0;
     effects.paperTravel.value = 0;
 
-    if (scroll > -1 && scroll < 1) {
+    if (showSpecimen && scroll > -1 && scroll < 1) {
       poseSpecimen(scroll, focus, pointer, motion, velocity, orbit);
       const scan = (1 - ease(.13, .26, Math.abs(scroll))) * (1 - ease(0, .35, focus));
-      plexus.update(seconds, scan * motion, rock);
-      wake.tick(seconds);
+      specimen.update(seconds, scan * motion);
       renderer.setRenderTarget(specimenTarget);
       renderer.render(specimenScene, specimenCamera);
     }
@@ -494,23 +390,12 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
 
   function intersect(x, y) {
     cursor.set(x / width * 2 - 1, 1 - (y / height + specimenParallax) * 2);
-    cast.setFromCamera(cursor, specimenCamera);
-    return cast.intersectObject(rock, true)[0];
+    return specimen.intersect(specimenCamera, cursor);
   }
 
   function tracePointer(x, y, enabled) {
     const hit = enabled ? intersect(x, y) : null;
-    if (hit) {
-      // The original uses a second, continuous UV set for the wake. Build the
-      // same kind of coordinate on our mesh without touching its painted UVs.
-      hit.object.worldToLocal(surfacePoint.copy(hit.point));
-      surfacePoint.sub(hit.object.userData.wakeCenter).normalize();
-      brushUV.set(Math.atan2(surfacePoint.z, surfacePoint.x) / (2 * Math.PI) + .5,
-        Math.asin(clamp(surfacePoint.y, -1, 1)) / Math.PI + .5);
-      wake.trace(brushUV);
-    } else {
-      wake.trace(null);
-    }
+    specimen.trace(hit);
     return Boolean(hit);
   }
 
