@@ -10,6 +10,7 @@ const stone = {
 const finalRingEntry = .42 * passageSpan;
 const finalRingExit = .52 * passageSpan;
 const chapterStops = [0, stone.display, 2.50, 3.98, 5.32];
+export const startsInPassage = new URLSearchParams(window.location.search).get('entry') === 'passage';
 
 function timeline() {
   const height = window.innerHeight;
@@ -40,8 +41,11 @@ function mapTimeline(value, from, to) {
   return mix(start[to], end[to], (value - start[from]) / (end[from] - start[from]));
 }
 
-export const storyAt = pixels => mapTimeline(pixels, 1, 0);
-export const storyTop = position => mapTimeline(position, 0, 1);
+// The book leads into the existing tunnel at its first fully revealed frame.
+const passageEntry = stone.display + (stone.system - stone.display) / finalRingExit;
+const entryOffset = () => startsInPassage ? mapTimeline(passageEntry, 0, 1) : 0;
+export const storyAt = pixels => mapTimeline(pixels + entryOffset(), 1, 0);
+export const storyTop = position => Math.max(0, mapTimeline(position, 0, 1) - entryOffset());
 export const chapterTop = chapter => storyTop(chapterStops[chapter]);
 
 export function specimenView(position, paused) {

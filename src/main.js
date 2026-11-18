@@ -3,7 +3,7 @@ import { paintSky } from './sky.js';
 import { createStage } from './stage.js';
 import { accent, ink, lightBlue, paper } from './palette.js';
 import { archiveArrival, archiveSlide, clamp, ease, mix, passageEnd, passageRest, passageSpan, powerInOut, scrollRate } from './motion.js';
-import { chapterTop, specimenView, storyAt } from './visitors-timeline.js';
+import { chapterTop, specimenView, startsInPassage, storyAt } from './visitors-timeline.js';
 
 const get = id => document.getElementById(id);
 const experience = get('experience');
@@ -30,6 +30,7 @@ const visibleAnnotationLimit = .325;
 const opening = -1;
 
 let stage;
+let passageReady = false;
 let width = innerWidth;
 let height = innerHeight;
 let target = opening;
@@ -450,6 +451,11 @@ function frame(now) {
   }
   const showSpecimen = !embedded || detailRequested || detail.open || focus > 0;
   stage?.render(progress, focus, pointer, ambient, motion, velocity, orbit, storyView?.portal, showSpecimen);
+  if (startsInPassage && !passageReady && (stage || experience.classList.contains('fallback'))) {
+    passageReady = true;
+    document.body.dataset.passageReady = 'true';
+    window.dispatchEvent(new Event('passage-ready'));
+  }
   updateLabels();
   if (scrollCue) updateCue();
 }
