@@ -49,21 +49,5 @@
   .scene-tunnel .title_serif__tunnel { min-width: 16rem; }
 }
 
-/* A distant fireball sits within the original illustrated hero. */
-.hero__hold::before {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  left: 57%;
-  top: 19%;
-  width: clamp(100px, 23vw, 345px);
-  height: clamp(7px, 1.1vw, 17px);
-  background:
-    radial-gradient(ellipse at 5% 50%, #fff9db 0 4%, #fbebc8 6%, #8dabf855 15%, transparent 32%),
-    linear-gradient(90deg, #fceecd 3%, #789df5a0 22%, #4671cd1c 81%, transparent);
-  clip-path: polygon(0 50%, 4% 5%, 100% 46%, 100% 54%, 4% 95%);
-  filter: drop-shadow(0 0 7px #a9bfff);
-  transform: rotate(-20deg);
-  opacity: .76;
-}
-body.is-loading .hero__hold::before { opacity: 0; }
+.hero__hold { position: relative; }
+.hero__content { z-index: 1; }
