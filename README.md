@@ -13,6 +13,16 @@
 
 运行 `npm ci` 和 `npm run dev`，访问 `/sleep-well/index.html` 从头查看整合版。开场页面从 `sleep-well/opening.html` 构建，公开素材及原滚动脚本位于 `public/sleep-well/`。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
 
+地球章节采用新的 MetBull 2024-10 公开镜像：82,854 条陨石目录记录，其中 50,951 条有可用坐标，31,903 条无坐标仍可搜索。包括 76,372 条 Official、6,385 条 Provisional、97 条 Relict*；伪陨石、陨石坑等 771 条原始档案不参与统计。选中记录可查看命名状态。数据来源、固定版本和清理规则见 [目录来源说明](src/data/README.md)。
+
+飞行动画抽样展示各批次的代表记录，所有可定位记录均计入区域柱，约 30 秒播放时间完成一轮目录揭示。流星大小、拖尾与落点闪光仍按回收质量区分；空中路径、顺序和落点光效为示意，Found 记录并非目击事件。SHOW ALL COUNTS 可立即展示当前选择的完整区域分布。暂停可冻结动画和柱高，循环不重复计数，关闭档案会保留当前筛选。
+
+区域柱延续 [globe.gl World Population](https://globe.gl/example/world-population/) 的六棱柱视觉。18 个等 sin(latitude) 纬带 × 72 个经度带组成等面积区域；柱高为地球半径的 0.075 × ln(1 + 区域记录数)，颜色也随对数数量从青蓝变为粉紫。该比例使南极的大型采集区与较小聚集区能同时看清。统计反映目录采集/发现分布，并不代表独立撞击次数或全球坠落率。
+
+用 `node scripts/check-earth-catalogue.mjs` 核对目录条数、坐标、质量单位、区域总数、柱高范围、完整揭示、暂停和循环计数。
+
+从 **04 EARTH** 继续下滚，地球转正、柱子退回表面，球面热力层随地球展开成 **05 MAP** 的 Equal Earth 等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核、0.9° 带宽和 Turbo 色带。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
+
 ## 参考范围
 
 整合入口在用户提供的 Sleep Well Creatives 本地参考结构上改编。钟表使用 Blender 建模并导出为 GLB。中央钟的表壳随滚动转动，两根指针按 12:1 的角速度倒走。档案视频来源和授权见网页各视频卡。原设计、开发及 3D 素材由 Victor Work / Victor Costa 创作，原站署名随本地副本保留。[Sleep Well Creatives 原站](https://sleep-well-creatives.com/)
@@ -27,6 +37,6 @@ VISITORS 的太阳系章节参考 [Monolith 的公开发布脚本](https://themo
 
 太阳系地球的海陆分布采用 [Natural Earth 1:10m Land v5.1.1](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-land/)。本地 `earth-geography.webp` 是 4096 × 2048 等经纬贴图，红通道用于裁切凸起的陆地层，绿、蓝通道由海岸距离生成，分别驱动近岸水纹和深浅色带。
 
-开场镜头使用 30° 视角和 −13° 横滚，滚动通过太阳和地球两组镜头姿态插值，末段沿镜头轴推进并擦入 VISITORS 的地球档案。整张画布使用原站纸纹，轮廓根据深度和色差做笔边扰动。按住画面拖动可绕太阳查看。松手保留角度，继续滚动回到故事镜头，RESET VIEW 恢复视角。
+开场镜头使用 30° 视角和 −13° 横滚，滚动通过太阳和地球两组镜头姿态插值。末段地球旋转至中央、靠近并覆盖整个视口，在全覆盖时衔接档案地球，再拉远至交互视图；向上滚动可反向重走。覆盖距离按视口对角线计算。整张画布使用原站纸纹，轮廓根据深度和色差做笔边扰动。按住画面拖动可绕太阳查看。松手保留角度，继续滚动回到故事镜头，RESET VIEW 恢复视角。
 
-太阳系的星点寿命、太阳粒子发射、碎石闭合样条和自转依据发布包中的 `Stars`、`Sun`、`AsteroidBelt` 与 `PositionSetSpline` 移植。彗尾使用原站噪声贴图、12 fps 色带更新和 20 秒横掠加 2 秒间隔，后期参考同一包中的三次径向色散、4 fps 轮廓扰动和 `MixTextureLine` 擦入。VISITORS 仍使用自己的场景渲染器、太阳环绕交互和地球档案。
+太阳系的星点寿命、太阳粒子发射、碎石闭合样条和自转依据发布包中的 `Stars`、`Sun`、`AsteroidBelt` 与 `PositionSetSpline` 移植。彗尾使用原站噪声贴图、12 fps 色带更新和 20 秒横掠加 2 秒间隔，后期参考同一包中的三次径向色散和 4 fps 轮廓扰动。VISITORS 仍使用自己的场景渲染器、太阳环绕交互和地球档案。

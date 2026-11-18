@@ -4,7 +4,7 @@ export const visitorsComposite = `
 varying vec2 vUv;
 uniform sampler2D a, b, solarDepth;
 uniform vec2 pixelSize;
-uniform float blend, aspect, portal, solarWeight, solarTime;
+uniform float blend, aspect, portal, solarWeight, earthWeight, solarTime;
 ${printPaper}
 
 float hash(vec2 p) {
@@ -61,15 +61,9 @@ void main() {
   float fine = hash(floor(pixel))-.5;
   float t;
   if (solarWeight > 0. && blend > 0.) {
-    // MixTextureLine moves a full-screen strip from y=-2 to 0. The
-    // leading edge rotates by up to 12 degrees at mid-transition.
-    float halfway = 1.-abs(blend*2.-1.);
-    float turn = radians(12.)*(1.-pow(1.-halfway,3.));
-    vec2 screen = vUv*2.-1.;
-    screen.y += 2.*(1.-blend);
-    float localY = -sin(turn)*screen.x+cos(turn)*screen.y;
-    float edge = max(fwidth(localY),.003);
-    t = 1.-smoothstep(1.-edge,1.+edge,localY);
+    // Both globe surfaces cover the viewport here. Change their paint as a
+    // single image, then pull back in the archive; there is no screen wipe.
+    t = blend;
   } else if (portal > .5) {
     t = 1.-smoothstep(blend*1.6-.04,blend*1.6+.04,d);
   } else {
@@ -79,9 +73,9 @@ void main() {
   if (blend > .999) t = 1.;
 
   vec3 outgoing = texture2D(a,vUv).rgb;
-  float grain = fine*.035;
+  vec3 incoming = texture2D(b,vUv).rgb;
+  float tooth = paperTooth(pixel);
   if (solarWeight > 0.) {
-    float tooth = paperTooth(pixel);
     vec3 pigment = drawSolar(vUv,tooth);
     if (viewDepth(vUv) > 149.) {
       // Modulate the dark paper so its blue does not wash out in linear light.
@@ -90,11 +84,15 @@ void main() {
     } else {
       outgoing = applyPaper(pigment,pixel,tooth,fine);
     }
-    grain *= t;
+    if (earthWeight > 0.) incoming = applyPaper(incoming,pixel,tooth,fine);
+  } else if (earthWeight > 0.) {
+    outgoing = applyPaper(outgoing,pixel,tooth,fine);
+  } else {
+    float grain = fine*.035;
+    outgoing += grain*smoothstep(.015,.45,dot(outgoing,vec3(.2126,.7152,.0722)));
   }
 
-  vec3 color = mix(outgoing,texture2D(b,vUv).rgb,t);
-  color += grain * smoothstep(.015,.45,dot(color,vec3(.2126,.7152,.0722)));
+  vec3 color = mix(outgoing,incoming,t);
   gl_FragColor = vec4(color,1.);
   #include <colorspace_fragment>
 }

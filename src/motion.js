@@ -15,6 +15,19 @@ export const ease = (start, end, value) => {
 };
 export const powerInOut = (t, power) => t < .5 ? (2 * t) ** power / 2 : 1 - (2 - 2 * t) ** power / 2;
 
+// Both Earth scenes meet at full coverage before the archive pulls back.
+// Use the viewport diagonal so the globe also covers the corners on wide screens.
+export function earthArrivalPose(position, aspect) {
+  return {
+    center: ease(3.24, 3.50, position),
+    approach: ease(3.34, 3.62, position),
+    blend: ease(3.64, 3.72, position),
+    reveal: ease(3.74, 3.96, position),
+    turn: -Math.PI * .85 * (1 - ease(3.30, 3.96, position)),
+    cover: Math.hypot(aspect, 1) * 1.12,
+  };
+}
+
 export function archivePose(progress) {
   const seconds = progress * archiveArrival;
   const push = clamp(seconds / archivePush) ** 4;
