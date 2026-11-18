@@ -1,6 +1,6 @@
 import { Color, Mesh, PlaneGeometry, RepeatWrapping, ShaderMaterial, TextureLoader } from 'three';
 import { clamp, ease, mix } from './motion.js';
-import { densityInk } from './earth-palette.js';
+import { densityInk, earthLatitudePaint } from './earth-palette.js';
 
 // Full projected spans at the equator and between the poles, for a unit sphere.
 const equalEarthWidth = 5.41326;
@@ -28,10 +28,7 @@ export function createEarthHeatmap(baseMap, geography) {
   });
   const paint = {
     baseMap: { value: baseMap }, geography, hasGeography: { value: false },
-    oceanLit: { value: new Color('#689dac') }, oceanShade: { value: new Color('#57537e') },
-    landLit: { value: new Color('#dfa9d2') }, landShade: { value: new Color('#7c729b') },
     coastInk: { value: new Color('#c7d7f0') }, outline: { value: new Color('#415c74') },
-    oceanFlat: { value: new Color('#6c93a6') }, landFlat: { value: new Color('#a093b6') },
   };
   const uniforms = {
     ...paint, density: { value: density },
@@ -42,7 +39,7 @@ export function createEarthHeatmap(baseMap, geography) {
   const fragmentShader = `
     uniform sampler2D baseMap, geography;
     uniform bool hasGeography;
-    uniform vec3 oceanLit, oceanShade, landLit, landShade, coastInk, outline, oceanFlat, landFlat;
+    uniform vec3 coastInk, outline;
     uniform float morph;
     varying vec2 geo;
     varying vec3 eyeNormal;
@@ -51,6 +48,7 @@ export function createEarthHeatmap(baseMap, geography) {
       uniform vec3 colors[9];
       uniform float heat;
     #endif
+    ${earthLatitudePaint}
     void main() {
       // Solar's geography texture stores signed shore distance in red.
       vec3 surface = hasGeography ? texture2D(geography,vec2(geo.x,1.-geo.y)).rgb : vec3(0.);
@@ -58,11 +56,13 @@ export function createEarthHeatmap(baseMap, geography) {
       float land = hasGeography ? smoothstep(.48,.52,surface.r) : smoothstep(.005,.23,fallback.r-fallback.b);
       float coast = hasGeography ? (1.-smoothstep(.012,.054,abs(surface.r-.5))) : 0.;
       vec3 n = normalize(eyeNormal);
-      float light = dot(n,normalize(vec3(-.86,-.36,.36)));
-      float band = .24*smoothstep(-.88,.5,light)+.76*smoothstep(.01,.07,light);
-      vec3 sea = mix(oceanShade,oceanLit,band);
-      vec3 ground = mix(landShade,landLit,band);
-      vec3 base = mix(mix(sea,oceanFlat,morph),mix(ground,landFlat,morph),land);
+      // Keep the solar sea mesh's local height range through the map projection.
+      float height = .84668*sin((geo.y-.5)*3.14159265);
+      float light = dot(n,normalize(vec3(-.95,-.30,.08)));
+      float illumination = mix(smoothstep(-.02,.04,light),.45,morph);
+      vec3 sea = earthSeaPigment(height)*mix(vec3(.62,.61,.68),vec3(.79,.75,.86),illumination);
+      vec3 ground = earthLandPigment(height)*mix(vec3(.73,.72,.80),vec3(.89,.84,.94),illumination);
+      vec3 base = sRGBTransferEOTF(vec4(clamp(mix(sea,ground,land),0.,1.),1.)).rgb;
       base = mix(base,coastInk,coast*mix(.69,.42,morph));
       float rim = (1.-smoothstep(.01,.12,n.z))*(1.-morph);
       base = mix(base,outline,rim*.64);

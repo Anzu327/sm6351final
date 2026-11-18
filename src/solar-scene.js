@@ -7,6 +7,7 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clamp, earthArrivalPose, powerInOut } from './motion.js';
 import { makeSolarBelt, makeSolarComet, makeSolarParticles } from './solar-atmosphere.js';
+import { earthLatitudePaint } from './earth-palette.js';
 
 const radians = Math.PI / 180;
 const orientation = (x, y, z) => new Quaternion().setFromEuler(
@@ -85,6 +86,7 @@ function makeSolarMaterial(ink, {
       uniform bool hasMap;
       uniform int kind;
       ${earthGeography}
+      ${earthLatitudePaint}
 
       vec3 waterBump(vec3 eye, vec3 normal, vec2 uv) {
         vec3 dx = dFdx(eye), dy = dFdy(eye);
@@ -119,8 +121,7 @@ function makeSolarMaterial(ink, {
           float coast = texture2D(geography,earthUV(surface)).r;
           if (coast < .5) discard;
           float shade = mix(.48,.534,smoothstep(.5,.62,coast));
-          vec3 tint = mix(vec3(.890,.871,.953),vec3(.698,.769,.902),surface.y);
-          color = shade*tint*1.4;
+          color = shade*earthLandPigment(surface.y)*1.4;
         } else if (kind == 3) {
           vec2 uv = texCoord;
           vec3 bump = (waterBump(-viewRay,normal,uv*2.+time*.01)
@@ -133,7 +134,7 @@ function makeSolarMaterial(ink, {
           float ripple = fract(land*.5-time*.2);
           ripple *= smoothstep(0.,.5,ripple)*(1.-smoothstep(.95,1.,ripple))*smoothstep(0.,1.,land);
           float depth = floor(coast.b*5.+.5)/5.;
-          color = mix(vec3(.612,.745,.855),vec3(.678,.588,.796),surface.y);
+          color = earthSeaPigment(surface.y);
           color = mix(color,color*mix(1.,depth,.7)+ripple+rippleOffset,.5);
         }
 
