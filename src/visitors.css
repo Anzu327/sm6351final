@@ -54,58 +54,6 @@ a {
   height: 100%;
   touch-action: pan-y;
 }
-.paper-border {
-  position: fixed;
-  inset: 14px;
-  border: 1px solid #15217d38;
-  pointer-events: none;
-  z-index: 2;
-  border-radius: 45% 1% 43% 1% / .12% 30% .12% 25%;
-}
-header {
-  position: fixed;
-  left: 0;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 31px 3.5vw;
-  z-index: 8;
-  pointer-events: none;
-}
-header > * {
-  pointer-events: auto;
-}
-#brand {
-  font-family:
-    Display,
-    Arial Black,
-    sans-serif;
-  font-size: 20px;
-  letter-spacing: -.7px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.brand-orbit {
-  font-size: 27px;
-  font-family: serif;
-  font-weight: 400;
-}
-.brand-dot {
-  margin-left: -9px;
-  color: var(--hover-ink);
-}
-.header-actions {
-  display: flex;
-  gap: 23px;
-}
-.header-actions button {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-}
 #scroll-story {
   height: 650vh;
 }
@@ -139,7 +87,9 @@ header > * {
   line-height: 1.25;
   margin: 10px 0;
 }
-#scene-title:empty {
+#chapter-label:empty,
+#scene-title:empty,
+#scene-sub:empty {
   display: none;
 }
 #scene-sub {
@@ -220,55 +170,6 @@ header > * {
 }
 #close-explore {
   float: right;
-}
-footer {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 27px 3.5vw;
-  z-index: 5;
-  gap: 15px;
-}
-#view-note {
-  font-size: 8px;
-  letter-spacing: 1px;
-  width: 270px;
-  line-height: 1.6;
-}
-footer nav {
-  display: flex;
-  gap: 23px;
-}
-footer nav button {
-  font-size: 8px;
-  letter-spacing: 1px;
-  opacity: .45;
-  padding: 5px 0;
-}
-footer nav span {
-  padding-left: 5px;
-}
-footer nav [aria-current=step] {
-  opacity: 1;
-  border-bottom: 1px solid currentColor;
-}
-#continue {
-  font-size: 8px;
-  letter-spacing: 1px;
-  width: 130px;
-  text-align: right;
-}
-#progress {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  background: var(--blue-accent);
-  z-index: 10;
 }
 .hotspot {
   position: fixed;
@@ -385,7 +286,12 @@ footer nav [aria-current=step] {
   justify-content: space-between;
   align-items: center;
 }
-.atlas-heading button {
+.atlas-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#close-atlas {
   font-size: 24px;
 }
 .atlas-tabs {
@@ -561,21 +467,6 @@ summary {
   line-height: 1.7;
   margin: 4px 0;
 }
-.dark {
-  color: var(--warm-paper);
-}
-.dark .action {
-  border-color: #fceecd77;
-}
-.dark #inspector {
-  color: var(--warm-paper);
-}
-.dark #view-note {
-  opacity: .75;
-}
-.dark .paper-border {
-  border-color: #fceecd33;
-}
 .atlas-open .scene-caption,
 .atlas-open .scene-tools {
   opacity: 0;
@@ -641,28 +532,6 @@ summary {
   display: none !important;
 }
 @media (max-width:760px) {
-  header {
-    padding: 26px 7vw;
-  }
-  #brand {
-    font-size: 17px;
-  }
-  .brand-orbit {
-    font-size: 23px;
-  }
-  .header-actions {
-    gap: 13px;
-  }
-  .header-actions button {
-    font-size: 7px;
-    letter-spacing: .5px;
-  }
-  #reset-view {
-    display: none;
-  }
-  .paper-border {
-    inset: 10px;
-  }
   .scene-caption {
     left: 7vw;
     bottom: 23vh;
@@ -677,27 +546,6 @@ summary {
   .scene-tools {
     left: 7vw;
     bottom: 15vh;
-  }
-  footer {
-    padding: 23px 7vw;
-    flex-wrap: wrap;
-  }
-  #view-note {
-    width: 100%;
-    font-size: 6px;
-    letter-spacing: .7px;
-    order: 2;
-    margin-top: 5px;
-  }
-  footer nav {
-    gap: 15px;
-  }
-  footer nav button {
-    font-size: 7px;
-  }
-  #continue {
-    font-size: 7px;
-    width: auto;
   }
   .explore-steps {
     gap: 17px;
@@ -806,19 +654,6 @@ summary {
 .hotspot {
   transition: opacity .3s ease;
 }
-@media (min-width:761px) {
-  footer {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-  }
-  #continue {
-    justify-self: end;
-  }
-  footer nav {
-    justify-self: center;
-  }
-}
-
 /* Only the new system labels; existing layout and type styles are retained. */
 #planet-labels{position:fixed;inset:0;z-index:4;pointer-events:none}
 .planet-name{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;font-size:9px;letter-spacing:1.1px;font-weight:600;padding:5px 8px;white-space:nowrap;text-shadow:0 0 5px var(--blue-ink)}
@@ -827,50 +662,31 @@ summary {
 @media(max-width:760px){.planet-name{font-size:8px;letter-spacing:.7px;padding:5px}}
 
 
-/* Keep the chapter controls available while the canvas changes hands. */
+/* The specimen layer supplies its own annotations. */
 body.specimen-visible .scene-caption { visibility: hidden; }
-body.specimen-visible .paper-border { opacity: 0; }
-body.specimen-visible footer { background: none; }
-body.specimen-archive-lock :is(header, footer, #progress) { visibility: hidden; }
 #world.specimen-covered { pointer-events: none; }
 
-body[data-chapter="2"] .paper-border { opacity: 0; }
 body[data-chapter="2"] .scene-caption {
   top: 17vh;
   bottom: auto;
 }
-body:is(.specimen-visible, [data-chapter="2"]) :is(header, footer),
-body[data-chapter="2"] :is(.scene-caption, .scene-tools, #planet-labels, #inspector) {
+body[data-chapter="2"] :is(.scene-caption, .scene-tools, #planet-labels, #inspector),
+body:is([data-chapter="3"], [data-chapter="4"]) :is(.scene-caption, .scene-tools, #inspector, #heatmap-legend) {
   color: var(--warm-paper);
   text-shadow: 0 1px 2px var(--blue-ink), 0 0 1px var(--blue-ink);
 }
-body:is(.specimen-visible, [data-chapter="2"]) :is(header, footer, .scene-tools) button {
+body:is([data-chapter="2"], [data-chapter="3"]) .scene-tools button {
   text-shadow: inherit;
 }
 body:is([data-chapter="2"], [data-chapter="3"]) #facts > div {
   border-color: #fceecd55;
 }
-body:is([data-chapter="1"], [data-chapter="2"]) :is(.explore-steps, footer nav) button {
+body:is([data-chapter="1"], [data-chapter="2"]) .explore-steps button {
   opacity: .8;
 }
-body:is([data-chapter="1"], [data-chapter="2"]) :is(.explore-steps [aria-pressed=true], footer nav [aria-current=step]) {
+body:is([data-chapter="1"], [data-chapter="2"]) .explore-steps [aria-pressed=true] {
   opacity: 1;
 }
-body:is([data-chapter="1"], [data-chapter="2"]) footer nav button {
-  position: relative;
-  padding-bottom: 9px;
-  border: 0;
-}
-body:is([data-chapter="1"], [data-chapter="2"]) footer nav button::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 2px;
-  background: currentColor;
-  opacity: .5;
-  box-shadow: 0 1px 2px #10195f60;
-}
-body:is([data-chapter="1"], [data-chapter="2"]) footer nav [aria-current=step]::after { opacity: 1; }
 body:is(.specimen-visible, [data-chapter="2"], [data-chapter="3"]) {
   --hover-ink: var(--blue-light);
 }
@@ -901,7 +717,6 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
 
 #arrival-note {
   margin: 14px 0 16px;
-  color: #2a4658;
   font-size: 10px;
   line-height: 1.7;
   letter-spacing: 1px;
@@ -909,26 +724,12 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
 #complete-density { margin-right: 16px; }
 #arrival-note small {
   display: block;
-  color: #304856;
   font-size: 9px;
   letter-spacing: .4px;
 }
 body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 185px); }
-body:is([data-chapter="3"], [data-chapter="4"]):not(.transitioning) {
-  color: #263e50;
-}
-body:is([data-chapter="3"], [data-chapter="4"]):not(.transitioning) button:hover {
-  color: #534a74;
-}
-body:is([data-chapter="3"], [data-chapter="4"]) :focus-visible { outline-color: #6e5889; }
-body:is([data-chapter="3"], [data-chapter="4"]) footer nav button:not([aria-current=step]),
-body[data-chapter="3"] .layer-tabs button:not([aria-pressed=true]) { opacity: .75; }
-body[data-chapter="3"] #atlas {
-  background: #dce3dcf5;
-  color: #293f51;
-  border-color: #4b677d70;
-}
-body:is([data-chapter="3"], [data-chapter="4"]) #progress { background: #75618e; }
+body[data-chapter="3"] .scene-tools .action { border-color: var(--blue-light); }
+body[data-chapter="3"] .layer-tabs button:not([aria-pressed=true]) { opacity: .8; }
 body[data-chapter="4"] .scene-caption {
   top: max(64px, 8.5vh);
   bottom: auto;
@@ -944,23 +745,20 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
   width: min(290px, 88vw);
   display: grid;
   gap: 5px;
-  color: #263e50;
   font-size: 10px;
   pointer-events: none;
 }
 #heatmap-legend strong { letter-spacing: .1em; }
-#heatmap-legend > span { color: #314c5d; }
 .heatmap-ramp {
   height: 5px;
   margin-top: 3px;
   background: var(--heatmap-ramp);
-  border: 1px solid #445b7555;
+  border: 1px solid #a9bfff80;
 }
 .heatmap-ticks {
   display: flex;
   justify-content: space-between;
   font-variant-numeric: tabular-nums;
-  color: #314c5d;
 }
 @media (max-width:760px) {
   body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }
