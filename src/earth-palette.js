@@ -5,8 +5,8 @@ export const densityInk = [
 ];
 
 export const heatmapInk = [
-  '#30123b', '#4662d7', '#28bbeb', '#48f18b', '#a4fc3c',
-  '#f4e435', '#fb9a27', '#df4220', '#a01101',
+  '#252672', '#4143a6', '#6752b8', '#995dbb', '#c06cab',
+  '#e084a2', '#f5a38d', '#ffca89', '#fff0ae',
 ];
 
 // Monolith's Earth uses local model Y to mix sRGB pigments before lighting.
