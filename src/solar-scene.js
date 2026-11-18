@@ -318,6 +318,7 @@ async function loadSolarArt() {
 
 export function createSolarScene(scene, camera) {
   scene.background = new Color('#a6bcb8');
+  const earthGeographyMap = { value: null };
   camera.fov = 30;
   camera.near = .1;
   camera.far = 150;
@@ -408,6 +409,7 @@ export function createSolarScene(scene, camera) {
       });
     }
     setBodies(meshes, maps);
+    earthGeographyMap.value = maps.get('earth-geography');
     placeholder.dispose();
     rocks.dispose();
     placeholderRock.dispose();
@@ -534,5 +536,5 @@ export function createSolarScene(scene, camera) {
     scene.updateMatrixWorld();
   }
 
-  return { planets: planets.filter(planet => planet.name), belt, update };
+  return { planets: planets.filter(planet => planet.name), belt, update, earthGeographyMap };
 }

@@ -4,7 +4,7 @@ export const visitorsComposite = `
 varying vec2 vUv;
 uniform sampler2D a, b, solarDepth;
 uniform vec2 pixelSize;
-uniform float blend, aspect, portal, solarWeight, solarTime;
+uniform float blend, aspect, portal, solarWeight, earthWeight, solarTime;
 ${printPaper}
 
 float hash(vec2 p) {
@@ -73,14 +73,14 @@ void main() {
   if (blend > .999) t = 1.;
 
   vec3 outgoing = texture2D(a,vUv).rgb;
-  float grain = fine*.035;
+  float paperWeight = clamp(solarWeight*(1.-t)+earthWeight,0.,1.);
+  float tooth = paperTooth(pixel);
   if (solarWeight > 0.) {
-    float tooth = paperTooth(pixel);
-    outgoing = applyPaper(drawSolar(vUv,tooth),pixel,tooth,fine);
-    grain *= t;
+    outgoing = drawSolar(vUv,tooth);
   }
 
-  vec3 color = mix(outgoing,texture2D(b,vUv).rgb,t)+grain;
+  vec3 color = mix(outgoing,texture2D(b,vUv).rgb,t);
+  color = mix(color+fine*.035,applyPaper(color,pixel,tooth,fine),paperWeight);
   gl_FragColor = vec4(color,1.);
   #include <colorspace_fragment>
 }

@@ -888,7 +888,7 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
 
 #arrival-note {
   margin: 14px 0 16px;
-  color: #ffd59b;
+  color: #2a4658;
   font-size: 10px;
   line-height: 1.7;
   letter-spacing: 1px;
@@ -896,11 +896,26 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
 #complete-density { margin-right: 16px; }
 #arrival-note small {
   display: block;
-  color: #eee1cb;
+  color: #304856;
   font-size: 9px;
   letter-spacing: .4px;
 }
 body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 185px); }
+body:is([data-chapter="3"], [data-chapter="4"]):not(.transitioning) {
+  color: #263e50;
+}
+body:is([data-chapter="3"], [data-chapter="4"]):not(.transitioning) button:hover {
+  color: #534a74;
+}
+body:is([data-chapter="3"], [data-chapter="4"]) :focus-visible { outline-color: #6e5889; }
+body:is([data-chapter="3"], [data-chapter="4"]) footer nav button:not([aria-current=step]),
+body[data-chapter="3"] .layer-tabs button:not([aria-pressed=true]) { opacity: .75; }
+body[data-chapter="3"] #atlas {
+  background: #dce3dcf5;
+  color: #293f51;
+  border-color: #4b677d70;
+}
+body:is([data-chapter="3"], [data-chapter="4"]) #progress { background: #75618e; }
 body[data-chapter="4"] .scene-caption {
   top: max(64px, 8.5vh);
   bottom: auto;
@@ -916,22 +931,23 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
   width: min(290px, 88vw);
   display: grid;
   gap: 5px;
-  color: #f4e9d0;
+  color: #263e50;
   font-size: 10px;
   pointer-events: none;
 }
 #heatmap-legend strong { letter-spacing: .1em; }
-#heatmap-legend > span { color: #d5ccbf; }
+#heatmap-legend > span { color: #314c5d; }
 .heatmap-ramp {
   height: 5px;
   margin-top: 3px;
-  background: linear-gradient(90deg, #30123b, #4662d7, #28bbeb, #48f18b, #a4fc3c, #f4e435, #fb9a27, #df4220, #a01101);
+  background: var(--heatmap-ramp);
+  border: 1px solid #445b7555;
 }
 .heatmap-ticks {
   display: flex;
   justify-content: space-between;
   font-variant-numeric: tabular-nums;
-  color: #e1d7c8;
+  color: #314c5d;
 }
 @media (max-width:760px) {
   body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }

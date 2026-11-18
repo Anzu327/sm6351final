@@ -17,11 +17,11 @@
 
 飞行动画抽样展示各批次的代表记录，所有可定位记录均计入区域柱，约 30 秒播放时间完成一轮目录揭示。流星大小、拖尾与落点闪光仍按回收质量区分；空中路径、顺序和落点光效为示意，Found 记录并非目击事件。SHOW ALL COUNTS 可立即展示当前选择的完整区域分布。暂停可冻结动画和柱高，循环不重复计数，关闭档案会保留当前筛选。
 
-区域柱延续 [globe.gl World Population](https://globe.gl/example/world-population/) 的六棱柱视觉。18 个等 sin(latitude) 纬带 × 72 个经度带组成等面积区域；柱高为地球半径的 0.075 × ln(1 + 区域记录数)，颜色也随对数数量从淡金变为橙红。该比例使南极的大型采集区与较小聚集区能同时看清。统计反映目录采集/发现分布，并不代表独立撞击次数或全球坠落率。
+区域柱延续 [globe.gl World Population](https://globe.gl/example/world-population/) 的六棱柱视觉。18 个等 sin(latitude) 纬带 × 72 个经度带组成等面积区域；柱高为地球半径的 0.075 × ln(1 + 区域记录数)，颜色也随对数数量从青蓝变为粉紫。该比例使南极的大型采集区与较小聚集区能同时看清。统计反映目录采集/发现分布，并不代表独立撞击次数或全球坠落率。
 
 用 `node scripts/check-earth-catalogue.mjs` 核对目录条数、坐标、质量单位、区域总数、柱高范围、完整揭示、暂停和循环计数。
 
-从 **04 EARTH** 继续下滚，地球转正、柱子退回表面，球面热力层随地球展开成 **05 MAP** 的 Equal Earth 等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核、0.9° 带宽和 Turbo 色带。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
+从 **04 EARTH** 继续下滚，地球转正、柱子退回表面，球面热力层随地球展开成 **05 MAP** 的 Equal Earth 等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核、0.9° 带宽，色带采用与地球和区域柱一致的青蓝及粉紫。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
 
 ## 参考范围
 

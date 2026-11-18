@@ -1,5 +1,6 @@
 import { BufferAttribute, BufferGeometry, Color, Group, Points, ShaderMaterial, Vector3 } from 'three';
 import { createLandingDensity } from './landing-density.js';
+import { densityInk } from './earth-palette.js';
 
 // Motion reference: https://mappa.js.org/docs/animated-meteorite-landings.html
 // Catalogue coordinates determine the endpoints. Incoming paths and playback
@@ -23,8 +24,9 @@ function makeParticles(capacity) {
     uniforms: {
       pixelRatio: { value: 1 },
       visibility: { value: 1 },
-      orange: { value: new Color('#ffae43') },
-      cream: { value: new Color('#fff0bb') },
+      trail: { value: new Color(densityInk[5]).multiplyScalar(.66) },
+      flare: { value: new Color('#fff0f7') },
+      unmeasured: { value: new Color('#7d98a8') },
     },
     vertexShader: `
       attribute float alpha, diameter, heat, ring;
@@ -39,7 +41,7 @@ function makeParticles(capacity) {
       }
     `,
     fragmentShader: `
-      uniform vec3 orange, cream;
+      uniform vec3 trail, flare, unmeasured;
       uniform float visibility;
       varying float opacity, warmth, halo;
       void main() {
@@ -48,8 +50,8 @@ function makeParticles(capacity) {
         float edge = 1. - smoothstep(.24, .5, radius);
         float annulus = smoothstep(.32, .39, radius) * (1. - smoothstep(.43, .5, radius));
         // Negative heat identifies records without a measured catalogue mass.
-        vec3 ink = warmth < 0. ? vec3(.49, .55, .58)
-          : mix(orange, cream, warmth * (1. - radius));
+        vec3 ink = warmth < 0. ? unmeasured
+          : mix(trail, flare, warmth * (1. - radius));
         gl_FragColor = vec4(ink, visibility * opacity * mix(edge, annulus, halo));
         #include <colorspace_fragment>
       }
