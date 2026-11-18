@@ -27,5 +27,6 @@ for (const path of [
   'visitors/display.ttf',
   'sleep-well/experience.css',
   'sleep-well/experience.js',
+  'sleep-well/files/unpkg.com/lenis@1.3.14/dist/lenis.css',
   'sleep-well/meteorite/falling-ball.js',
 ]) await stat('.pages/' + path);
