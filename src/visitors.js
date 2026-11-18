@@ -4053,7 +4053,7 @@ function _4(now) {
     if (R0 !== 3) X9();
     document.body.dataset.chapter = String(R0);
     n1("#view-note").textContent = [
-      "ARTISTIC RECONSTRUCTION", "", "SCHEMATIC VIEW · NOT TO SCALE", "CATALOGUE RECORDS · NOT A RISK MAP", "CYLINDRICAL EQUAL-AREA MAP"
+      "ARTISTIC RECONSTRUCTION", "", "SCHEMATIC VIEW · NOT TO SCALE", "CATALOGUE RECORDS · NOT A RISK MAP", "EQUAL EARTH PROJECTION"
     ][R0];
   }
   n1("#progress").style.width = O1 / heatmapEnd * 100 + "%";
