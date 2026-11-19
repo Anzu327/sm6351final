@@ -86,7 +86,7 @@ void main() {
     }
     if (earthWeight > 0.) incoming = applyPaper(incoming,pixel,tooth,fine);
   } else if (earthWeight > 0.) {
-    outgoing = applyPaper(outgoing,pixel,tooth,fine);
+    outgoing = mix(outgoing,applyPaper(outgoing,pixel,tooth,fine),earthWeight);
   } else {
     float grain = fine*.035;
     outgoing += grain*smoothstep(.015,.45,dot(outgoing,vec3(.2126,.7152,.0722)));

@@ -7,13 +7,13 @@ import { densityInk } from './earth-palette.js';
 // order are illustrative: neither trajectories nor fall times are reconstructed.
 const interval = .115;
 const flightSlots = 28;
-const tailSamples = 22;
+const tailSamples = 40;
 const surfaceRadius = 1.012;
 
 const fraction = value => value - Math.floor(value);
 const noise = index => fraction(Math.sin(index * 127.1 + 311.7) * 43758.5453);
 
-function makeParticles(capacity) {
+function makeParticles(capacity, flying = false) {
   const geometry = new BufferGeometry();
   for (const [name, size] of [['position', 3], ['alpha', 1], ['diameter', 1], ['heat', 1], ['ring', 1]]) {
     geometry.setAttribute(name, new BufferAttribute(new Float32Array(capacity * size), size));
@@ -24,9 +24,13 @@ function makeParticles(capacity) {
     uniforms: {
       pixelRatio: { value: 1 },
       visibility: { value: 1 },
+      flying: { value: flying },
       trail: { value: new Color(densityInk[5]).multiplyScalar(.66) },
       flare: { value: new Color('#fff0f7') },
       unmeasured: { value: new Color('#7d98a8') },
+      flightCore: { value: new Color('#fff7dc') },
+      flightGlow: { value: new Color('#ffd286') },
+      flightEmber: { value: new Color('#b45a2c') },
     },
     vertexShader: `
       attribute float alpha, diameter, heat, ring;
@@ -42,6 +46,8 @@ function makeParticles(capacity) {
     `,
     fragmentShader: `
       uniform vec3 trail, flare, unmeasured;
+      uniform vec3 flightCore, flightGlow, flightEmber;
+      uniform bool flying;
       uniform float visibility;
       varying float opacity, warmth, halo;
       void main() {
@@ -49,10 +55,20 @@ function makeParticles(capacity) {
         if (radius > .5 || opacity < .001) discard;
         float edge = 1. - smoothstep(.24, .5, radius);
         float annulus = smoothstep(.32, .39, radius) * (1. - smoothstep(.43, .5, radius));
-        // Negative heat identifies records without a measured catalogue mass.
-        vec3 ink = warmth < 0. ? unmeasured
-          : mix(trail, flare, warmth * (1. - radius));
-        gl_FragColor = vec4(ink, visibility * opacity * mix(edge, annulus, halo));
+        vec3 ink;
+        float shape;
+        if (flying) {
+          float head = warmth;
+          vec3 glow = mix(flightEmber, flightGlow, 1. - smoothstep(.20, .42, radius));
+          ink = mix(glow, flightCore, head * (1. - smoothstep(.10, .24, radius)));
+          shape = mix(edge, 1. - smoothstep(.15, .5, radius), head);
+        } else {
+          // Negative heat identifies records without a measured catalogue mass.
+          ink = warmth < 0. ? unmeasured : mix(trail, flare, warmth * (1. - radius));
+          ink = mix(ink, flightEmber, halo * .55);
+          shape = mix(edge, annulus, halo);
+        }
+        gl_FragColor = vec4(ink, visibility * opacity * shape);
         #include <colorspace_fragment>
       }
     `,
@@ -68,7 +84,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
   group.name = 'Meteorite arrivals';
   group.visible = false;
   earth.add(group);
-  const flights = makeParticles(flightSlots * tailSamples);
+  const flights = makeParticles(flightSlots * tailSamples, true);
   flights.name = 'Incoming short trails';
   group.add(flights);
   let landings = makeParticles(0);
@@ -112,12 +128,13 @@ export function createMeteorArrivals(earth, pointOnSphere) {
         // Recovered mass controls a visual accent, not physical impact energy.
         const strength = hasMass ? Math.max(0, Math.min(1, (Math.log10(row.value) - 1) / 5)) : .25;
         return {
-          end, start, strength, hasMass, lat: row.lat, lon: row.lon,
+          end, start, strength, hasMass, row,
           duration: 2.05 + noise(index + 109) * .7,
-          diameter: 3 + strength * 4.8,
-          tailSeconds: .1 + strength * .22,
-          opacity: .5 + strength * .46,
-          flashSeconds: .28 + strength * .65,
+          diameter: 6 + strength * 5,
+          tailSeconds: .24 + strength * .24,
+          opacity: .76 + strength * .24,
+          flashSeconds: .16 + strength * .18,
+          ringSeconds: .34 + strength * .36,
         };
       });
     // Reveal the entire catalogue in about 30 seconds. One flying trail is a
@@ -144,10 +161,11 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     });
     elapsed = 2.8;
     previousTime = null;
-    density.setRecords(records);
+    density.setRecords(records.map(record => record.row));
   }
 
-  function update({ time, visible, pixelRatio, visibility = 1 }) {
+  function update({ time, visible, pixelRatio, visibility = 1, interactionDt, reducedMotion = false,
+    viewportWidth = 1, viewportHeight = 1 }) {
     group.visible = visible && records.length > 0;
     const dt = group.visible && previousTime !== null ? Math.max(0, Math.min(.05, time - previousTime)) : 0;
     elapsed += dt;
@@ -173,16 +191,16 @@ export function createMeteorArrivals(earth, pointOnSphere) {
       const record = records[index];
       const age = elapsed - launch;
       if (age > record.duration + record.tailSeconds) continue;
-      for (let sample = 0; sample < tailSamples; sample++) {
+      for (let sample = tailSamples - 1; sample >= 0; sample--) {
         const lag = sample / (tailSamples - 1);
         const progress = (age - lag * record.tailSeconds) / record.duration;
         if (progress < 0 || progress > 1) continue;
         // Accelerate into the surface, like the Mappa interpolation effect.
         point.copy(record.start).lerp(record.end, progress ** 1.75);
         point.toArray(flight.position.array, count * 3);
-        flight.alpha.array[count] = record.opacity * (1 - lag) ** .85;
-        flight.diameter.array[count] = record.diameter * (1 - lag * .8);
-        flight.heat.array[count] = record.hasMass ? (1 - lag) ** 3 * (.35 + .6 * record.strength) : -1;
+        flight.alpha.array[count] = record.opacity * (sample === 0 ? 1 : .38 * (1 - lag) ** 1.4);
+        flight.diameter.array[count] = record.diameter * (sample === 0 ? 1 : .56 * (1 - lag * .85));
+        flight.heat.array[count] = sample === 0 ? 1 : 0;
         count++;
       }
     }
@@ -196,21 +214,24 @@ export function createMeteorArrivals(earth, pointOnSphere) {
         for (let row = index * batchSize; row < Math.min(records.length, (index + 1) * batchSize); row++) density.land(row);
       }
       const age = ((elapsed % cycle) - firstLanding + cycle) % cycle;
-      const flash = sinceFirst >= 0 ? Math.max(0, 1 - age / record.flashSeconds) : 0;
-      landed.alpha.array[index] = sinceFirst >= 0 ? .4 + record.strength * .25 + flash * .3 : 0;
-      landed.diameter.array[index] = 1.8 + record.strength * 1.8 + flash * (3 + record.strength * 7);
-      landed.heat.array[index] = record.hasMass ? flash * (.35 + record.strength * .65) : -1;
-      // A restrained expanding ring gives larger records a distinct arrival.
+      const flash = sinceFirst >= 0 ? Math.max(0, 1 - age / record.flashSeconds) ** 2 : 0;
+      landed.alpha.array[index] = sinceFirst >= 0 ? .4 + record.strength * .2 + flash * .4 : 0;
+      landed.diameter.array[index] = 1.8 + record.strength * 1.8 + flash * (4 + record.strength * 8);
+      landed.heat.array[index] = flash > 0 ? flash : record.hasMass ? 0 : -1;
+      // Begin the ring as the initial flash fades.
       // This is an illustration of relative mass, not a simulated crater.
-      impact.alpha.array[index] = record.hasMass && record.strength > .65
-        ? flash * .55 * record.strength : 0;
-      impact.diameter.array[index] = (6 + record.strength * 18) * (1 - flash * .7);
-      impact.heat.array[index] = .6;
+      const ringProgress = (age - record.flashSeconds * .45) / record.ringSeconds;
+      const ringFade = ringProgress >= 0 && ringProgress < 1
+        ? Math.min(1, ringProgress * 10) * (1 - ringProgress) ** 1.4 : 0;
+      impact.alpha.array[index] = sinceFirst >= 0 ? ringFade * (.40 + .42 * record.strength) : 0;
+      impact.diameter.array[index] = (9 + record.strength * 19) * (.44 + .56 * Math.min(1, Math.max(0, ringProgress)));
+      impact.heat.array[index] = .85;
     }
     for (const attribute of Object.values(flight)) attribute.needsUpdate = true;
     for (const name of ['alpha', 'diameter', 'heat']) landed[name].needsUpdate = true;
     for (const name of ['alpha', 'diameter', 'heat']) impact[name].needsUpdate = true;
-    density.update(dt, visibility);
+    density.setViewport(viewportWidth, viewportHeight);
+    density.update(dt, visibility, interactionDt, reducedMotion);
   }
 
   function complete() {
@@ -220,6 +241,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     density.update(1);
   }
 
-  return { setRecords, update, complete, get count() { return records.length; },
+  return { setRecords, update, complete, pickRegion: density.pick, hoverRegion: density.hover, selectRegion: density.select,
+    get count() { return records.length; },
     get revealedCount() { return density.landedCount; } };
 }
