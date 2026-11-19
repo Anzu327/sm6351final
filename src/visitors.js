@@ -3899,7 +3899,7 @@ let I=new i0,Y=new tn(I,new D0({transparent:!0,depthWrite:!1,uniforms:{color:{va
   l[3].position.set(0, 0, coverDistance * (restDistance / coverDistance) ** arrival.reveal);
   l[3].lookAt(0, 0, 0);
   M.visible = !mapPose.surface;
-  heatmap.update(mapPose, l[3], E);
+  heatmap.update(mapPose, l[3], E, dt);
   Y.visible = arrival.reveal > .9 && p <= heatmapStart && (atlasOpen || arrivals.count === 0);
   arrivals.update({time, visible: arrival.reveal > .99 && !atlasOpen && !mapPose.surface,
     visibility: 1 - mapPose.turn, interactionDt: dt, reducedMotion: paused, pixelRatio: Math.min(devicePixelRatio, 1.6),

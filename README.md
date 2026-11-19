@@ -23,6 +23,10 @@
 
 从 **04 EARTH** 继续下滚，地球转正、放射线退回表面，球面热力层随地球展开成 **05 MAP** 的 Equal Earth 等面积世界地图。向上滚可收回。平面图显示完整目录的 50,951 条有坐标记录，每条权重为 1。热力参考 [globe.gl Population Heatmap](https://globe.gl/example/population-heatmap/) 的球面高斯核和 0.9° 带宽，在深蓝夜色底图上，以蓝紫、青绿、黄橙至红色呈现由低到高的密度。本项目用对数色标显示每 100,000 km² 的估计记录数，并将密度预先烘焙成纹理。目录更新后用 `python scripts/build-meteorite-heatmap.py` 重建纹理，生成脚本使用 NumPy、SciPy 和 Pillow。
 
+在 **05 MAP** 点洲界内的陆地或七洲按钮可放大，点 **World map** 或按 Escape 可返回全图。局部放大使用全图的密度纹理及色标。点击区采用 [Natural Earth 1:110m Admin 0](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/) 的概化轮廓，欧亚分界作近似处理。若更新轮廓，用 Shapely 2 运行 `python scripts/build-continent-outlines.py <countries.geojson>`。
+
+七大洲的放大视图附有十四条精选陨石记录，涵盖目击坠落和发现样本。金色圆点按目录经纬度定位，点圆点或洲名下的按钮后，引线会从记录地点连到屏幕边缘的档案卡。卡片包含标本照片、日期、分类、简介和来源。图片按原宽高比缩放并转为 WebP，作者、原始文件和许可可从每张卡片查看。放大时可直接点其他洲的按钮或地图上可见的洲界，切换到对应视图。
+
 ## 参考范围
 
 整合入口在用户提供的 Sleep Well Creatives 本地参考结构上改编。钟表使用 Blender 建模并导出为 GLB。中央钟的表壳随滚动转动，两根指针按 12:1 的角速度倒走。档案视频来源和授权见网页各视频卡。原设计、开发及 3D 素材由 Victor Work / Victor Costa 创作，原站署名随本地副本保留。[Sleep Well Creatives 原站](https://sleep-well-creatives.com/)

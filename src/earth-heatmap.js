@@ -1,6 +1,7 @@
 import { Color, Mesh, PlaneGeometry, RepeatWrapping, ShaderMaterial, TextureLoader } from 'three';
 import { clamp, ease, mix } from './motion.js';
 import { earthLatitudePaint, heatmapInk } from './earth-palette.js';
+import { createContinentMap } from './continent-map.js';
 
 // Full projected spans at the equator and between the poles, for a unit sphere.
 const equalEarthWidth = 5.41326;
@@ -21,6 +22,7 @@ export function heatmapPose(position) {
 // A single surface carries the coastline and density through the unfold.
 // The longitude arcs unfurl into the curved outline of the Equal Earth projection.
 export function createEarthHeatmap(baseMap, geography) {
+  const continentMap = createContinentMap();
   const assets = `${import.meta.env.BASE_URL}visitors/`;
   const density = new TextureLoader().load(`${assets}meteorite-heatmap.png`, texture => {
     texture.wrapS = RepeatWrapping;
@@ -140,14 +142,17 @@ export function createEarthHeatmap(baseMap, geography) {
   mesh.visible = false;
   mesh.frustumCulled = false;
 
-  function update(pose, camera, earth) {
+  function update(pose, camera, earth, dt) {
     paint.hasGeography.value = Boolean(geography.value);
     mesh.visible = pose.surface;
+    const worldScale = Math.min(camera.aspect * .92 / equalEarthWidth, .63 / equalEarthHeight);
+    const frame = continentMap.update(pose.morph, camera.aspect, worldScale, dt);
     if (!mesh.visible) return;
     const height = 2 * camera.position.z * Math.tan(camera.fov * Math.PI / 360);
-    mesh.position.y = mix(earth.position.y, height * .015, pose.morph);
+    mesh.position.x = height * frame.x;
+    mesh.position.y = mix(earth.position.y, height * frame.y, pose.morph);
     uniforms.radius.value = earth.scale.x;
-    uniforms.mapScale.value = Math.min(height * camera.aspect * .92 / equalEarthWidth, height * .63 / equalEarthHeight);
+    uniforms.mapScale.value = height * frame.scale;
     uniforms.morph.value = clamp(pose.morph);
     uniforms.heat.value = pose.heat;
   }
