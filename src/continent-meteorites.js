@@ -25,6 +25,7 @@ export function createContinentMeteorites(overlay) {
   const line = leader.querySelector('path');
   const end = leader.querySelector('circle');
   const closeButton = card.querySelector('button');
+  const kind = card.querySelector('.meteorite-card-kind');
   const title = card.querySelector('h3');
   const subtitle = card.querySelector('.meteorite-card-subtitle');
   const location = card.querySelector('.meteorite-card-location');
@@ -53,7 +54,7 @@ export function createContinentMeteorites(overlay) {
     tooltip.textContent = record.title;
     marker.append(tooltip);
     const hit = marker.querySelector('.pin-hit');
-    const entry = { ...record, classification: row[4], position, button, marker, hit };
+    const entry = { ...record, classification: row[4], status: row[5], position, button, marker, hit };
     button.addEventListener('click', () => open(entry));
     marker.addEventListener('click', () => open(entry));
     button.addEventListener('focus', () => marker.classList.add('highlighted'));
@@ -75,6 +76,7 @@ export function createContinentMeteorites(overlay) {
   function open(entry) {
     close();
     active = entry;
+    kind.textContent = entry.status === 'Fell' ? 'OBSERVED FALL' : 'RECORDED FIND';
     title.textContent = entry.title;
     subtitle.textContent = entry.chinese;
     location.textContent = `${entry.date} · ${entry.location} · ${entry.classification}`;
@@ -129,6 +131,7 @@ export function createContinentMeteorites(overlay) {
   function showRegion(name) {
     close();
     shown = entries.filter(entry => entry.region === name);
+    for (const { marker } of shown) marker.removeAttribute('transform');
     list.replaceChildren(...shown.map(entry => entry.button));
     pins.replaceChildren(...shown.map(entry => entry.marker));
     list.hidden = shown.length === 0;

@@ -47,5 +47,54 @@
     "source": "https://commons.wikimedia.org/wiki/File:Meteora_di_condrite_ordinaria_LL5,_caduta_il_16_giugno_1794_presso_siena,_170g,_e_volume_di_padre_ambrogio_soldani_sull%27evento.JPG",
     "license": "CC BY 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0"
+  },
+  "604": {
+    "alt": "NASA photograph of the Allan Hills 84001 meteorite",
+    "author": "NASA",
+    "source": "https://commons.wikimedia.org/wiki/File:ALH84001_(S85-39565).jpg",
+    "license": "Public domain",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:ALH84001_(S85-39565).jpg#Licensing"
+  },
+  "5247": {
+    "alt": "A Campo del Cielo iron meteorite specimen",
+    "author": "Fredlyfish4",
+    "source": "https://commons.wikimedia.org/wiki/File:Campo_del_Cielo_Meteorite.JPG",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  "10054": {
+    "alt": "A polished Esquel meteorite slice with olivine crystals",
+    "author": "James St. John",
+    "source": "https://commons.wikimedia.org/wiki/File:Esquel_meteorite,_pallasite_(14608975850).jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+  },
+  "11890": {
+    "alt": "The Hoba iron meteorite at its site near Grootfontein",
+    "author": "Damien du Toit",
+    "source": "https://commons.wikimedia.org/wiki/File:Hoba_meteorite,_Grootfontein.jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+  },
+  "16852": {
+    "alt": "A full slice of the Mundrabilla iron meteorite",
+    "author": "Tim",
+    "source": "https://commons.wikimedia.org/wiki/File:Mundrabilla_meteorite_-_full_slice_-_Smithsonian_Museum_of_Natural_History_-_2012-05-17.jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
+  },
+  "16875": {
+    "alt": "A Murchison carbonaceous chondrite specimen",
+    "author": "Art Bromage",
+    "source": "https://commons.wikimedia.org/wiki/File:Murchison_meteorite.jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
+  },
+  "54823": {
+    "alt": "A specimen of the Tissint meteorite from Morocco",
+    "author": "Jon Taylor",
+    "source": "https://commons.wikimedia.org/wiki/File:Tissint_meteorite.jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
   }
 }

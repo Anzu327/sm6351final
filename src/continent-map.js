@@ -27,6 +27,7 @@ export function createContinentMap() {
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = region.name;
+    button.setAttribute('aria-pressed', 'false');
     const path = document.createElementNS(svgNamespace, 'path');
     path.setAttribute('d', region.path);
     path.setAttribute('fill-rule', 'evenodd');
@@ -45,16 +46,19 @@ export function createContinentMap() {
   });
 
   function select(choice, moveFocus = true) {
+    if (choice === selected) return;
     const previous = selected;
     selected = choice;
-    menu.hidden = Boolean(choice);
     detail.hidden = !choice;
     label.textContent = choice?.name ?? '';
     meteorites.showRegion(choice?.name);
     legend.textContent = choice ? 'GLOBAL DENSITY SCALE' : overviewLegend;
     overlay.toggleAttribute('data-focused', Boolean(choice));
-    for (const item of choices) item.path.classList.toggle('selected', item === choice);
-    if (moveFocus) (choice ? back : previous?.button)?.focus({ preventScroll: true });
+    for (const item of choices) {
+      item.path.classList.toggle('selected', item === choice);
+      item.button.setAttribute('aria-pressed', String(item === choice));
+    }
+    if (moveFocus) (choice?.button ?? previous?.button)?.focus({ preventScroll: true });
   }
 
   back.addEventListener('click', () => select(null));
