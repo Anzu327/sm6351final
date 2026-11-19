@@ -267,6 +267,29 @@ a {
   opacity: .7;
   margin-top: 20px;
 }
+#inspector:has(#region-details:not([hidden])) {
+  box-sizing: border-box;
+  max-height: 70dvh;
+  overflow-y: auto;
+  padding: 18px;
+  background: #10195ff2;
+}
+#region-details h3 {
+  margin: 14px 0 8px;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+#region-records {
+  margin: 0 0 16px;
+  padding-left: 17px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+#region-reveal {
+  font-size: 11px;
+}
+#world[data-region-hover] { cursor: pointer; }
+#world[data-dragging] { cursor: grabbing; }
 #atlas {
   position: fixed;
   right: 2vw;
@@ -742,26 +765,32 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
   right: 4vw;
   bottom: 9.5vh;
   z-index: 3;
-  width: min(290px, 88vw);
+  width: min(420px, 88vw);
   display: grid;
-  gap: 5px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.35;
   pointer-events: none;
 }
-#heatmap-legend strong { letter-spacing: .1em; }
+#heatmap-legend strong { font-size: 16px; letter-spacing: .09em; }
 .heatmap-ramp {
-  height: 5px;
+  height: 10px;
   margin-top: 3px;
   background: var(--heatmap-ramp);
   border: 1px solid #a9bfff80;
 }
 .heatmap-ticks {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  min-height: 1.35em;
   font-variant-numeric: tabular-nums;
 }
+.heatmap-ticks span { position: absolute; }
+.heatmap-ticks span:nth-child(2) { left: 26%; transform: translateX(-50%); }
+.heatmap-ticks span:nth-child(3) { left: 50.1%; transform: translateX(-50%); }
+.heatmap-ticks span:nth-child(4) { left: 75%; transform: translateX(-50%); }
+.heatmap-ticks span:last-child { right: 0; }
 @media (max-width:760px) {
   body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }
   body[data-chapter="4"] .scene-caption { left: 7vw; }
-  #heatmap-legend { left: 7vw; right: auto; bottom: max(84px, 13vh); }
+  #heatmap-legend { right: 7vw; width: min(420px, 86vw); bottom: max(56px, 11vh); font-size: 13px; }
 }

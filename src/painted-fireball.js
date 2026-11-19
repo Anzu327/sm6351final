@@ -1,55 +1,219 @@
-// Fireball geometry and materials from the local Chelyabinsk reconstruction.
+// Fireball and fragment shapes from the local Chelyabinsk reconstruction.
 import {
-  Group as a0, BufferGeometry as i0, Float32BufferAttribute as z1,
-  ShaderMaterial as D0, DoubleSide as E0, Color as R1, Mesh as b1,
-  PlaneGeometry as Z6, Shape as h2, ShapeGeometry as t5,
-  MeshBasicMaterial as S0, Line as c6, Vector3 as S, LineBasicMaterial as f6,
-  LineSegments as R2, BufferAttribute as m0, Points as tn, PointsMaterial as Sn,
+  BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Group, Line,
+  LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial, PlaneGeometry,
+  ShaderMaterial, Shape, ShapeGeometry, Vector3,
 } from 'three';
+import { createFireballTrails } from './fireball-trails.js';
 
-const E6 = seed => {
-  const value = Math.sin(seed*127.1+19.7)*43758.54;
-  return value-Math.floor(value);
-};
-const fn = (start,end,value) => {
-  const t = Math.max(0,Math.min(1,(value-start)/(end-start)));
-  return t*t*(3-2*t);
-};
+const fragmentCount = 30;
+const glowGeometry = new PlaneGeometry(.9, .9);
+const phaseAt = flight => .14 + .88 * flight;
 
-function es(u){return{split:fn(.34,.68,u),intact:1-fn(.34,.405,u),fragments:fn(.34,.405,u),flash:Math.sin(Math.PI*fn(.34,.46,u))**2,cracks:fn(.27,.34,u)*(1-fn(.36,.41,u)),commonTrail:1-.97*fn(.36,.57,u)}}export function createPaintedFireball(){let u=new a0;u.name="painted-fireball";let n=[["#e59580",.3,.42,8.1],["#f2b381",.18,.72,7.8],["#ffdfab",.073,.95,7.2],["#fff3cc",.018,.98,6.3]],l=[];n.forEach(([D,R,p,j],k)=>{let Q=[],E=[];function M($,V){let G=$/100,X=Math.pow(1-G,1.2),P=Math.sin(G*61+k)*.014+Math.sin(G*127+k)*.005;return[G*j,G*j*.275+V*(R*X+P*X),k*.012]}for(let $=0;$<100;$++){let V=M($,-1),G=M($,1),X=M($+1,1),P=M($+1,-1);for(let[y,_,e1]of[[V,$/100,0],[G,$/100,1],[X,($+1)/100,1],[V,$/100,0],[X,($+1)/100,1],[P,($+1)/100,0]])Q.push(...y),E.push(_,e1)}let I=new i0;I.setAttribute("position",new z1(Q,3)),I.setAttribute("uv",new z1(E,2));let Y=new D0({transparent:!0,depthWrite:!1,side:E0,uniforms:{color:{value:new R1(D)},opacity:{value:p},breakup:{value:0}},vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",fragmentShader:`varying vec2 vUv;uniform vec3 color;uniform float opacity,breakup;void main(){float grain=fract(sin(dot(floor(vUv*vec2(1400.,80.)),vec2(17.1,29.7)))*43758.54);float edge=smoothstep(0.,.13,vUv.y)*(1.-smoothstep(.87,1.,vUv.y));float fade=pow(1.-vUv.x,.55)*mix(1.,smoothstep(0.,.12,vUv.x),breakup);gl_FragColor=vec4(color+(grain-.5)*.06,opacity*edge*fade*(.8+grain*.2));
-#include <colorspace_fragment>
-}`}),w=new b1(I,Y);w.renderOrder=k,u.add(w),l.push({material:Y,opacity:p})});let e=new b1(new Z6(.9,.9),new D0({transparent:!0,depthWrite:!1,uniforms:{color:{value:new R1("#ffe1a4")},strength:{value:1}},vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",fragmentShader:`varying vec2 vUv;uniform vec3 color;uniform float strength;void main(){float d=length((vUv-.5)*vec2(.7,1.));float a=exp(-d*d*30.)*.38*(1.-smoothstep(.3,.5,d));gl_FragColor=vec4(color,a*strength);
-#include <colorspace_fragment>
-}`}));e.position.set(-.02,0,.065),e.renderOrder=4,u.add(e);let a=new h2;a.moveTo(-.22,-.025),a.bezierCurveTo(-.17,-.16,.12,-.16,.21,.025),a.bezierCurveTo(.1,.15,-.1,.14,-.22,-.025);let o=new b1(new t5(a),new S0({color:"#fff1c7",side:E0,transparent:!0,depthWrite:!1}));o.rotation.z=.275,o.position.z=.08,o.renderOrder=5,u.add(o);let t=new a0;for(let D of[[[-.13,.09],[.01,.015],[-.02,-.11]],[[.01,.015],[.14,.08]],[[.01,.015],[.14,-.07]]]){let R=new c6(new i0().setFromPoints(D.map(([p,j])=>new S(p,j,.095))),new f6({color:"#946c76",transparent:!0,opacity:0,depthWrite:!1}));R.renderOrder=8,t.add(R)}u.add(t);for(let D=0;D<8;D++){let R=[];for(let j=0;j<=100;j++){let k=j/100;R.push(new S(k*8,k*2.2+(D-3.5)*.045*Math.pow(1-k,.7)+Math.sin(k*43+D)*.009,.02))}let p=new c6(new i0().setFromPoints(R),new f6({color:D%2?"#ffe2ae":"#dc957e",transparent:!0,opacity:.45,depthWrite:!1}));u.add(p),l.push({material:p.material,opacity:.45})}let i=new a0;i.name="fireball-fragments",u.add(i);let d=[];function r(D,R,p,j,k){let Q=[],E=[];function M($,V){let G=$/40;return[G*D,V*(R*Math.pow(1-G,1.3)+(Math.sin(G*32+k)*.011+Math.sin(G*83+k)*.004)*(1-G)),0]}for(let $=0;$<40;$++){let V=M($,-1),G=M($,1),X=M($+1,1),P=M($+1,-1);for(let[y,_,e1]of[[V,$/40,0],[G,$/40,1],[X,($+1)/40,1],[V,$/40,0],[X,($+1)/40,1],[P,($+1)/40,0]])Q.push(...y),E.push(_,e1)}let I=new i0;I.setAttribute("position",new z1(Q,3)),I.setAttribute("uv",new z1(E,2));let Y=new D0({transparent:!0,depthWrite:!1,side:E0,uniforms:{color:{value:new R1(p)},opacity:{value:0}},vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",fragmentShader:`varying vec2 vUv;uniform vec3 color;uniform float opacity;void main(){float n=fract(sin(dot(floor(vUv*vec2(600.,40.)),vec2(17.,31.)))*43758.54);float edge = pow(max(0.,1.-abs(vUv.y-.5)*2.),1.7);
-float streak = sin(vUv.x*113.+vUv.y*29.)*.5+.5;
-float brush = (.63+.37*n)*(.71+.29*streak);
-gl_FragColor=vec4(color+(n-.5)*.028,opacity*pow(1.-vUv.x,.92)*edge*brush);
-#include <colorspace_fragment>
-}`}),w=new b1(I,Y);return w.renderOrder=6,{mesh:w,material:Y,opacity:j}}for(let D=0;D<30;D++){let R=new a0,p=.275+(E6(D+54)-.5)*.14,j=.9+E6(D+81)*3.9,k=2.5+E6(D+18)*4.5,Q=r(k,.037,"#e85332",.73,D),E=r(k*.9,.011,"#ffbc52",.98,D+7);E.mesh.position.z=.01,R.add(Q.mesh,E.mesh);let M=new h2;[[-.15,-.025],[-.06,.1],[.08,.075],[.13,-.025],[.01,-.1]].forEach(([V,G],X)=>{let P=.8+E6(D*9+X)*.4;X?M.lineTo(V*P,G*P):M.moveTo(V*P,G*P)}),M.closePath();let Y=new b1(new t5(M),new S0({color:["#ffe184","#ffab55","#f87842"][D%3],side:E0,transparent:!0,opacity:0,depthWrite:!1}));Y.position.z=.07,Y.renderOrder=9;
-    Y.material.onBeforeCompile = shader => {
-      shader.vertexShader = 'varying vec2 vEmber;\n'+shader.vertexShader
-        .replace('#include <begin_vertex>','#include <begin_vertex>\nvEmber = position.xy;');
-      shader.fragmentShader = 'varying vec2 vEmber;\n'+shader.fragmentShader.replace(
-        '#include <opaque_fragment>',`
-          vec2 grainCell = floor(vEmber*210.);
-          float pigment = fract(sin(dot(grainCell,vec2(41.7,73.1)))*43758.54);
-          float brushEdge = length(vEmber/vec2(.162,.107));
-          float feather = 1.-smoothstep(.46,1.05,brushEdge+pigment*.13);
-          outgoingLight *= .76+pigment*.24;
-          diffuseColor.a *= feather;
-          #include <opaque_fragment>
-        `);
-    };let w=(D<7?.43:.17)+E6(D+28)*.16;Y.scale.setScalar(w),R.add(Y);let $=new b1(e.geometry,e.material.clone());$.scale.setScalar(.74),$.position.z=.055,$.renderOrder=7,R.add($),R.rotation.z=p,i.add(R),d.push({part:R,body:Y,glow:$,tail:Q,core:E,angle:p,speed:j,length:k,size:w})}let s=new a0;u.add(s);let F=new b1(e.geometry,e.material.clone());F.position.z=.12,F.renderOrder=10,s.add(F);let L=[];for(let D=0;D<12;D++){let R=D/12*Math.PI*2,p=.48+E6(D+72)*.55;L.push(Math.cos(R)*.15,Math.sin(R)*.1,.1,Math.cos(R)*p,Math.sin(R)*p*.65,.1)}let c=new i0;c.setAttribute("position",new z1(L,3));let m=new R2(c,new f6({color:"#fff0bd",transparent:!0,opacity:0,depthWrite:!1}));m.renderOrder=11,s.add(m);let h=new i0,H=new Float32Array(90*3);h.setAttribute("position",new m0(H,3));let f=new tn(h,new Sn({color:"#ffe1a6",size:.025,transparent:!0,opacity:.85,depthWrite:!1}));f.frustumCulled=!1,u.add(f);function Z(D,R=0){R=.47+R*.58;let p=es(R);u.userData.phase=R<.27?"intact":R<.34?"cracking":R<.46?"breaking":"fragments",u.userData.fragmentCount=30,o.visible=p.intact>.001,o.material.opacity=p.intact,o.scale.setScalar((1+Math.sin(D*3)*.035)*(1+p.flash*.32)),l.forEach(({material:j,opacity:k})=>{j.uniforms?(j.uniforms.opacity.value=k*p.commonTrail,j.uniforms.breakup.value=fn(.05,.45,p.split)):j.opacity=k*p.commonTrail}),e.material.uniforms.strength.value=p.intact+p.flash*.78,e.scale.setScalar(1+p.flash*1.6),t.visible=p.cracks>.001,t.children.forEach(j=>j.material.opacity=p.cracks*.9),i.visible=p.fragments>.001,d.forEach((j,k)=>{
-      const delay = E6(k+61)*.105;
-      const travel = fn(.335+delay,.94,R);
-      const axial = travel*j.speed;
-      const lane = (E6(k+37)-.5)*travel*1.4;
-      const brightness = fn(.335+delay,.385+delay,R) *
-        (1-fn(.65+delay,.94+delay,R)) *
-        (0.82+0.18*Math.sin(D*8+k*2.1));
-      j.part.position.set(-Math.cos(j.angle)*axial,-Math.sin(j.angle)*axial+lane,.02+k%3*.012);
-      j.part.rotation.z = j.angle;
-      j.body.material.opacity = brightness;
-      j.glow.material.uniforms.strength.value = brightness*(k<7?.85:.38);
-      for (const trail of [j.tail,j.core]) trail.material.uniforms.opacity.value = trail.opacity*brightness;
-    }),s.visible=p.flash>.001,F.material.uniforms.strength.value=p.flash*1.3,F.scale.setScalar(1.4+p.flash*1.3),m.material.opacity=p.flash*.12,m.scale.setScalar(.65+p.flash*.7);for(let j=0;j<90;j++){let k=(E6(j)+D*.018)%1,Q=k*7.2,E=d[j%d.length],M=k*E.length,I=E.part.position.x+Math.cos(E.angle)*M,Y=E.part.position.y+Math.sin(E.angle)*M+(E6(j+5)-.5)*.18;H[j*3]=Q*(1-p.split)+I*p.split,H[j*3+1]=(Q*.275+(E6(j+5)-.5)*(.22+k*.35))*(1-p.split)+Y*p.split,H[j*3+2]=.04}h.attributes.position.needsUpdate=!0}return{group:u,update:Z,pieces:d}}
+function random(seed) {
+  const value = Math.sin(seed * 127.1 + 19.7) * 43758.54;
+  return value - Math.floor(value);
+}
+
+function fade(start, end, value) {
+  const t = Math.max(0, Math.min(1, (value - start) / (end - start)));
+  return t * t * (3 - 2 * t);
+}
+
+function makeGlow() {
+  return new Mesh(glowGeometry, new ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { color: { value: new Color('#ffe1a4') }, strength: { value: 0 } },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      varying vec2 vUv;
+      uniform vec3 color;
+      uniform float strength;
+      void main() {
+        float d = length((vUv - .5) * vec2(.7, 1.));
+        float alpha = exp(-d*d*30.) * .38 * (1. - smoothstep(.3, .5, d));
+        gl_FragColor = vec4(color, alpha * strength);
+        #include <colorspace_fragment>
+      }
+    `,
+  }));
+}
+
+function pigment(color) {
+  return new MeshBasicMaterial({ color, side: DoubleSide, transparent: true, opacity: 0, depthWrite: false });
+}
+
+function createFragment(index) {
+  const part = new Group();
+  const angle = .275 + (random(index + 54) - .5) * .14;
+  const speed = .9 + random(index + 81) * 3.9;
+  const driftX = -Math.cos(angle) * speed;
+  const driftY = -Math.sin(angle) * speed + (random(index + 37) - .5) * 1.4;
+  const delay = random(index + 61) * .105;
+  part.rotation.z = angle;
+
+  const shape = new Shape();
+  [[-.15, -.025], [-.06, .1], [.08, .075], [.13, -.025], [.01, -.1]].forEach(([x, y], point) => {
+    const variation = .8 + random(index * 9 + point) * .4;
+    if (point === 0) shape.moveTo(x * variation, y * variation);
+    else shape.lineTo(x * variation, y * variation);
+  });
+  shape.closePath();
+  const body = new Mesh(new ShapeGeometry(shape), pigment(['#ffe184', '#ffab55', '#f87842'][index % 3]));
+  body.position.z = .07;
+  body.renderOrder = 9;
+  body.scale.setScalar((index < 7 ? .43 : .17) + random(index + 28) * .16);
+  body.material.onBeforeCompile = shader => {
+    shader.vertexShader = 'varying vec2 vEmber;\n' + shader.vertexShader
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvEmber = position.xy;');
+    shader.fragmentShader = 'varying vec2 vEmber;\n' + shader.fragmentShader.replace(
+      '#include <opaque_fragment>', /* glsl */ `
+        vec2 grainCell = floor(vEmber * 210.);
+        float grain = fract(sin(dot(grainCell, vec2(41.7, 73.1))) * 43758.54);
+        float brushEdge = length(vEmber / vec2(.162, .107));
+        float feather = 1. - smoothstep(.46, 1.05, brushEdge + grain * .13);
+        outgoingLight *= .76 + grain * .24;
+        diffuseColor.a *= feather;
+        #include <opaque_fragment>
+      `,
+    );
+  };
+  const glow = makeGlow();
+  glow.scale.setScalar(.74);
+  glow.position.z = .055;
+  glow.renderOrder = 7;
+  part.add(body, glow);
+
+  function sample(flight, point) {
+    const phase = phaseAt(flight);
+    const travel = fade(.335 + delay, .94, phase);
+    point.x = driftX * travel;
+    point.y = driftY * travel;
+    point.brightness = fade(.335 + delay, .385 + delay, phase) *
+      (.82 + .18 * Math.sin(flight * 16 + index * 2.1));
+  }
+
+  return {
+    part, body, glow,
+    track: {
+      sample,
+      width: index < 7 ? .079 : .036,
+      heat: index < 7 ? .67 : .44,
+      lifetime: .12 + random(index + 18) * .13,
+    },
+  };
+}
+
+export function createPaintedFireball() {
+  const group = new Group();
+  group.name = 'painted-fireball';
+
+  const shape = new Shape();
+  shape.moveTo(-.22, -.025);
+  shape.bezierCurveTo(-.17, -.16, .12, -.16, .21, .025);
+  shape.bezierCurveTo(.1, .15, -.1, .14, -.22, -.025);
+  const body = new Mesh(new ShapeGeometry(shape), pigment('#fff1c7'));
+  body.rotation.z = .275;
+  body.position.z = .08;
+  body.renderOrder = 5;
+  const glow = makeGlow();
+  glow.position.set(-.02, 0, .065);
+  glow.renderOrder = 4;
+  group.add(body, glow);
+
+  const cracks = new Group();
+  for (const line of [
+    [[-.13, .09], [.01, .015], [-.02, -.11]],
+    [[.01, .015], [.14, .08]],
+    [[.01, .015], [.14, -.07]],
+  ]) {
+    const geometry = new BufferGeometry().setFromPoints(line.map(([x, y]) => new Vector3(x, y, .095)));
+    const crack = new Line(geometry, new LineBasicMaterial({
+      color: '#946c76', transparent: true, opacity: 0, depthWrite: false,
+    }));
+    crack.renderOrder = 8;
+    cracks.add(crack);
+  }
+  group.add(cracks);
+
+  const fragments = new Group();
+  fragments.name = 'fireball-fragments';
+  const pieces = Array.from({ length: fragmentCount }, (_, index) => createFragment(index));
+  for (const piece of pieces) fragments.add(piece.part);
+  group.add(fragments);
+
+  const flash = makeGlow();
+  flash.position.z = .12;
+  flash.renderOrder = 10;
+  const rays = [];
+  for (let index = 0; index < 12; index++) {
+    const angle = index / 12 * Math.PI * 2;
+    const length = .48 + random(index + 72) * .55;
+    rays.push(Math.cos(angle) * .15, Math.sin(angle) * .1, .1,
+      Math.cos(angle) * length, Math.sin(angle) * length * .65, .1);
+  }
+  const rayGeometry = new BufferGeometry();
+  rayGeometry.setAttribute('position', new Float32BufferAttribute(rays, 3));
+  const flashRays = new LineSegments(rayGeometry, new LineBasicMaterial({
+    color: '#fff0bd', transparent: true, opacity: 0, depthWrite: false,
+  }));
+  flashRays.renderOrder = 11;
+  group.add(flash, flashRays);
+
+  const mainTrail = {
+    width: .27,
+    heat: 1,
+    lifetime: .35,
+    sample(flight, point) {
+      const phase = phaseAt(flight);
+      point.x = 0;
+      point.y = 0;
+      point.brightness = fade(0, .12, flight) * (1 - fade(.33, .43, phase));
+    },
+  };
+  const wake = createFireballTrails([mainTrail, ...pieces.map(piece => piece.track)]);
+  group.add(wake.mesh);
+
+  const sample = { x: 0, y: 0, brightness: 0 };
+  function update(flight, bodyOpacity, trailOpacity, motion) {
+    const phase = phaseAt(flight);
+    const intact = 1 - fade(.34, .405, phase);
+    const flare = Math.sin(Math.PI * fade(.34, .46, phase)) ** 2;
+    const crackStrength = fade(.27, .34, phase) * (1 - fade(.36, .41, phase));
+    group.userData.phase = phase < .27 ? 'intact' : phase < .34 ? 'cracking' :
+      phase < .46 ? 'breaking' : 'fragments';
+    body.visible = intact > .001;
+    body.material.opacity = intact * bodyOpacity;
+    body.scale.setScalar((1 + Math.sin(flight * 6) * .035) * (1 + flare * .32));
+    glow.material.uniforms.strength.value = (intact + flare * .78) * bodyOpacity;
+    glow.scale.setScalar(1 + flare * 1.6);
+    cracks.visible = crackStrength > .001;
+    for (const crack of cracks.children) crack.material.opacity = crackStrength * .9 * bodyOpacity;
+
+    fragments.visible = phase > .335 && bodyOpacity > 0;
+    if (fragments.visible) {
+      pieces.forEach(({ part, body, glow, track }, index) => {
+        track.sample(flight, sample);
+        const brightness = sample.brightness * bodyOpacity;
+        part.position.set(sample.x, sample.y, .02 + index % 3 * .012);
+        body.material.opacity = brightness;
+        glow.material.uniforms.strength.value = brightness * (index < 7 ? .85 : .38);
+      });
+    }
+    flash.visible = flashRays.visible = flare > .001;
+    flash.material.uniforms.strength.value = flare * 1.3 * bodyOpacity;
+    flash.scale.setScalar(1.4 + flare * 1.3);
+    flashRays.material.opacity = flare * .12 * bodyOpacity;
+    flashRays.scale.setScalar(.65 + flare * .7);
+    wake.update(flight, motion, trailOpacity);
+  }
+
+  return { group, update };
+}

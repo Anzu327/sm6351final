@@ -67,18 +67,23 @@ export function createEarthHeatmap(baseMap, geography) {
       float rim = (1.-smoothstep(.01,.12,n.z))*(1.-morph);
       base = mix(base,outline,rim*.64);
       #ifdef DENSITY
+        vec3 nightSea = mix(vec3(.027,.063,.114),vec3(.055,.113,.174),surface.b*.45);
+        vec3 nightLand = mix(vec3(.066,.123,.191),vec3(.117,.191,.271),surface.r);
+        vec3 night = mix(nightSea,nightLand,land);
+        night = mix(night,vec3(.24,.35,.48),coast*.22);
+        base = mix(base,sRGBTransferEOTF(vec4(night,1.)).rgb,heat);
         float value = texture2D(density,geo).r;
         float rank = value*8.;
         vec3 ink = colors[0];
         for (int i=0; i<8; i++) {
           ink = mix(ink,colors[i+1],clamp(rank-float(i),0.,1.));
         }
-        // Keep the density texture and the globe.gl cube-root opacity curve.
-        float alpha = pow(value,1./3.)*smoothstep(0.,.10,value)*heat;
+        // Fade the sparse blue halo into the base map and keep the cores saturated.
+        float alpha = pow(smoothstep(0.,.50,value),.62)*heat;
         base = mix(base,ink,alpha);
         vec2 margin = min(geo,1.-geo)/max(fwidth(geo),vec2(.00001));
         float edge = 1.-smoothstep(.15,1.3,min(margin.x,margin.y));
-        base = mix(base,outline,edge*smoothstep(.78,1.,morph)*.81);
+        base = mix(base,outline,edge*smoothstep(.78,1.,morph)*.42);
       #endif
       gl_FragColor = vec4(base,1.);
       #include <colorspace_fragment>

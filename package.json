@@ -12,6 +12,7 @@
     "d3-delaunay": "^6.0.4",
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
+    "h3-js": "4.5.0",
     "three": "0.185.1"
   },
   "devDependencies": {
