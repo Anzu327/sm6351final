@@ -25,7 +25,7 @@
 
 在 **05 MAP** 点洲界内的陆地或七洲按钮可放大，点 **World map** 或按 Escape 可返回全图。局部放大使用全图的密度纹理及色标。点击区采用 [Natural Earth 1:110m Admin 0](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/) 的概化轮廓，欧亚分界作近似处理。若更新轮廓，用 Shapely 2 运行 `python scripts/build-continent-outlines.py <countries.geojson>`。
 
-亚洲、北美洲和欧洲的放大视图附有七条精选目击坠落。金色圆点按目录经纬度定位，洲名下的按钮也可打开同一张档案卡。卡片给出坠落日期、分类、简介和来源。
+亚洲、北美洲和欧洲的放大视图附有七条精选目击坠落。金色圆点按目录经纬度定位，点圆点或洲名下的按钮后，引线会从落点连到屏幕边缘的档案卡。卡片包含标本照片、坠落日期、分类、简介和来源。图片按原宽高比缩放并转为 WebP，作者、原始文件和许可可从每张卡片查看。
 
 ## 参考范围
 
