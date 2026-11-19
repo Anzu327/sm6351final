@@ -773,6 +773,67 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
   pointer-events: none;
 }
 #heatmap-legend strong { font-size: 16px; letter-spacing: .09em; }
+#continent-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  pointer-events: none;
+}
+#continent-overlay path {
+  fill: #fff0c908;
+  stroke: #ffe9c480;
+  stroke-width: .65;
+  stroke-linejoin: round;
+  pointer-events: visibleFill;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+#continent-overlay path:is(:hover, .highlighted) {
+  fill: #fff0c925;
+  stroke: #fff0c9;
+  stroke-width: 1.5;
+}
+#continent-overlay[data-focused] path {
+  fill: #12184938;
+  stroke: none;
+  pointer-events: none;
+}
+#continent-overlay[data-focused] path.selected {
+  fill: none;
+  stroke: #ffe9c4b8;
+  stroke-width: 1;
+}
+#continent-controls {
+  position: fixed;
+  z-index: 4;
+  left: 4vw;
+  bottom: 9.5vh;
+  width: min(46vw, 510px);
+  color: var(--warm-paper);
+}
+#continent-menu,
+#continent-detail {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+#continent-controls button {
+  padding: 7px 11px;
+  border: 1px solid #a9bfff80;
+  border-radius: 3px;
+  background: #192164e8;
+  color: inherit;
+  font-size: 12px;
+}
+#continent-controls button:is(:hover, :focus-visible) {
+  background: var(--warm-paper);
+  color: var(--blue-ink);
+}
+#continent-controls button:focus-visible { outline: 2px solid var(--warm-paper); }
+#continent-detail strong { font-size: 15px; letter-spacing: .02em; }
 .heatmap-ramp {
   height: 10px;
   margin-top: 3px;
@@ -793,4 +854,11 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
   body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }
   body[data-chapter="4"] .scene-caption { left: 7vw; }
   #heatmap-legend { right: 7vw; width: min(420px, 86vw); bottom: max(56px, 11vh); font-size: 13px; }
+  #continent-controls {
+    top: max(123px, calc(8.5vh + 59px));
+    bottom: auto;
+    left: 7vw;
+    width: 86vw;
+  }
+  #continent-controls button { min-height: 36px; }
 }
