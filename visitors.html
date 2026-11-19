@@ -8,14 +8,24 @@
 <div class="scene-caption"><span id="chapter-label">01 / THE MORNING</span><h2 id="scene-title">Chelyabinsk, Russia</h2><p id="scene-sub">15 February 2013</p></div>
 <button id="earth-hotspot" class="hotspot subtle" hidden aria-label="Select Earth"><span>+</span><small>EARTH</small></button>
 <div class="scene-tools"><div id="system-tools" hidden><div class="explore-steps"><button data-step="1" aria-pressed="false">01 <span>EARTH</span></button><button data-step="2" aria-pressed="false">02 <span>MAIN BELT</span></button><button data-step="3" aria-pressed="false">03 <span>NEAR EARTH</span></button></div></div><div id="earth-tools" hidden><div class="layer-tabs"><button data-layer="meteorites" aria-pressed="true">METEORITES</button><button data-layer="fireballs" aria-pressed="false">FIREBALLS</button></div><p id="arrival-note" hidden>CATALOGUE · <span id="arrival-count"></span> LOCATED<small>Size: recovered mass · sampled trails</small><small>Radial lines: all mapped records · H3 counts</small><small id="density-progress">0% of mapped records revealed</small></p><button id="complete-density" class="action">SHOW ALL COUNTS</button> <button id="open-atlas" class="action">OPEN THE RECORDS ↗</button></div></div>
-<svg id="continent-overlay" aria-hidden="true" hidden><g></g></svg>
+<svg id="continent-overlay" aria-hidden="true" hidden><g></g><g id="meteorite-pins"></g></svg>
 <nav id="continent-controls" aria-label="Explore the continents" hidden>
   <div id="continent-menu"></div>
   <div id="continent-detail" hidden>
     <button type="button">← World map</button>
     <strong aria-live="polite"></strong>
+    <div id="continent-featured" role="group" aria-label="Notable meteorite falls" hidden></div>
   </div>
 </nav>
+<aside id="meteorite-card" aria-labelledby="meteorite-card-title" hidden>
+  <button type="button" aria-label="Close meteorite details">×</button>
+  <span class="mini-label">OBSERVED FALL</span>
+  <h3 id="meteorite-card-title"></h3>
+  <p class="meteorite-card-subtitle" lang="zh-Hans"></p>
+  <p class="meteorite-card-location"></p>
+  <p class="meteorite-card-story"></p>
+  <a target="_blank" rel="noreferrer"></a>
+</aside>
 <div id="heatmap-legend" hidden aria-label="Heatmap scale. Logarithmic catalogue records per 100,000 square kilometers">
   <strong>50,951 LOCATED RECORDS</strong>
   <span>Estimated records per 100,000 km² · log scale</span>

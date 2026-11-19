@@ -1,5 +1,6 @@
 import regions from './data/continent-outlines.json';
 import { ease, mix } from './motion.js';
+import { createContinentMeteorites } from './continent-meteorites.js';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
 const centerY = .015;
@@ -12,6 +13,7 @@ export function createContinentMap() {
   const back = detail.querySelector('button');
   const overlay = document.querySelector('#continent-overlay');
   const group = overlay.querySelector('g');
+  const meteorites = createContinentMeteorites(overlay);
   const legend = document.querySelector('#heatmap-legend strong');
   const overviewLegend = legend.textContent;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -48,6 +50,7 @@ export function createContinentMap() {
     menu.hidden = Boolean(choice);
     detail.hidden = !choice;
     label.textContent = choice?.name ?? '';
+    meteorites.showRegion(choice?.name);
     legend.textContent = choice ? 'GLOBAL DENSITY SCALE' : overviewLegend;
     overlay.toggleAttribute('data-focused', Boolean(choice));
     for (const item of choices) item.path.classList.toggle('selected', item === choice);
@@ -58,7 +61,7 @@ export function createContinentMap() {
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !selected || !ready) return;
     event.preventDefault();
-    select(null);
+    if (!meteorites.close(true)) select(null);
   });
 
   function update(morph, aspect, worldScale, dt) {
@@ -101,6 +104,7 @@ export function createContinentMap() {
         group.setAttribute('transform', transform);
         lastTransform = transform;
       }
+      meteorites.update(framed);
     }
     return framed;
   }

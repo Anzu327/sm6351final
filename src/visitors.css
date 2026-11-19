@@ -834,6 +834,64 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
 }
 #continent-controls button:focus-visible { outline: 2px solid var(--warm-paper); }
 #continent-detail strong { font-size: 15px; letter-spacing: .02em; }
+#continent-featured {
+  display: flex;
+  flex: 0 0 100%;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+#continent-featured button {
+  border-color: #ffdf92a0;
+}
+#continent-featured button[aria-expanded="true"] {
+  background: var(--warm-paper);
+  color: var(--blue-ink);
+}
+.meteorite-pin .pin-hit {
+  fill: transparent;
+  pointer-events: all;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+.meteorite-pin .pin-ring {
+  fill: #172060;
+  stroke: #fff2c3;
+  stroke-width: 1.6;
+  pointer-events: none;
+}
+.meteorite-pin .pin-core {
+  fill: #ffdb87;
+  pointer-events: none;
+}
+.meteorite-pin:is(:hover, .selected, .highlighted) .pin-ring {
+  fill: #856147;
+  stroke-width: 2.4;
+}
+#meteorite-card {
+  position: fixed;
+  z-index: 6;
+  top: max(48px, 8.5vh);
+  right: 4vw;
+  width: min(325px, 43vw);
+  padding: 16px 18px;
+  color: var(--warm-paper);
+  background: #172163f5;
+  border: 1px solid #a9bfff90;
+  border-radius: 4px;
+}
+#meteorite-card button {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+}
+#meteorite-card :is(button, a):focus-visible { outline: 2px solid var(--warm-paper); }
+#meteorite-card h3 { margin: 7px 36px 2px 0; font-size: 20px; }
+#meteorite-card p { margin: 6px 0; font-size: 13px; line-height: 1.45; }
+#meteorite-card .meteorite-card-location { color: #c6d5fa; font-size: 12px; }
+#meteorite-card a { display: inline-block; margin-top: 6px; font-size: 11px; text-decoration: underline; }
 .heatmap-ramp {
   height: 10px;
   margin-top: 3px;
@@ -861,4 +919,12 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
     width: 86vw;
   }
   #continent-controls button { min-height: 36px; }
+  #meteorite-card {
+    top: auto;
+    bottom: max(154px, 23vh);
+    right: 7vw;
+    width: 86vw;
+    max-height: 42vh;
+    overflow-y: auto;
+  }
 }

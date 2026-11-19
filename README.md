@@ -25,6 +25,8 @@
 
 在 **05 MAP** 点洲界内的陆地或七洲按钮可放大，点 **World map** 或按 Escape 可返回全图。局部放大使用全图的密度纹理及色标。点击区采用 [Natural Earth 1:110m Admin 0](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/) 的概化轮廓，欧亚分界作近似处理。若更新轮廓，用 Shapely 2 运行 `python scripts/build-continent-outlines.py <countries.geojson>`。
 
+亚洲、北美洲和欧洲的放大视图附有七条精选目击坠落。金色圆点按目录经纬度定位，洲名下的按钮也可打开同一张档案卡。卡片给出坠落日期、分类、简介和来源。
+
 ## 参考范围
 
 整合入口在用户提供的 Sleep Well Creatives 本地参考结构上改编。钟表使用 Blender 建模并导出为 GLB。中央钟的表壳随滚动转动，两根指针按 12:1 的角速度倒走。档案视频来源和授权见网页各视频卡。原设计、开发及 3D 素材由 Victor Work / Victor Costa 创作，原站署名随本地副本保留。[Sleep Well Creatives 原站](https://sleep-well-creatives.com/)

@@ -1,0 +1,51 @@
+export const featuredMeteorites = [
+  {
+    id: '12171', region: 'Asia', title: 'Jilin', chinese: '吉林陨石',
+    date: '8 March 1976', location: 'Jilin, China',
+    story: 'A witnessed shower scattered tonnes of stone near Jilin. The largest recovered piece weighed 1,770 kg.',
+    source: 'https://www.lpi.usra.edu/meteor/?code=12171',
+    sourceLabel: 'Meteoritical Bulletin',
+  },
+  {
+    id: '57165', region: 'Asia', title: 'Chelyabinsk', chinese: '车里雅宾斯克陨石',
+    date: '15 February 2013', location: 'Chelyabinsk Oblast, Russia',
+    story: 'Dashcams recorded the fireball, and the airburst shattered windows across the region. A fragment weighing over half a tonne was recovered from Lake Chebarkul.',
+    source: 'https://doi.org/10.1126/science.1242642',
+    sourceLabel: 'Science',
+  },
+  {
+    id: '23593', region: 'Asia', title: 'Sikhote-Alin', chinese: '锡霍特-阿林陨石',
+    date: '12 February 1947', location: 'Primorsky Krai, Russia',
+    story: 'A witnessed iron meteorite shower fell in the Sikhote-Alin mountains. The Meteoritical Bulletin lists 23 tonnes of material.',
+    source: 'https://www.lpi.usra.edu/meteor/metbull.php?code=23593',
+    sourceLabel: 'Meteoritical Bulletin',
+  },
+  {
+    id: '2278', region: 'North America', title: 'Allende', chinese: '阿连德陨石',
+    date: '8 February 1969', location: 'Chihuahua, Mexico',
+    story: 'Allende contains calcium–aluminium-rich inclusions (CAIs), among the earliest solids to form in the Solar System. Its fragments became important samples for cosmochemistry.',
+    source: 'https://www.si.edu/object/siris_sic_13852',
+    sourceLabel: 'Smithsonian Institution',
+  },
+  {
+    id: '23773', region: 'North America', title: 'Sylacauga (Hodges)', chinese: '西拉库加／霍奇斯陨石',
+    date: '30 November 1954', location: 'Alabama, United States',
+    story: 'A roughly 3.9 kg fragment broke through a roof and struck Ann Hodges, who survived. The fragment is displayed at the Alabama Museum of Natural History.',
+    source: 'https://almnh.museums.ua.edu/exhibits/',
+    sourceLabel: 'Alabama Museum of Natural History',
+  },
+  {
+    id: '55529', region: 'North America', title: 'Sutter’s Mill', chinese: '苏特磨坊陨石',
+    date: '22 April 2012', location: 'California, United States',
+    story: 'Weather radar helped researchers locate fragments soon after the fireball. The fragments include CM-type carbonaceous material that offers a glimpse of a primitive asteroid’s surface.',
+    source: 'https://pubmed.ncbi.nlm.nih.gov/23258889/',
+    sourceLabel: 'Science',
+  },
+  {
+    id: '23586', region: 'Europe', title: 'Siena', chinese: '锡耶纳陨石',
+    date: '16 June 1794', location: 'Tuscany, Italy',
+    story: 'Witnesses reported stones falling near Siena. The event became evidence in the debate over stones falling from the sky, the same debate sparked by Chladni’s work.',
+    source: 'https://lweb.cfa.harvard.edu/~loeb/UM1.pdf',
+    sourceLabel: 'Meteoritics & Planetary Science',
+  },
+];
