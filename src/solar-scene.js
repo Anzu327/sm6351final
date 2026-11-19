@@ -6,9 +6,10 @@ import {
   SphereGeometry, SRGBColorSpace, TextureLoader, Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { clamp, earthArrivalPose, powerInOut } from './motion.js';
+import { clamp, ease, earthArrivalPose, powerInOut } from './motion.js';
 import { makeSolarBelt, makeSolarComet, makeSolarParticles } from './solar-atmosphere.js';
 import { earthLatitudePaint } from './earth-palette.js';
+import { createSolarMeteorShowers } from './meteor-arrivals.js';
 
 const radians = Math.PI / 180;
 const orientation = (x, y, z) => new Quaternion().setFromEuler(
@@ -367,6 +368,9 @@ export function createSolarScene(scene, camera) {
     new MeshBasicMaterial({ color: 15385253, side: DoubleSide }));
   saturnRing.rotation.set(.95, -.24, 0);
   planets[4].body.add(saturnRing);
+  const earth = planets[1];
+  // Just above the detailed globe's raised coastline in globe-local units.
+  const meteorShowers = createSolarMeteorShowers(.876);
 
   const gasRings = [5.85, 8.4, 11.7].map(radius => makeGasRing(radius, clock));
   scene.add(...gasRings);
@@ -376,6 +380,7 @@ export function createSolarScene(scene, camera) {
     for (const planet of planets) {
       if (planet.name === 'SATURN') planet.body.clear().add(saturnRing);
       else planet.body.clear();
+      if (planet === earth) planet.body.add(meteorShowers.points);
       if (planet.texture || !meshes) {
         planet.body.add(makeOutlinedMesh(sphere, planet.ink, { base: planet.base, map: maps?.get(planet.texture), clock }));
         continue;
@@ -452,7 +457,7 @@ export function createSolarScene(scene, camera) {
   const closeDirection = new Vector3();
   const frontDirection = new Vector3(0, 0, 1);
   const earthTarget = new Vector3();
-  const earth = planets[1];
+  const earthView = new Vector3();
   const flareOffset = new Vector3();
 
   function update({ p, time, mobile, yaw, pitch, step, dt, paused, pointer, orbit }) {
@@ -493,7 +498,11 @@ export function createSolarScene(scene, camera) {
     hover.y += ((ambient ? -pointer.x * .10 : 0) - hover.y) * hoverEase;
     hoverFrame.setFromEuler(hover);
     basePosition.copy(openingPosition);
-    if (mobile) basePosition.z += 3.8;
+    if (mobile) {
+      // Keep Earth and its incoming trails inside the narrow overview.
+      basePosition.x = earthTarget.x * .48;
+      basePosition.z = Math.max(21.5, 11.1 / camera.aspect);
+    }
     // Rotate the camera position and its pose together about the Sun. Blending
     // inside the orbit keeps the camera outside the scene during a wide reset.
     if (orbit.active) orbitTarget.setFromEuler(orbitAngles.set(orbit.pitch, orbit.yaw, 0));
@@ -521,6 +530,13 @@ export function createSolarScene(scene, camera) {
     earth.body.rotation.y += (-2.6 + yaw + arrival.turn - earth.body.rotation.y) * center;
     earth.body.rotation.z *= 1 - center;
     camera.updateMatrixWorld();
+
+    const depth = -earthView.copy(earthTarget).applyMatrix4(camera.matrixWorldInverse).z;
+    meteorShowers.update({
+      time, mobile, pixelRatio: Math.min(devicePixelRatio, 1.6),
+      projectedRadius: depth > camera.near ? earth.size * camera.projectionMatrix.elements[5] * innerHeight / (2 * depth) : 0,
+      visibility: paused ? 0 : ease(2.30, 2.50, p) * (1 - ease(3.34, 3.62, p)),
+    });
 
     // Monolith's LensFlare follows a two-second cycle sampled in 24 steps.
     const flarePhase = Math.floor((time % 2) * 12) / 12;

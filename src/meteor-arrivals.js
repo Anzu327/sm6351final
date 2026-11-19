@@ -79,6 +79,87 @@ function makeParticles(capacity, flying = false) {
   return points;
 }
 
+function writeFlightTrail(attributes, count, point, record, age) {
+  for (let sample = tailSamples - 1; sample >= 0; sample--) {
+    const lag = sample / (tailSamples - 1);
+    const progress = (age - lag * record.tailSeconds) / record.duration;
+    if (progress < 0 || progress > 1) continue;
+    // Sample in seconds to keep the tail consistent across frame rates.
+    point.lerpVectors(record.start, record.end, progress ** 1.75);
+    point.toArray(attributes.position.array, count * 3);
+    attributes.alpha.array[count] = record.opacity * (sample === 0 ? 1 : .38 * (1 - lag) ** 1.4);
+    attributes.diameter.array[count] = record.diameter * (sample === 0 ? 1 : .56 * (1 - lag * .85));
+    attributes.heat.array[count] = sample === 0 ? 1 : 0;
+    count++;
+  }
+  return count;
+}
+
+export function createSolarMeteorShowers(surfaceRadius) {
+  const desktopSlots = 16;
+  const mobileSlots = 12;
+  const cycle = 2.65;
+  const flashSeconds = .18;
+  const points = makeParticles(desktopSlots * (tailSamples + 1), true);
+  points.name = 'Solar Earth meteor showers';
+  points.visible = false;
+  // The planet selector walks the Earth's descendants.
+  points.raycast = () => {};
+  const attributes = points.geometry.attributes;
+  const pathPoint = new Vector3();
+  const paths = Array.from({length: desktopSlots * 4}, (_, index) => {
+    const y = 1 - 2 * (index + .5) / (desktopSlots * 4);
+    const angle = index * Math.PI * (3 - Math.sqrt(5));
+    const horizontal = Math.sqrt(1 - y * y);
+    const normal = new Vector3(Math.cos(angle) * horizontal, y, Math.sin(angle) * horizontal);
+    const tangent = new Vector3(-normal.z, 0, normal.x).normalize();
+    const side = new Vector3().crossVectors(normal, tangent);
+    const heading = noise(index + 23) * Math.PI * 2;
+    return {
+      end: normal.clone().multiplyScalar(surfaceRadius),
+      start: normal.multiplyScalar(surfaceRadius * (1.85 + noise(index + 31) * .75))
+        .addScaledVector(tangent, Math.cos(heading) * surfaceRadius * .54)
+        .addScaledVector(side, Math.sin(heading) * surfaceRadius * .54),
+      duration: 1.95 + noise(index + 57) * .22,
+      tailSeconds: .32 + noise(index + 79) * .16,
+      opacity: .85 + noise(index + 101) * .15,
+      diameter: 0,
+    };
+  });
+
+  function update({ time, mobile, visibility, pixelRatio, projectedRadius }) {
+    points.visible = visibility > .001 && projectedRadius > 0;
+    if (!points.visible) return;
+    points.material.uniforms.pixelRatio.value = pixelRatio;
+    points.material.uniforms.visibility.value = visibility;
+    const slots = mobile ? mobileSlots : desktopSlots;
+    const scale = Math.min(1, Math.max(.65, projectedRadius / 29));
+    let count = 0;
+    for (let slot = 0; slot < slots; slot++) {
+      const offset = time + cycle * (slot + noise(slot + 149) * .65) / slots;
+      const lap = Math.floor(offset / cycle);
+      const age = offset - lap * cycle;
+      const index = (slot * 17 + lap * 11) % paths.length;
+      const path = paths[index];
+      path.diameter = (4.4 + noise(index + 179) * 1.3) * scale;
+      count = writeFlightTrail(attributes, count, pathPoint, path, age);
+      const sinceLanding = age - path.duration;
+      if (sinceLanding >= 0 && sinceLanding < flashSeconds) {
+        const fade = 1 - sinceLanding / flashSeconds;
+        path.end.toArray(attributes.position.array, count * 3);
+        attributes.alpha.array[count] = fade ** 2 * .9;
+        attributes.diameter.array[count] = path.diameter * (1.4 - fade * .45);
+        attributes.heat.array[count] = 1;
+        count++;
+      }
+    }
+    points.geometry.setDrawRange(0, count);
+    for (const name of ['position', 'alpha', 'diameter', 'heat']) attributes[name].needsUpdate = true;
+  }
+
+  return { points, update };
+}
+
 export function createMeteorArrivals(earth, pointOnSphere) {
   const group = new Group();
   group.name = 'Meteorite arrivals';
@@ -182,8 +263,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     const cycle = cycleSlots * interval;
     const lastEvent = Math.floor(elapsed / interval);
     let count = 0;
-    // Each slot represents a recently launched meteor. Sample its recent path
-    // in seconds (not frames) to keep the short tail consistent at any FPS.
+    // Each slot represents a recently launched meteor.
     for (let event = Math.max(0, lastEvent - flightSlots + 1); event <= lastEvent; event++) {
       const launch = event * interval;
       const index = (event % cycleSlots) * batchSize;
@@ -191,18 +271,7 @@ export function createMeteorArrivals(earth, pointOnSphere) {
       const record = records[index];
       const age = elapsed - launch;
       if (age > record.duration + record.tailSeconds) continue;
-      for (let sample = tailSamples - 1; sample >= 0; sample--) {
-        const lag = sample / (tailSamples - 1);
-        const progress = (age - lag * record.tailSeconds) / record.duration;
-        if (progress < 0 || progress > 1) continue;
-        // Accelerate into the surface, like the Mappa interpolation effect.
-        point.copy(record.start).lerp(record.end, progress ** 1.75);
-        point.toArray(flight.position.array, count * 3);
-        flight.alpha.array[count] = record.opacity * (sample === 0 ? 1 : .38 * (1 - lag) ** 1.4);
-        flight.diameter.array[count] = record.diameter * (sample === 0 ? 1 : .56 * (1 - lag * .85));
-        flight.heat.array[count] = sample === 0 ? 1 : 0;
-        count++;
-      }
+      count = writeFlightTrail(flight, count, point, record, age);
     }
     flights.geometry.setDrawRange(0, count);
     for (let index = 0; index < samples.length; index++) {
