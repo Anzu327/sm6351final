@@ -31,11 +31,11 @@
 <link rel="stylesheet" vite-ignore href="./files/sleep-well-creatives.netlify.app/assets/index-DQEsxz9V.css">
 <style>
   #chapter-bridge {
-    min-height: 45svh;
-    background: linear-gradient(#fceecd, #f4e2b9);
+    height: 20svh;
+    background: var(--dark-blue);
   }
 </style>
-<link rel="stylesheet" vite-ignore href="./meteorite/story.css?v=direct-asteroid-handoff">
+<link rel="stylesheet" vite-ignore href="./meteorite/story.css?v=direct-reconstruction">
 <link rel="stylesheet" vite-ignore href="./meteorite/composition.css">
 </head><body id="top" class="body is-loading"><div class="style w-embed"><style>
 html {
@@ -145,7 +145,6 @@ section {
 .cycle__cycle,
 .solution__hero__ornament,
 .the-balance__list,
-.footer__cta__link,
 .note__hold,
 .note__fader,
 .ender__content,
@@ -165,7 +164,6 @@ section {
 .cycle__cycle>*,
 .solution__hero__ornament>*,
 .the-balance__list>*,
-.footer__cta__link>*,
 .note__hold>*,
 .note__fader>*,
 .ender__content>*,
@@ -284,8 +282,7 @@ path.stats__path__solid {
 }
 
 
-body:has(.is-cans-active) canvas,
-body:has(.is-footer-active) canvas {
+body:has(.is-cans-active) canvas {
 	z-index: 2;
 	background: transparent;
 }
@@ -321,28 +318,6 @@ li.solutions__each:before {
 
 .solutions__each:nth-child(1):before {
 	display: none;
-}
-
-path.footer-decor-solid,
-.cta-button {
-	-webkit-filter: drop-shadow(1px 1px 1px #94b8f2);
-	filter: drop-shadow(1px 1px 1px #94b8f2);
-}
-
-.footer__cta:hover .hover-btn rect {
-	fill: var(--color);
-}
-
-.hover-btn rect {
-	transition: fill .25s ease-in-out;
-}
-
-.footer__cta__link__span {
-	transition: color .25s ease-in-out;
-}
-
-.footer__cta:hover .footer__cta__link__span {
-	color: var(--white);
 }
 
 section.note {
@@ -522,17 +497,6 @@ body:has(.is-cursor) .cursor-insight__text {
 .insigh-pannel:hover .insigh-pannel__hold {
 	transform: translateX(0rem);
 }
-.trg-sound {
-	transition: bottom .3s ease-in-out;
-}
-
-body:has(.is-footer-active) .trg-sound {
-	bottom: 7rem;
-}
-
-body:has(.is-footer-active) .insigh-pannel {
-	opacity: 0 !important;
-}
 .webgl-ready .preloader__span, .webgl-ready .preloader__dots {
 	opacity: 0 !important;
 	animation-play-state: paused;
@@ -559,14 +523,6 @@ body:has(.is-footer-active) .insigh-pannel {
 /* ___________________ DESKTOP ___________________ */
 /* ___________________ DESKTOP ___________________ */
 @media only screen and (min-width: 1025px) {
-	.footer__hold>* {
-		position: absolute;
-	}
-
-	.hover-btn svg {
-		overflow: visible;
-	}
-
 	.lined {
 		position: relative;
 	}
@@ -902,53 +858,54 @@ p.parag,
     <circle cx="363.009" cy="363.448" r="318.667" transform="rotate(3.04188 363.009 363.448)" stroke="var(--color-soft)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.91 29.25"/>
     <circle cx="362.892" cy="362.888" r="292.495" transform="rotate(3.04188 362.892 362.888)" stroke="var(--color-soft)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.91 29.25"/>
 </svg></div><div class="solution__hero__title" id="meteorite-origins-title" role="heading" aria-level="2"><div class="solution__hero__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">ORIGINS · CHELYABINSK</div></div></div><div class="solution__hero__title__serif"><div class="title_serif">Where do meteorites</div></div><div class="solution__hero__title__sans"><div class="title_sans">come from?</div></div></div><div class="solution__hero__parag"><p class="parag">Follow the stone from the young Solar System to the morning it lit up the sky.</p></div><div class="solution__hero__dot"></div></div><ul role="list" class="solutions__list w-list-unstyled"><li class="solutions__each solutions__each__empty"></li>
-<li class="solutions__each">
-  <div class="solutions__each__media"><div class="solutions__each__video origin-illustration origin-illustration--formation" role="img" aria-label="Dust and rings around the young Sun">
-    <span class="origin-illustration__body" aria-hidden="true"></span>
-    <span class="origin-illustration__detail" aria-hidden="true"></span>
-  </div></div>
-  <div class="solutions__each__texts">
-    <div class="solutions__each__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">~4.6 BILLION YEARS AGO</div></div></div>
-    <div class="solutions__each__title"><div class="description">Dust becomes rock</div></div>
-    <div class="solutions__each__parag"><p class="parag">Dust and rock gathered around the young Sun. Some of that early material became part of asteroids. <a href="https://science.nasa.gov/asteroids-comets-meteors/facts/" target="_blank" rel="noopener">NASA</a></p></div>
-  </div>
+<li class="solutions__each origins-slide">
+  <h3 class="origins-heading" id="origins-chronology">Dust becomes rock</h3>
+  <figure class="origins-chart" data-chart="chronology" aria-labelledby="origins-chronology"></figure>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Earliest dated solids</p><output class="origins-number" data-reading-value>4,567.30</output><p data-reading-detail>±0.16 million years ago</p></div></div>
 </li>
-<li class="solutions__each">
-  <div class="solutions__each__media"><div class="solutions__each__video origin-illustration origin-illustration--parent" role="img" aria-label="A rocky asteroid with a cut face">
-    <span class="origin-illustration__body" aria-hidden="true"></span>
-    <span class="origin-illustration__detail" aria-hidden="true"></span>
-  </div></div>
-  <div class="solutions__each__texts">
-    <div class="solutions__each__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">EARLY SOLAR SYSTEM</div></div></div>
-    <div class="solutions__each__title"><div class="description">An asteroid holds the clues</div></div>
-    <div class="solutions__each__parag"><p class="parag">Chelyabinsk is an LL5 ordinary chondrite. Its minerals and rounded grains preserve clues about its rocky parent body. <a href="https://www.lpi.usra.edu/meteor/metbull.php?code=57165" target="_blank" rel="noopener">Sample record</a></p></div>
-  </div>
+<li class="solutions__each origins-slide">
+  <h3 class="origins-heading" id="origins-minerals">An asteroid holds the clues</h3>
+  <figure class="origins-chart" data-chart="minerals" aria-labelledby="origins-minerals"></figure>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Olivine</p><output class="origins-number" data-reading-value>50–60%</output><p data-reading-detail>of the studied rock</p></div></div>
 </li>
-<li class="solutions__each">
-  <div class="solutions__each__media"><div class="solutions__each__video origin-illustration origin-illustration--separation" role="img" aria-label="Small rock fragments separating from a larger rock">
-    <span class="origin-illustration__body" aria-hidden="true"></span>
-    <span class="origin-illustration__detail" aria-hidden="true"></span>
-  </div></div>
-  <div class="solutions__each__texts">
-    <div class="solutions__each__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">LATER · DATE UNKNOWN</div></div></div>
-    <div class="solutions__each__title"><div class="description">A fragment breaks away</div></div>
-    <div class="solutions__each__parag"><p class="parag">Collisions can knock pieces off asteroids. The exact time and source of the Chelyabinsk fragment remain uncertain. <a href="https://science.nasa.gov/solar-system/meteors-meteorites/facts/" target="_blank" rel="noopener">NASA</a></p></div>
-  </div>
+<li class="solutions__each origins-slide">
+  <h3 class="origins-heading" id="origins-exposure">A fragment breaks away</h3>
+  <figure class="origins-chart" data-chart="exposure" aria-labelledby="origins-exposure"></figure>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Exposure age</p><output class="origins-number" data-reading-value>1.2 ± 0.2</output><p data-reading-detail>million years</p></div><p class="origins-context">Breakaway date unknown</p></div>
 </li>
-<li class="solutions__each">
-  <div class="solutions__each__media"><div class="solutions__each__video origin-illustration origin-illustration--orbit" role="img" aria-label="A fragment’s path intersecting Earth’s orbit">
-    <span class="origin-illustration__body" aria-hidden="true"></span>
-    <span class="origin-illustration__detail" aria-hidden="true"></span>
-  </div></div>
-  <div class="solutions__each__texts">
-    <div class="solutions__each__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">BEFORE 15 FEBRUARY 2013</div></div></div>
-    <div class="solutions__each__title"><div class="description">A path to Earth</div></div>
-    <div class="solutions__each__parag"><p class="parag">The fragment orbited the Sun. It met Earth when both reached the same point in space at the same time. <a href="https://www.nature.com/articles/nature12671" target="_blank" rel="noopener">Trajectory study</a></p></div>
-  </div>
+<li class="solutions__each origins-slide">
+  <h3 class="origins-heading" id="origins-orbit">A path to Earth</h3>
+  <figure class="origins-chart" data-chart="orbit" aria-labelledby="origins-orbit"></figure>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Earth encounter</p><output class="origins-number" data-reading-value>15 Feb</output><p data-reading-detail>2013</p></div></div>
 </li>
-<li class="solutions__each"><div class="solutions__each__media"><video controls playsinline preload="none" poster="./meteorite/dashcam.webp" class="solutions__each__video footage" aria-label="The fireball in the sky" data-source="./meteorite/dashcam.mp4"></video></div><div class="solutions__each__texts"><div class="solutions__each__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">15 FEBRUARY 2013 · DASHCAM</div></div></div><div class="solutions__each__title"><div class="description">The fireball in the sky</div></div><div class="solutions__each__parag"><p class="parag"><span class="origin-footage-context">The rock broke apart in the atmosphere. Pieces that reached the ground became meteorites. </span>Kamensk-Uralsky · Aleksandr Ivanov · CC BY 3.0. Video resized and encoded without audio. <a href="https://commons.wikimedia.org/wiki/File:Взрыв_метеорита_над_Челябинском_15_02_2013_avi-iCawTYPtehk.ogv" target="_blank" rel="noopener">Source</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">License</a></p></div></div></li>
-<li class="solutions__each"><div class="solutions__each__media"><video controls playsinline preload="none" poster="./meteorite/cctv.webp" class="solutions__each__video footage" aria-label="The flash on the ground" data-source="./meteorite/cctv.mp4"></video></div><div class="solutions__each__texts"><div class="solutions__each__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">15 FEBRUARY 2013 · SECURITY CAMERA</div></div></div><div class="solutions__each__title"><div class="description">The flash on the ground</div></div><div class="solutions__each__parag"><p class="parag"><span class="origin-footage-context">A second camera recorded the flash from a different location. </span>Yekaterinburg · Fixed surveillance camera · Source and reuse information on Wikimedia Commons. Video resized and encoded without audio. <a href="https://commons.wikimedia.org/wiki/File:Chelyabinsk_meteor_security_camera_footage,_Yekaterinburg.webm" target="_blank" rel="noopener">Source</a></p></div></div></li>
+<li class="solutions__each origins-slide">
+  <h3 class="origins-heading" id="origins-speed">The fireball slows</h3>
+  <figure class="origins-chart" data-chart="speed" aria-labelledby="origins-speed"></figure>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Last detection</p><output class="origins-number" data-reading-value>4.9 km/s</output><p data-reading-detail>13.6 km above the ground</p></div><p class="origins-context">First detected at 19.16 km/s</p></div>
+</li>
+<li class="solutions__each origins-slide">
+  <h3 class="origins-heading" id="origins-shock">The shock arrives later</h3>
+  <figure class="origins-chart" data-chart="shock" aria-labelledby="origins-shock"></figure>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Chelyabinsk</p><output class="origins-number" data-reading-value>144.8 s</output><p data-reading-detail>after peak brightness</p></div><p class="origins-context">Camera shook</p></div>
+</li>
 </ul></div></div></div>
+<section class="origins-feature origins-flight" aria-labelledby="origins-flight-title">
+  <header>
+    <h2 class="origins-heading" id="origins-flight-title">Sixteen seconds in the sky</h2>
+    <p>Explore the fireball’s path across the Southern Urals.</p>
+  </header>
+  <div class="origins-linked">
+    <figure class="origins-chart" data-chart="cameras" aria-label="Camera sites and reconstructed track">
+      <figcaption><span class="origins-key origins-key--video">Fireball filmed</span><span class="origins-key origins-key--shadow">Shadows measured</span></figcaption>
+    </figure>
+    <figure class="origins-chart" data-chart="altitude" aria-label="Fireball height over 16 seconds"></figure>
+  </div>
+  <div class="origins-playhead">
+    <p class="origins-event-name" data-flight-name>Main brightness peak</p>
+    <output class="origins-number" for="origins-flight-time" data-flight-value>11.4 s · 29.7 km</output>
+    <input id="origins-flight-time" type="range" min="0" max="16" step="0.05" value="11.4" aria-label="Fireball event">
+  </div>
+</section>
 <section class="stats section-reboot section-blue"><div class="stats__top-decor w-embed"><svg width="100%" viewBox="0 0 1920 586" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M960.25 40C390.5 40 0 286 0 286V585.5H1920.5V286C1920.5 286 1530 40 960.25 40Z" fill="var(--dark-blue)"/>
     <path class="path-stats-opac" d="M0 247C0 247 390.5 1 960.25 1C1530 1 1920.5 247 1920.5 247" stroke="var(--color-soft)" stroke-width="2"/>
@@ -969,11 +926,27 @@ p.parag,
     <path class="stats__opac__line" d="M1032.32 0.0045166V1436.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
     <path class="stats__opac__line" d="M1032.34 0.0045166C1034.45 423.694 1246.09 878.535 1640.63 1438.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
     <path class="stats__opac__line" d="M1032.35 0.0045166C1036.26 427.821 1380.25 867.645 2064.32 1438.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
-</svg></div><div class="onclock__spiral__center stats__spiral__center__pattern"><img src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp" loading="lazy" sizes="100vw" srcset="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-500.webp 500w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-800.webp 800w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-1080.webp 1080w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp 1232w" alt=""/></div></div><div class="stats__lines-decor"></div><div data-anima="texts" class="stats__text"><div class="stats__text__serif"><div class="title_serif">A fragment</div></div><div class="stats__text__sans"><div class="title_sans">of an asteroid.</div></div><div data-anima="parag" class="stats__text__parag"><p class="small-parag">The rock began far from Earth. Collisions can break larger asteroids apart, leaving fragments that travel around the Sun on their own orbits.</p></div></div><div class="stats__stats"><div class="stats_stats__pattern"><img src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp" loading="lazy" sizes="100vw" srcset="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-500.webp 500w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-800.webp 800w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-1080.webp 1080w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp 1232w" alt=""/></div><div class="stats_stats__solid"></div><div class="stats_stats__border"></div><ul role="list" class="stats__stats__ul w-list-unstyled"><li class="stats__stats__li"><div class="stats__stats__number">4.0</div></li><li class="stats__stats__li"><div class="stats__stats__number">4.5</div></li><li class="stats__stats__li"><div class="stats__stats__number">4.6</div></li></ul><div class="stats__stats__minimum"><p class="small-parag minimum">Billion years since the early Solar System</p></div></div></div></section><section class="onclock section-blue" id="composition" aria-labelledby="composition-title"><div class="onclock__hold"><div class="onclock__top"><div class="onclock__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
+</svg></div><div class="onclock__spiral__center stats__spiral__center__pattern"><img src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp" loading="lazy" sizes="100vw" srcset="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-500.webp 500w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-800.webp 800w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-1080.webp 1080w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp 1232w" alt=""/></div></div><div class="stats__lines-decor"></div><div data-anima="texts" class="stats__text"><div class="stats__text__serif"><div class="title_serif">A fragment</div></div><div class="stats__text__sans"><div class="title_sans">of an asteroid.</div></div><div data-anima="parag" class="stats__text__parag"><p class="small-parag">The rock began far from Earth. Collisions can break larger asteroids apart, leaving fragments that travel around the Sun on their own orbits.</p></div></div><div class="stats__stats"><div class="stats_stats__pattern"><img src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp" loading="lazy" sizes="100vw" srcset="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-500.webp 500w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-800.webp 800w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-1080.webp 1080w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp 1232w" alt=""/></div><div class="stats_stats__solid"></div><div class="stats_stats__border"></div>
+<figure class="stats__stats__ul impact-timeline" aria-labelledby="impact-timeline-title">
+  <svg class="impact-timeline__plot" viewBox="0 0 400 400" role="group" aria-label="Four impacts positioned by age. Each color block represents one isotope system."></svg>
+  <figcaption class="impact-timeline__caption">
+    <h2 id="impact-timeline-title">Recorded impacts</h2>
+    <div aria-live="polite" aria-atomic="true">
+      <p class="impact-timeline__age" data-impact-age>4.45</p>
+      <p class="impact-timeline__unit" data-impact-unit>billion years ago</p>
+    </div>
+  </figcaption>
+  <div class="impact-timeline__footer">
+    <ul class="impact-timeline__legend" aria-label="Isotope systems"></ul>
+    <a href="https://doi.org/10.1111/maps.13927" target="_blank" rel="noopener">Beard et al. · Table 6 ↗</a>
+  </div>
+</figure>
+</div></div></section><section class="onclock section-blue" id="composition" aria-labelledby="composition-title"><div class="onclock__hold"><div class="onclock__top"><div class="onclock__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle class="index_path__opacity" opacity="0.1" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 
 <circle class="index_path__solid" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 </svg></div><div class="section-index__index">03</div></div></div><div class="onclock__title"><div data-anima="texts" class="onclock__title__serif"><h2 class="title_serif" id="composition-title">Crossing Earth’s orbit.</h2></div></div></div><div class="composition">
+  <div class="composition__stage">
   <div class="onclock__spiral__wrapper"><div class="onclock__spiral onclock__spiral__original"><div class="onclock__pendulum__svg onclock__lines__solid w-embed"><svg width="100%" viewBox="0 0 1324 1787" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M0.320557 0C881.654 677.095 881.654 1073.18 0.320557 1809" stroke="var(--white)" stroke-opacity="1"/>
 <path d="M280.321 4C788.821 681.358 788.821 1073.5 280.321 1795" stroke="var(--white)" opacity="1"/>
@@ -1001,18 +974,14 @@ p.parag,
     <li class="onclock__word" style="--angle:270deg"><button type="button" class="onclock__word__text" data-topic="near">NEAR</button></li>
     <li class="onclock__word" style="--angle:330deg"><button type="button" class="onclock__word__text" data-topic="pass">PASS</button></li>
   </ul>
+  </div>
   <svg class="composition__leader" aria-hidden="true">
     <path class="composition__leader-ink" pathLength="1"/>
     <path class="composition__leader-hit"/>
   </svg>
-  <aside class="composition__note" id="composition-note" aria-labelledby="composition-note-title" data-lenis-prevent hidden>
-    <h3 id="composition-note-title"></h3>
-    <figure class="composition__figure">
-      <svg class="composition__graphic" role="img"></svg>
-      <figcaption></figcaption>
-    </figure>
-    <p class="composition__description"></p>
-    <footer class="composition__source"><a target="_blank" rel="noopener"></a></footer>
+  <span class="composition__leader-label" aria-hidden="true" hidden></span>
+  <aside class="composition__note" id="composition-note" aria-label="Meteorite chart" data-lenis-prevent hidden>
+    <svg class="composition__graphic" role="img"></svg>
   </aside>
 </div>
 <div class="onclock__bottom"><div data-anima="parag" class="onclock__bottom__left"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">A FRAGMENT IN ORBIT</div></div><p class="parag">Once separated, a fragment follows its own orbit around the Sun. Over time gravitational encounters can change where that orbit takes it.</p></div><div data-anima="parag" class="encounter__bottom__right"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">AN ENCOUNTER WITH EARTH</div></div><p class="parag">Earth and the fragment reached the same point at the same time. The rock entered the atmosphere and broke apart.</p></div></div></div></section>
@@ -1053,21 +1022,30 @@ p.parag,
 <rect width="1920" height="506.5" fill="white"/>
 </clipPath>
 </defs>
-</svg></div></div><div class="importance__bottom"><div data-anima="parag" class="importance__bottom__left"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text importance__text">STONE AND METAL</div></div><p class="parag importance__text">Stony meteorites are rich in silicate minerals. Iron meteorites are mostly iron and nickel. Stony-iron meteorites contain substantial amounts of both silicate and metal.</p></div><div data-anima="parag" class="importance__bottom__right"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">THE CHELYABINSK SAMPLE</div></div><p class="parag">Chelyabinsk is an <em>LL5 ordinary chondrite</em>. The small rounded grains typical of chondrites are called chondrules. Its interior was also altered by heat before the fall.</p></div></div></div></section><footer class="footer"><div class="footer__hold"><div class="footer__title"><div class="footer__title__hold"><div class="footer__logo"><span class="footer__logo__img visitors-wordmark">VISITORS</span></div><div class="footer__descr"><p class="parag parag__footer">A field guide that follows a fireball from its origins to the cameras that recorded it.<br/><span class="text-span">Continue into the illustrated event reconstruction.</span></p></div></div></div><div class="footer__link"><div class="footer__link__hold"><div class="footer__cta"><a href="#chapter-bridge" class="footer__cta__link w-inline-block"><div class="hover-btn w-embed"><svg width="100%" viewBox="0 0 273 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="272" height="41" rx="20.5" fill="var(--white)"/>
-    <path class="cta-button" d="M136.5 0.5H21C9.67816 0.5 0.5 9.67816 0.5 21C0.5 32.3218 9.67817 41.5 21 41.5H136.5" stroke="var(--color)" stroke-wodth="2" />
-    <path class="cta-button" d="M136.5 41.5L252 41.5C263.322 41.5 272.5 32.3218 272.5 21C272.5 9.67816 263.322 0.499999 252 0.499998L136.5 0.499988" stroke="var(--color)" stroke-wodth="2" />
-    <path d="M136.5 0.5H21C9.67816 0.5 0.5 9.67816 0.5 21C0.5 32.3218 9.67817 41.5 21 41.5H136.5" stroke="var(--color-soft)" opacity="0.7" stroke-wodth="2" />
-    <path d="M136.5 41.5L252 41.5C263.322 41.5 272.5 32.3218 272.5 21C272.5 9.67816 263.322 0.499999 252 0.499998L136.5 0.499988" stroke="var(--color-soft)" opacity="0.7" stroke-wodth="2" />
-</svg></div><div class="footer__cta__link__span">ENTER THE RECONSTRUCTION</div></a></div><ul role="list" class="footer__socials w-list-unstyled"><li class="footer__socials__link"><a href="https://science.nasa.gov/solar-system/meteors-meteorites/facts/" target="_blank" class="footer__socials__a w-inline-block"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text lined">NASA SCIENCE</div></div></a></li><li class="footer__socials__link"><a href="https://www.lpi.usra.edu/meteor/docs/mb102.pdf" target="_blank" class="footer__socials__a w-inline-block"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text lined">METEORITICAL BULLETIN</div></div></a></li><li class="footer__socials__link"><a href="https://doi.org/10.1051/0004-6361/201526680" target="_blank" class="footer__socials__a w-inline-block"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text lined">VIDEO RECORDS</div></div></a></li></ul><div class="footer__disclosure"><p class="parag parag__footer participation">SOURCES FOR THE STORY AND VISUAL REFERENCE</p></div><a href="https://vwlab.io/products/memorable-web-experience" target="_blank" class="footer__vwlab__link w-inline-block"><div class="footer__vwlab"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text subtitle__text__vwlab lined">ORIGINAL INTERACTION DESIGN:</div></div><div class="footer__vwlab__svg w-embed"><svg width="100%" viewBox="0 0 136 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M59.5547 30.2989L59.9178 29.9649V28.8321L60.7165 28.0334H61.8202L62.1687 27.6704V12.9885L62.982 12.1753H64.1147L64.8844 12.9885V27.6704L64.1147 28.4836H62.982L62.6189 28.8321V29.9649L61.8202 30.7345H60.7165L60.368 31.0976V32.2303L59.5547 33H58.422L57.6523 32.2303V31.0976L57.3038 30.7345H56.1711L55.4014 29.9649V28.8321L55.0384 28.4836H53.9056L53.136 27.6704V12.9885L53.9056 12.1753H55.0384L55.8371 12.9885V27.6704L56.1711 28.0334H57.3038L58.1025 28.8321V29.9649L58.422 30.2989H59.5547ZM75.5407 29.9649V12.9885L76.3539 12.1753H77.4867L78.2563 12.9885V29.9649L77.4867 30.7345H76.3539L75.9909 31.0976V32.2303L75.1922 33H74.0885L73.2898 32.2303V31.0976L72.9267 30.7345H71.794L71.4745 31.0976V32.2303L70.6758 33H69.5431L68.7734 32.2303V31.0976L68.4103 30.7345H67.2776L66.5079 29.9649V12.9885L67.2776 12.1753H68.4103L69.2091 12.9885V29.9649L69.5431 30.2989H70.6758L71.0243 29.9649V24.3158L71.794 23.517H72.9267L73.74 24.3158V29.9649L74.0885 30.2989H75.1922L75.5407 29.9649ZM85.7323 32.4336L85.166 33H84.0478L83.2636 32.2013V31.0686L83.8299 30.5022L83.2636 29.9358V28.8031L84.0478 28.0044H85.166L85.7323 28.5707L86.3277 28.0044H87.4314L88.2301 28.8031V29.9358L87.6638 30.5022L88.2301 31.0686V32.2013L87.4314 33H86.3277L85.7323 32.4336ZM85.7323 30.1682L85.4129 30.5022L85.7323 30.8217L86.0954 30.5022L85.7323 30.1682ZM93.2519 32.2303V12.9885L94.0506 12.1753H95.1833L95.9821 12.9885V29.9649L95.4157 30.5312L95.7497 30.8652L96.3161 30.2989H104.231L105.029 31.0976V32.2303L104.231 33H94.0506L93.2519 32.2303ZM109.688 33L108.918 32.2013V31.0686L108.555 30.7345H107.423L106.624 29.9358V26.5522L107.423 25.7389H108.555L108.918 25.4194V24.2867L109.688 23.488H115.337L115.904 24.0544L116.252 23.7204L115.7 23.154V19.7703L115.337 19.4363H109.688L109.354 19.7703V20.8885L108.555 21.7018H107.423L106.624 20.8885V19.7703L107.423 18.9571H108.555L108.918 18.6376V17.5049L109.688 16.7062H115.337L116.136 17.5049V18.6376L116.499 18.9571H117.603L118.401 19.7703V32.2013L117.603 33H109.688ZM109.688 30.2698H115.337L115.904 30.8217L116.252 30.5022L115.7 29.9358V26.5522L116.252 25.9858L115.904 25.6518L115.337 26.2182H109.688L109.354 26.5522V29.9358L109.688 30.2698ZM129.479 32.2013L128.709 33H120.766L119.996 32.2013V12.9595L120.766 12.1753H121.898L122.697 12.9595V16.3431L122.131 16.9095L122.465 17.2725L123.031 16.7062H128.709L129.479 17.4758V18.6086L129.842 18.9571H130.975L131.744 19.7703V29.9358L130.975 30.7055H129.842L129.479 31.0686V32.2013ZM122.131 30.5022L122.465 30.8217L123.031 30.2698H128.709L129.029 29.9358V19.7703L128.709 19.4073H123.031L122.465 18.8409L122.131 19.1749L122.697 19.7703V29.9358L122.131 30.5022Z" fill="var(--color)"/>
-<path d="M24.0449 6.54297C26.8669 6.54301 29.1541 8.83044 29.1543 11.6523C29.1543 14.4744 26.867 16.7627 24.0449 16.7627C23.7243 16.7627 23.4106 16.733 23.1064 16.6763C21.8956 16.4506 20.4976 16.5946 19.7485 17.5723C19.2801 18.1837 19.1881 18.9876 19.2599 19.7545C19.2747 19.9118 19.2822 20.0712 19.2822 20.2324C19.2822 20.7042 19.2181 21.1609 19.0982 21.5945C18.7157 22.9778 18.5268 24.5788 19.4 25.7177C20.2833 26.87 21.9047 27.0985 23.3564 27.0786C23.3802 27.0783 23.4039 27.0781 23.4277 27.0781C26.2497 27.0781 28.5379 29.3656 28.5381 32.1875C28.5381 35.0096 26.2498 37.2979 23.4277 37.2979C20.6058 37.2977 18.3184 35.0095 18.3184 32.1875C18.3184 32.1377 18.3191 32.088 18.3205 32.0385C18.3676 30.3986 18.4454 28.5926 17.4475 27.2904L16.7429 26.3707C16.1545 25.6027 15.1403 25.3427 14.1729 25.3428C13.2048 25.3428 12.1899 25.603 11.601 26.3712L10.9771 27.1853C9.9996 28.4605 10.0985 30.2326 10.2078 31.8356C10.2157 31.9519 10.2197 32.0692 10.2197 32.1875C10.2197 35.0096 7.93145 37.2979 5.10938 37.2979C2.28749 37.2976 0 35.0094 0 32.1875C0.000181406 29.3657 2.2876 27.0784 5.10938 27.0781C6.52336 27.0781 8.08903 26.833 8.94907 25.7106C9.81919 24.5752 9.63157 22.9795 9.24837 21.6012C9.12727 21.1656 9.0625 20.7066 9.0625 20.2324C9.06268 17.4105 11.3509 15.123 14.1729 15.123C14.7366 15.1231 15.2788 15.2146 15.7857 15.3834C16.8157 15.7264 18.0707 15.641 18.7308 14.7791C19.1626 14.2155 19.2112 13.4621 19.0569 12.7691C18.9768 12.4096 18.9346 12.0358 18.9346 11.6523C18.9348 8.83042 21.223 6.54297 24.0449 6.54297ZM32.9209 18.3789C35.7427 18.3791 38.0301 20.6665 38.0303 23.4883C38.0303 26.3103 35.7428 28.5985 32.9209 28.5986C30.0988 28.5986 27.8105 26.3104 27.8105 23.4883C27.8107 20.6664 30.0989 18.3789 32.9209 18.3789Z" fill="var(--color)"/>
-</svg></div></div></a></div></div><div class="footer__decor"><div class="footer__decor__svg w-embed"><svg width="100%" viewBox="0 0 1850 340" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path class="footer-decor-solid" d="M35.2686 338.908C187.14 177.372 461.874 15.9925 955.769 1.4209C1421.69 -12.3255 1692.58 129.876 1849.27 287.447" stroke="var(--color)"/>
-    <path class="footer-decor-solid" d="M0.268638 199.088C164.321 94.5817 403.312 11.6727 750.769 1.42154C1267.16 -13.8139 1543.97 162.512 1691.27 339.014" stroke="var(--color)"/>
-    <path opacity="0.5" d="M35.2686 338.908C187.14 177.372 461.874 15.9925 955.769 1.4209C1421.69 -12.3255 1692.58 129.876 1849.27 287.447" stroke="var(--color-soft)"/>
-    <path opacity="0.5" d="M0.268638 199.088C164.321 94.5817 403.312 11.6727 750.769 1.42154C1267.16 -13.8139 1543.97 162.512 1691.27 339.014" stroke="var(--color-soft)"/>
-</svg></div></div><div class="footer__bottom"><div class="footer__bottom__hold"><div class="footer__copyrights"><div class="subtitle__text">© ALL RIGHTS RESERVED | <span class="year">2025</span></div></div><a href="https://vwlab.io/pages/report" target="_blank" class="footer__credits__link w-inline-block"><div class="footer__credits lined"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">ORIGINAL DESIGN AND DEVELOPMENT</div></div><div class="subtitle__text subtitle__text__victor">VICTOR WORK</div></div></a></div></div></div></footer>
+</svg></div></div><div class="importance__bottom"><div data-anima="parag" class="importance__bottom__left"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text importance__text">STONE AND METAL</div></div><p class="parag importance__text">Stony meteorites are rich in silicate minerals. Iron meteorites are mostly iron and nickel. Stony-iron meteorites contain substantial amounts of both silicate and metal.</p></div><div data-anima="parag" class="importance__bottom__right"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">THE CHELYABINSK SAMPLE</div></div><p class="parag">Chelyabinsk is an <em>LL5 ordinary chondrite</em>. The small rounded grains typical of chondrites are called chondrules. Its interior was also altered by heat before the fall.</p></div></div></div>
+  <div class="origins-feature origins-classification" aria-labelledby="origins-classes-title">
+    <header>
+      <h3 class="origins-heading" id="origins-classes-title">Chelyabinsk is LL5</h3>
+      <p>Compare its class with H5 and L5 in the meteorite catalogue.</p>
+    </header>
+    <div class="origins-switch" role="group" aria-label="Records to compare">
+      <button type="button" data-records="official" aria-pressed="true">Official records</button>
+      <button type="button" data-records="fell" aria-pressed="false">Observed falls</button>
+    </div>
+    <figure class="origins-chart" data-chart="classification" aria-label="Catalogue counts by classification"></figure>
+    <div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>LL5</p><output class="origins-number" data-reading-value>3,315</output><p data-reading-detail>official records</p></div>
+    <details class="origins-sources"><summary>Sources</summary>
+      <p>The speed profile uses seven trajectory events and reported speeds. Connected segments guide the eye between reported values. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=15" target="_blank" rel="noopener">Popova et al. · Science · Table S1 ↗</a></p>
+      <p>The shock clocks show one video observation at each of four sites. Delays use 03:20:32.2 UTC, the main brightness peak, as zero. The arcs encode elapsed time. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=83" target="_blank" rel="noopener">Popova et al. · Science · Table S12 ↗</a></p>
+      <p>Ages are from early Solar System samples. Caps show the reported uncertainty for calcium–aluminum-rich inclusions (CAIs) and for the endpoints of the dated chondrule span. <a href="https://pubmed.ncbi.nlm.nih.gov/23118187/" target="_blank" rel="noopener">Connelly et al. · Science ↗</a></p>
+      <p>Ranges describe the minerals in the studied light and dark rock types. <a href="https://doi.org/10.1111/maps.13027" target="_blank" rel="noopener">Kaeter et al. · Meteoritics &amp; Planetary Science ↗</a></p>
+      <p>The exposure estimate comes from aluminum-26. Myr means million years. <a href="https://doi.org/10.1111/maps.12855" target="_blank" rel="noopener">Querfeld et al. · Meteoritics &amp; Planetary Science ↗</a></p>
+      <p>The reconstructed orbit is projected onto the J2000 ecliptic plane. The 1 AU circle approximates Earth’s orbit. The marker is the incoming orbit’s descending node on 15 February 2013. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=31" target="_blank" rel="noopener">Popova et al. · Science · Table S5B ↗</a></p>
+      <p>The map shows calibrated video and shadow-analysis sites. The line connects the published trajectory events. Time starts at first detection. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=15" target="_blank" rel="noopener">Popova et al. · Science · Tables S1–S3 ↗</a></p>
+      <p>Counts use the October 2024 catalogue mirror. Bars compare exact H5, L5 and LL5 classes with Official naming status. The observed-fall view counts records marked Fell. Each count is a catalogue entry. <a href="https://www.lpi.usra.edu/meteor/metbull.php" target="_blank" rel="noopener">Meteoritical Bulletin Database ↗</a></p>
+    </details>
+  </div>
+</section>
 <div id="chapter-bridge" aria-hidden="true" hidden></div>
 
 
@@ -1085,8 +1063,24 @@ window.scrollTo(0,0);
 </script>
 
 <!-- <script type="module" defer crossorigin="" src="http://localhost:5173/main.js"></script>  -->
-<script type="module" vite-ignore crossorigin="" src="./files/sleep-well-creatives.netlify.app/assets/index-8YjIcPvu.js?v=direct-asteroid-handoff"></script>
+<script type="module" vite-ignore crossorigin="" src="./files/sleep-well-creatives.netlify.app/assets/index-8YjIcPvu.js?v=direct-reconstruction"></script>
 
 <script type="module" vite-ignore src="./meteorite/story.js"></script>
+<template id="phone-archive-clips">
+  <article data-video="./meteorite/dashcam.mp4" data-poster="./meteorite/dashcam.webp">
+    <p>15 February 2013 · Dashcam</p>
+    <h3>The fireball in the sky</h3>
+    <p>Kamensk-Uralsky · Aleksandr Ivanov · Resized and encoded without audio.
+      <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>
+    </p>
+  </article>
+  <article data-video="./meteorite/cctv.mp4" data-poster="./meteorite/cctv.webp">
+    <p>15 February 2013 · Security camera</p>
+    <h3>The flash on the ground</h3>
+    <p>Yekaterinburg · Fixed surveillance camera · Resized and encoded without audio.</p>
+  </article>
+</template>
 <script type="module" src="/src/phone-archive.js"></script><script type="module" src="/src/hero-meteor.js"></script><script type="module" src="/src/composition-specimen.js"></script>
+<script type="module" src="/src/origins.js"></script>
+<script type="module" src="/src/impact-timeline.js"></script>
 </body></html>

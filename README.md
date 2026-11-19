@@ -1,6 +1,6 @@
 # Chelyabinsk · 车里雅宾斯克陨石
 
-在 Finder 双击 **打开 Demo.command** 启动本地预览。先点 **Enter Site**，下滚经过俄罗斯火球开场、钟表隧道、陨石科普和两段实拍。滚过原来的翻书页或点 **Enter the reconstruction** 即可进入同页的车里雅宾斯克事件重建。在重建开头向上滚可返回前半段。脚本使用 Python 3，关闭终端或按 Ctrl+C 停止。
+在 Finder 双击 **打开 Demo.command** 启动本地预览。先点 **Enter Site**，下滚经过俄罗斯火球开场、钟表隧道、陨石科普、火球减速和冲击波到达时间图。看完最后一段陨石科普后继续下滚，即可进入同页的车里雅宾斯克事件重建。在重建开头向上滚可返回前半段。脚本使用 Python 3，关闭终端或按 Ctrl+C 停止。
 
 同一预览地址的 `/visitors.html` 可直接打开 VISITORS，下滚或按左右方向键切换章节，穿过石环进入太阳系。整合版的材质分析圆框展示主陨石，重建页原档案可通过 `/visitors.html#specimen` 直达。`/index.html` 可打开独立陨石 Demo。下列操作说明针对独立 Demo。构建后的 `dist/` 包含整合入口、两个 Demo 页面和本地资源。
 
@@ -29,7 +29,10 @@
 
 ## 参考范围
 
-整合入口在用户提供的 Sleep Well Creatives 本地参考结构上改编。钟表使用 Blender 建模并导出为 GLB。中央钟的表壳随滚动转动，两根指针按 12:1 的角速度倒走。档案视频来源和授权见网页各视频卡。原设计、开发及 3D 素材由 Victor Work / Victor Costa 创作，原站署名随本地副本保留。[Sleep Well Creatives 原站](https://sleep-well-creatives.com/)
+整合入口在用户提供的 Sleep Well Creatives 本地参考结构上改编。钟表使用 Blender 建模并导出为 GLB。中央钟的表壳随滚动转动，两根指针按 12:1 的角速度倒走。原设计、开发及 3D 素材由 Victor Work / Victor Costa 创作。[Sleep Well Creatives 原站](https://sleep-well-creatives.com/)
+
+- Kamensk-Uralsky 行车记录仪视频由 Aleksandr Ivanov 拍摄，本地版本调整了尺寸并移除了音轨。[Wikimedia Commons 原片](https://commons.wikimedia.org/wiki/File:Взрыв_метеорита_над_Челябинском_15_02_2013_avi-iCawTYPtehk.ogv) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)
+- Yekaterinburg 固定监控视频的本地版本调整了尺寸并移除了音轨。[Wikimedia Commons 原片与复用说明](https://commons.wikimedia.org/wiki/File:Chelyabinsk_meteor_security_camera_footage,_Yekaterinburg.webm)
 
 滚轮换算、两级缓动、展品的垂直镜头路径、转场视差、穿环镜头关键帧和三次畸变节点依据 [Igloo](https://www.igloo.inc/) 的公开前端代码重建。开场采用占位空景，之后衔接一个本地展品和三道圆环。陨石周围的线网依据原站的 18 点、每点最多 3 条连接及 0.35 秒伸缩逻辑，表面采用原站的 UV 轨迹注入和双缓冲扩散机制。遮罩、扰动和着色按本地模型与插画风格重建。
 

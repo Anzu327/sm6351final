@@ -41,7 +41,7 @@ function mapTimeline(value, from, to) {
   return mix(start[to], end[to], (value - start[from]) / (end[from] - start[from]));
 }
 
-// The book leads into the existing tunnel at its first fully revealed frame.
+// The opening leads into the tunnel at its first fully revealed frame.
 const passageEntry = stone.display + (stone.system - stone.display) / finalRingExit;
 const entryOffset = () => startsInPassage ? mapTimeline(passageEntry, 0, 1) : 0;
 export const storyAt = pixels => mapTimeline(pixels + entryOffset(), 1, 0);

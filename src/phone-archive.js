@@ -1,24 +1,25 @@
-import { Raycaster, Vector2 } from 'three';
+import { Raycaster, Sphere, Vector2 } from 'three';
 import { mapArchivePanels } from './phone-card-surfaces.js';
 
 const hero = document.querySelector('.hero');
 const section = document.querySelector('.scene-phone');
-const clips = [...document.querySelectorAll('.solutions__each video[data-source]')].map(video => {
-  const item = video.closest('.solutions__each');
+const archive = document.querySelector('#phone-archive-clips');
+const clips = [...archive.content.querySelectorAll('[data-video]')].map(item => {
   const poster = new Image();
-  poster.src = video.poster;
+  poster.src = new URL(item.dataset.poster, document.baseURI).href;
   return {
-    poster, video,
-    title:item.querySelector('.solutions__each__title').textContent.trim(),
-    kind:item.querySelector('.solutions__each__subt').textContent.trim(),
-    description:item.querySelector('.solutions__each__parag p'),
+    poster,
+    source: new URL(item.dataset.video, document.baseURI).href,
+    title: item.querySelector('h3').textContent.trim(),
+    kind: item.firstElementChild.textContent.trim(),
+    description: item.lastElementChild,
   };
 });
 
 const panel = document.createElement('aside');
 panel.className = 'phone-archive-info';
 panel.innerHTML = `
-  <button type="button" class="phone-archive-exit" autofocus>Exit viewing <span aria-hidden="true">×</span></button>
+  <button type="button" class="phone-archive-exit" aria-label="Close video" autofocus></button>
   <p class="phone-archive-kind"></p>
   <h2 id="phone-archive-title"></h2>
   <p class="phone-archive-description"></p>
@@ -40,11 +41,17 @@ const ray = new Raycaster();
 const target = new Vector2();
 const tileWidth = 384;
 const tileHeight = 256;
+const hoverScale = 1.12;
+const hoverDuration = 160;
+const hoverMotion = matchMedia('(any-hover: hover) and (any-pointer: fine) and (prefers-reduced-motion: no-preference)');
 let scene, mesh, mapping, atlas, texture;
+let surfaces, panelScales;
 let progress = 0;
 let leave = 0;
 let selected = -1;
-let hovering = false;
+let hovered = -1;
+let pointer = null;
+let hoverFrame = 0;
 
 function paintTile(slot, source) {
   const ctx = atlas.getContext('2d');
@@ -74,6 +81,28 @@ function attach() {
   if (!mesh) return;
   mapping = mapArchivePanels(mesh);
   if (!mapping.panels.length) return;
+  surfaces = [archiveSurface(mesh, mapping.panels)];
+  const outline = faces.find(face=>face.material.name === 'Outline');
+  if (outline) {
+    const outlinePanels = mapArchivePanels(outline).panels;
+    if (outlinePanels.length === mapping.panels.length) {
+      // Draco gives each material its own vertex ordering. Pair by local center.
+      const ordered = mapping.panels.map(({center})=>outlinePanels.reduce((nearest, panel)=>
+        center.distanceToSquared(panel.center) < center.distanceToSquared(nearest.center) ? panel : nearest));
+      surfaces.push(archiveSurface(outline, ordered));
+    }
+  }
+  panelScales = mapping.panels.map(()=>({scale:1, from:1, start:0}));
+
+  // Include the full hover range in the raycast and frustum bounds.
+  mapping.panels.forEach((_,slot)=>scalePanel(slot,hoverScale));
+  for (const {geometry,restBounds} of surfaces) {
+    geometry.computeBoundingBox();
+    geometry.boundingBox.union(restBounds);
+    geometry.boundingSphere = geometry.boundingBox.getBoundingSphere(new Sphere());
+  }
+  mapping.panels.forEach((_,slot)=>scalePanel(slot,1));
+
   atlas = document.createElement('canvas');
   atlas.width = tileWidth*mapping.panels.length;
   atlas.height = tileHeight;
@@ -87,6 +116,7 @@ function attach() {
   for (const clip of clips) clip.poster.addEventListener('load',()=>{
     if (selected < 0) paintPosters();
   });
+  if (pointer && active()) requestHoverUpdate();
 }
 
 function active() {
@@ -99,6 +129,58 @@ function hit(event) {
   const intersection = ray.intersectObject(mesh,false)[0];
   return intersection ? mapping.slotByVertex[intersection.face.a] : -1;
 }
+function archiveSurface({geometry}, panels) {
+  const positions = geometry.getAttribute('position');
+  return {geometry, panels, positions, restPositions:positions.clone(), restBounds:geometry.boundingBox.clone()};
+}
+function scalePanel(slot, scale) {
+  const {center} = mapping.panels[slot];
+  for (const {panels, positions, restPositions} of surfaces) {
+    for (const i of panels[slot].vertices) {
+      positions.setXYZ(i,
+        center.x+(restPositions.getX(i)-center.x)*scale,
+        center.y+(restPositions.getY(i)-center.y)*scale,
+        center.z+(restPositions.getZ(i)-center.z)*scale);
+    }
+    positions.needsUpdate = true;
+  }
+}
+function setHovered(slot, now) {
+  if (slot === hovered) return;
+  for (const i of [hovered,slot]) {
+    if (i < 0) continue;
+    const state = panelScales[i];
+    state.from = state.scale;
+    state.start = now;
+  }
+  hovered = slot;
+  document.body.classList.toggle('phone-card-hover',slot >= 0);
+  scene.ring.userData.archivePaused = selected >= 0 || (slot >= 0 && hoverMotion.matches);
+}
+function updateHover(now) {
+  hoverFrame = 0;
+  const tracking = pointer && active() && !viewer.open;
+  setHovered(tracking ? hit(pointer) : -1,now);
+  let animating = false;
+  if (panelScales) {
+    panelScales.forEach((state,slot)=>{
+      const goal = slot === hovered && hoverMotion.matches ? hoverScale : 1;
+      if (state.scale === goal) return;
+      const elapsed = hoverMotion.matches ? Math.min(1,(now-state.start)/hoverDuration) : 1;
+      state.scale = elapsed === 1 ? goal : goal+(state.from-goal)*(1-elapsed)**3;
+      scalePanel(slot,state.scale);
+      animating ||= elapsed < 1;
+    });
+  }
+  if (tracking || animating) requestHoverUpdate();
+}
+function requestHoverUpdate() {
+  if (!hoverFrame) hoverFrame = requestAnimationFrame(updateHover);
+}
+function clearPointer() {
+  pointer = null;
+  requestHoverUpdate();
+}
 function stop() {
   if (selected < 0) return;
   player.pause();
@@ -107,6 +189,7 @@ function stop() {
   selected = -1;
   if (viewer.open) viewer.close();
   scene.ring.userData.archivePaused = false;
+  requestHoverUpdate();
   paintPosters();
 }
 function play(slot) {
@@ -115,7 +198,6 @@ function play(slot) {
   selected = slot;
   scene.ring.userData.archivePaused = true;
   const clip = clips[slot%clips.length];
-  clips.forEach(item=>item.video.pause());
   panel.querySelector('.phone-archive-kind').textContent = clip.kind;
   panel.querySelector('h2').textContent = clip.title;
   panel.querySelector('.phone-archive-description').replaceChildren(
@@ -124,13 +206,12 @@ function play(slot) {
   player.poster = clip.poster.src;
   player.setAttribute('aria-label',clip.title);
   viewer.showModal();
-  document.body.classList.remove('phone-card-hover');
-  hovering = false;
-  player.src = new URL(clip.video.dataset.source,document.baseURI).href;
+  clearPointer();
+  player.src = clip.source;
   player.play().catch(()=>{
     if (selected !== slot) return;
     const status = panel.querySelector('.phone-archive-status');
-    status.textContent = 'Press play to start the clip, or open the source.';
+    status.textContent = 'Press play to start the clip.';
     status.hidden = false;
   });
 }
@@ -138,24 +219,36 @@ close.addEventListener('click',stop);
 viewer.addEventListener('cancel',event=>{ event.preventDefault(); stop(); });
 viewer.addEventListener('close',stop);
 viewer.addEventListener('click',event=>{ if (event.target === viewer) stop(); });
-document.addEventListener('visibilitychange',()=>{ if (document.hidden) stop(); });
+document.addEventListener('visibilitychange',()=>{
+  if (!document.hidden) return;
+  clearPointer();
+  stop();
+});
 document.addEventListener('click',event=>{
   const slot = hit(event);
   if (slot >= 0) play(slot);
 });
 document.addEventListener('pointermove',event=>{
-  const over = hit(event) >= 0;
-  if (over === hovering) return;
-  hovering = over;
-  document.body.classList.toggle('phone-card-hover',over);
+  pointer = event.pointerType === 'mouse' && !viewer.open
+    ? {clientX:event.clientX,clientY:event.clientY}
+    : null;
+  if (active() || hovered >= 0) requestHoverUpdate();
+},{passive:true});
+document.addEventListener('pointerout',event=>{ if (!event.relatedTarget) clearPointer(); });
+window.addEventListener('blur',clearPointer);
+hoverMotion.addEventListener('change',()=>{
+  if (scene) scene.ring.userData.archivePaused = selected >= 0 || (hovered >= 0 && hoverMotion.matches);
+  requestHoverUpdate();
 });
 document.addEventListener('visitors-phone-progress',event=>{
   progress = event.detail;
   if (!active()) stop();
+  if (pointer || hovered >= 0) requestHoverUpdate();
 });
 document.addEventListener('visitors-phone-leave',event=>{
   leave = event.detail;
   if (!active()) stop();
+  if (pointer || hovered >= 0) requestHoverUpdate();
 });
 section.addEventListener('phone-archive-ready',attach);
 attach();
