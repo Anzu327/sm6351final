@@ -997,7 +997,24 @@ p.parag,
 <path d="M684.292 342.539L731.057 389.304L777.821 342.539" stroke="var(--color)" stroke-width="0.826685"/>
 <path d="M422.36 674.521L389.292 731.795L446.567 764.862" stroke="var(--color)" stroke-width="0.826685"/>
 <path d="M93.821 436.069L47.0566 389.305L0.292272 436.069" stroke="var(--color)" stroke-width="0.826685"/>
-</svg></div></div></div><div class="drop-cans__bottom"><div data-anima="parag" class="drop-cans__bottom__left"><div class="description">The surviving pieces are meteorites. The main mass from Chelyabinsk was recovered from Lake Chebarkul.</div></div></div></div></section>
+</svg></div></div></div><div class="drop-cans__bottom"><div data-anima="parag" class="drop-cans__bottom__left"><div class="description">The surviving pieces are meteorites. The main mass from Chelyabinsk was recovered from Lake Chebarkul.</div></div></div>
+<figure id="recovery-map" class="recovery-map" aria-label="Selected meteorite recovery locations">
+  <div class="recovery-map__layout">
+    <svg class="recovery-map__plot" role="group" aria-label="Selected recovery locations and the projected fireball trajectory near Chelyabinsk"></svg>
+    <aside class="recovery-map__rail" aria-label="Point details">
+      <div class="recovery-map__card" hidden>
+        <div class="recovery-map__readout" aria-live="polite"></div>
+        <button class="recovery-map__close" type="button" aria-label="Clear selected location" hidden>×</button>
+      </div>
+    </aside>
+  </div>
+  <figcaption>
+    <span><i class="recovery-map__key-line" aria-hidden="true"></i>Flight path</span>
+    <span><i class="recovery-map__key-point" aria-hidden="true"></i>Selected finds</span>
+    <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf" target="_blank" rel="noopener">Popova et al. · Tables S1 and S13 ↗</a>
+  </figcaption>
+</figure>
+</div></section>
 
 <div data-insight="Some meteorites preserve material from the early Solar System." data-iscursor="" data-audio="sleep_maint" class="spacer-fs scene-lamp"></div>
 <section class="importance section-blue"><div class="importance__hold"><div class="importance__top"><div class="importance__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1083,4 +1100,5 @@ window.scrollTo(0,0);
 <script type="module" src="/src/phone-archive.js"></script><script type="module" src="/src/hero-meteor.js"></script><script type="module" src="/src/composition-specimen.js"></script>
 <script type="module" src="/src/origins.js"></script>
 <script type="module" src="/src/impact-timeline.js"></script>
+<script type="module" src="/src/recovery-map.js"></script>
 </body></html>
