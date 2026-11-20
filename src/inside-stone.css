@@ -1,0 +1,82 @@
+.importance .importance__beats { display: none !important; }
+
+.stone-chart {
+  width: min(92%, 1040px);
+  margin: 20px auto 30px;
+  scroll-margin-top: 70px;
+  color: #fff0c9;
+  font: 700 13px/1.45 var(--sans, Arial), sans-serif;
+}
+.stone-chart__stage { position: relative; }
+.stone-chart svg { display: block; width: 100%; }
+.stone-chart__stone {
+  position: absolute;
+  left: var(--stone-x);
+  top: var(--stone-y);
+  width: 21%;
+  aspect-ratio: 1;
+  opacity: var(--stone-opacity, 0);
+  transform: translate(-50%, calc(-50% + var(--stone-offset, 0px)));
+  pointer-events: none;
+}
+.stone-chart__tracking { pointer-events: none; }
+.stone-chart__line {
+  fill: none;
+  stroke: #abc1ff;
+  stroke-width: 1.3;
+  stroke-dasharray: 1;
+}
+.stone-chart__tracking circle { fill: #fff0c9; stroke: #96b3ff; stroke-width: 1.25; }
+.stone-chart__sector { cursor: pointer; outline: none; }
+.stone-chart__face path { stroke: #bedbb0; stroke-width: 1; }
+.stone-chart__hit { fill: transparent; }
+.stone-chart__depth { pointer-events: none; }
+.stone-chart__sector text {
+  fill: #fff0c9;
+  stroke: #102c29;
+  stroke-width: 2;
+  paint-order: stroke;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.stone-chart__leader {
+  fill: none;
+  stroke: #fff0c9;
+  stroke-width: 1;
+  opacity: .85;
+  pointer-events: none;
+}
+.stone-chart__detail {
+  position: relative;
+  box-sizing: border-box;
+  width: min(320px, 65%);
+  margin: 0 0 12px max(0px, calc(var(--card-x) - min(160px, 32.5%)));
+  padding: 14px 36px 14px 16px;
+  font-size: 18px;
+  background: #141b57;
+  border: 1px solid #abc1ff70;
+  border-top-color: #fff0c9;
+}
+.stone-chart__detail strong { font-size: 21px; }
+.stone-chart__detail p { margin: 4px 0 0; color: #cbd5f5; }
+.stone-chart__detail button {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+@media (max-width: 600px) {
+  .stone-chart__stone { width: 21%; }
+  .stone-chart__sector text { font-size: 17px; }
+}
+
+.stone-chart__title {
+  margin: 0 0 12px;
+  color: #fff0c9;
+  font: 700 clamp(22px, 3vw, 34px)/1.2 var(--sans, Arial), sans-serif;
+}
