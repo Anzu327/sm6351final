@@ -9,7 +9,7 @@ if (!integrated.includes('<head>')) {
 }
 await writeFile('.pages/index.html', integrated.replace('<head>', '<head>\n  <base href="./sleep-well/">'));
 
-for (const page of ['visitors.html', 'specimen.html', 'sleep-well/opening.html']) {
+for (const page of ['visitors.html', 'specimen.html', 'sleep-well/index.html']) {
   const url = new URL('../.pages/' + page, import.meta.url);
   const html = await readFile(url, 'utf8');
   const assets = [...html.matchAll(/(?:src|href)="(\.{1,2}\/assets\/[^"]+)"/g)];
@@ -26,8 +26,6 @@ for (const path of [
   'visitors/scene-atlas.png',
   'visitors/meteorite-heatmap.png',
   'visitors/display.ttf',
-  'sleep-well/experience.css',
-  'sleep-well/experience.js',
   'sleep-well/files/unpkg.com/lenis@1.3.14/dist/lenis.css',
   'sleep-well/meteorite/falling-ball.js',
 ]) await stat('.pages/' + path);

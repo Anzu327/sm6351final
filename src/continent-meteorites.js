@@ -1,3 +1,5 @@
+import { visitorsRoot } from './visitors-dom.js';
+import { assetBase } from './asset-base.js';
 import catalogue from './data/meteorite-catalogue.json';
 import { featuredMeteorites } from './data/featured-meteorites.js';
 import featuredPhotos from './data/featured-photos.json';
@@ -19,9 +21,9 @@ function mapPoint(lon, lat) {
 
 export function createContinentMeteorites(overlay) {
   const pins = overlay.querySelector('#meteorite-pins');
-  const list = document.querySelector('#continent-featured');
-  const card = document.querySelector('#meteorite-card');
-  const leader = document.querySelector('#meteorite-leader');
+  const list = visitorsRoot.querySelector('#continent-featured');
+  const card = visitorsRoot.querySelector('#meteorite-card');
+  const leader = visitorsRoot.querySelector('#meteorite-leader');
   const line = leader.querySelector('path');
   const end = leader.querySelector('circle');
   const closeButton = card.querySelector('button');
@@ -83,7 +85,7 @@ export function createContinentMeteorites(overlay) {
     story.textContent = entry.story;
     const image = featuredPhotos[entry.id];
     photo.alt = image.alt;
-    photo.src = `${import.meta.env.BASE_URL}visitors/featured/${entry.id}.webp`;
+    photo.src = `${assetBase}visitors/featured/${entry.id}.webp`;
     credit.href = image.source;
     credit.textContent = image.author;
     license.href = image.licenseUrl;

@@ -1,3 +1,4 @@
+import { visitorsRoot } from './visitors-dom.js';
 import regions from './data/continent-outlines.json';
 import { ease, mix } from './motion.js';
 import { createContinentMeteorites } from './continent-meteorites.js';
@@ -6,15 +7,15 @@ const svgNamespace = 'http://www.w3.org/2000/svg';
 const centerY = .015;
 
 export function createContinentMap() {
-  const panel = document.querySelector('#continent-controls');
-  const menu = document.querySelector('#continent-menu');
-  const detail = document.querySelector('#continent-detail');
+  const panel = visitorsRoot.querySelector('#continent-controls');
+  const menu = visitorsRoot.querySelector('#continent-menu');
+  const detail = visitorsRoot.querySelector('#continent-detail');
   const label = detail.querySelector('strong');
   const back = detail.querySelector('button');
-  const overlay = document.querySelector('#continent-overlay');
+  const overlay = visitorsRoot.querySelector('#continent-overlay');
   const group = overlay.querySelector('g');
   const meteorites = createContinentMeteorites(overlay);
-  const legend = document.querySelector('#heatmap-legend strong');
+  const legend = visitorsRoot.querySelector('#heatmap-legend strong');
   const overviewLegend = legend.textContent;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let selected = null;

@@ -1,3 +1,4 @@
+import { assetBase } from './asset-base.js';
 import { Color, Mesh, PlaneGeometry, RepeatWrapping, ShaderMaterial, TextureLoader } from 'three';
 import { clamp, ease, mix } from './motion.js';
 import { earthLatitudePaint, heatmapInk } from './earth-palette.js';
@@ -23,7 +24,7 @@ export function heatmapPose(position) {
 // The longitude arcs unfurl into the curved outline of the Equal Earth projection.
 export function createEarthHeatmap(baseMap, geography) {
   const continentMap = createContinentMap();
-  const assets = `${import.meta.env.BASE_URL}visitors/`;
+  const assets = `${assetBase}visitors/`;
   const density = new TextureLoader().load(`${assets}meteorite-heatmap.png`, texture => {
     texture.wrapS = RepeatWrapping;
     texture.needsUpdate = true;

@@ -3,6 +3,7 @@ export const scrollRate = .00075;
 export const passageSpan = 6.5;
 export const passageEnd = .54 * passageSpan;
 export const passageRest = .20 * passageSpan;
+export const passageEntryProgress = 1;
 export const archivePush = 1.25;
 export const archiveSlide = 1.34;
 export const archiveArrival = 2.16;

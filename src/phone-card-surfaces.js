@@ -1,4 +1,6 @@
-import { Float32BufferAttribute, Vector3 } from 'three';
+import { BufferAttribute, BufferGeometry, Float32BufferAttribute, Vector3 } from 'three';
+
+const verticalAxis = new Vector3(0,1,0);
 
 // The GLB stores the blue ribbon faces in one mesh. Group welded vertices
 // into its original panels while keeping both the geometry and outline intact.
@@ -63,5 +65,56 @@ export function mapArchivePanels(mesh) {
     });
   });
   geometry.setAttribute('archiveUv',new Float32BufferAttribute(uv,2));
+  return {axis,panels,slotByVertex};
+}
+
+export function arrangeArchivePanels(mesh, source, placements, axis, widthScale) {
+  const original = mesh.geometry;
+  const geometry = new BufferGeometry();
+  const attributes = Object.entries(original.attributes);
+  const vertexCount = placements.reduce((count,{panel})=>count+source.panels[panel].vertices.length,0);
+  for (const [name,attribute] of attributes) {
+    const values = new attribute.array.constructor(vertexCount*attribute.itemSize);
+    geometry.setAttribute(name,new BufferAttribute(values,attribute.itemSize,attribute.normalized));
+  }
+
+  const indices = [];
+  const slotByVertex = new Int16Array(vertexCount);
+  const destinationByVertex = new Int32Array(original.getAttribute('position').count);
+  const point = new Vector3();
+  const normal = new Vector3();
+  const position = geometry.getAttribute('position');
+  const normals = geometry.getAttribute('normal');
+  const uv = geometry.getAttribute('archiveUv');
+  let destination = 0;
+  const panels = placements.map(({panel,angle,target},slot)=>{
+    const {vertices,center} = source.panels[panel];
+    const arrangedVertices = vertices.map(vertex=>{
+      const index = destination++;
+      for (const [name,attribute] of attributes) geometry.getAttribute(name).copyAt(index,attribute,vertex);
+      point.fromBufferAttribute(position,index).sub(axis);
+      const relative = Math.atan2(point.z,point.x)-angle;
+      const offset = Math.atan2(Math.sin(relative),Math.cos(relative));
+      const rotation = angle-target+offset*(1-widthScale);
+      point.applyAxisAngle(verticalAxis,rotation).add(axis);
+      position.setXYZ(index,point.x,point.y,point.z);
+      if (normals) {
+        normal.fromBufferAttribute(normals,index).applyAxisAngle(verticalAxis,rotation);
+        normals.setXYZ(index,normal.x,normal.y,normal.z);
+      }
+      uv.setX(index,(uv.getX(index)*source.panels.length-panel+slot)/placements.length);
+      destinationByVertex[vertex] = index;
+      slotByVertex[index] = slot;
+      return index;
+    });
+    for (const index of original.index.array) {
+      if (source.slotByVertex[index] === panel) indices.push(destinationByVertex[index]);
+    }
+    const arrangedCenter = center.clone().sub(axis).applyAxisAngle(verticalAxis,angle-target).add(axis);
+    return {vertices:arrangedVertices,center:arrangedCenter};
+  });
+  geometry.setIndex(indices);
+  geometry.computeBoundingBox();
+  mesh.geometry = geometry;
   return {panels,slotByVertex};
 }

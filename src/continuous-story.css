@@ -1,0 +1,27 @@
+body.body {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+html:has(body.visitors-atlas-open, body.specimen-archive-lock) {
+  overflow: hidden;
+}
+
+#visitors-story {
+  min-height: 100vh;
+  padding: 0;
+  overflow: visible;
+  background: var(--dark-blue);
+}
+
+#visitors-stage {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: 100vh;
+  contain: layout paint;
+}
+
+#visitors-stage[inert] {
+  pointer-events: none;
+}

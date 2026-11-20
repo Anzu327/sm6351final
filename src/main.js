@@ -1,11 +1,11 @@
-import './style.css';
 import { paintSky } from './sky.js';
 import { createStage } from './stage.js';
 import { accent, ink, lightBlue, paper } from './palette.js';
 import { archiveArrival, archiveSlide, clamp, ease, mix, passageEnd, passageRest, passageSpan, powerInOut, scrollRate } from './motion.js';
 import { chapterTop, specimenView, startsInPassage, storyAt } from './visitors-timeline.js';
+import { visitorsInView, visitorsRoot, visitorsView } from './visitors-dom.js';
 
-const get = id => document.getElementById(id);
+const get = id => visitorsRoot.getElementById(id);
 const experience = get('experience');
 const canvas = get('stage');
 const sky = get('sky');
@@ -411,6 +411,7 @@ function frame(now) {
   const ticks = 60 * dt;
   const motion = reducedMotion.matches || storyView?.paused ? 0 : 1;
   animationFrame = requestAnimationFrame(frame);
+  if (passageReady && !visitorsInView() && !detailRequested && !detail.open) return;
   if (embedded && !storyView?.visible && !detailRequested && !detail.open) return;
   if (!detailRequested && !detail.open && focus === 0) {
     if (embedded && storyView) {
@@ -465,7 +466,7 @@ function showFallback(message) {
   canvas.hidden = true;
   leaders.hidden = true;
   status.textContent = message;
-  document.body.classList.add('no-model');
+  visitorsView.classList.add('no-model');
   experience.classList.add('fallback');
   if (scrollCue) scrollCue.disabled = true;
   target = buffered = progress = 0;
@@ -493,7 +494,7 @@ function openInitialArchive() {
   syncArchive(true);
 }
 
-createStage(canvas, sky, embedded).then(result => {
+createStage(canvas, sky, embedded, startsInPassage).then(result => {
   stage = result;
   resize();
   ready = true;

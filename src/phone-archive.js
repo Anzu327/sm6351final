@@ -1,5 +1,5 @@
 import { Raycaster, Sphere, Vector2 } from 'three';
-import { mapArchivePanels } from './phone-card-surfaces.js';
+import { arrangeArchivePanels, mapArchivePanels } from './phone-card-surfaces.js';
 
 const hero = document.querySelector('.hero');
 const section = document.querySelector('.scene-phone');
@@ -66,7 +66,7 @@ function paintTile(slot, source) {
   ctx.drawImage(source,x+(tileWidth-w)/2,(tileHeight-h)/2,w,h);
 }
 function paintPosters() {
-  mapping.panels.forEach((_,i)=>paintTile(i,clips[i%clips.length].poster));
+  clips.forEach((clip,i)=>paintTile(i,clip.poster));
   texture.needsUpdate = true;
 }
 
@@ -79,17 +79,32 @@ function attach() {
   });
   mesh = faces.sort((a,b)=>b.geometry.index.count-a.geometry.index.count)[0];
   if (!mesh) return;
-  mapping = mapArchivePanels(mesh);
-  if (!mapping.panels.length) return;
+  const source = mapArchivePanels(mesh);
+  if (!source.panels.length) return;
+  const {axis,panels:sourcePanels} = source;
+  const angleOf = ({center})=>Math.atan2(center.z-axis.z,center.x-axis.x);
+  const startAngle = angleOf(sourcePanels[0]);
+  const placements = clips.map((_,slot)=>{
+    const panel = slot%sourcePanels.length;
+    return {panel,angle:angleOf(sourcePanels[panel]),target:startAngle+2*Math.PI*slot/clips.length};
+  });
+  const widthScale = Math.min(1,sourcePanels.length/clips.length);
+  mapping = arrangeArchivePanels(mesh,source,placements,axis,widthScale);
   surfaces = [archiveSurface(mesh, mapping.panels)];
   const outline = faces.find(face=>face.material.name === 'Outline');
   if (outline) {
-    const outlinePanels = mapArchivePanels(outline).panels;
-    if (outlinePanels.length === mapping.panels.length) {
+    const outlineSource = mapArchivePanels(outline);
+    if (outlineSource.panels.length === sourcePanels.length) {
       // Draco gives each material its own vertex ordering. Pair by local center.
-      const ordered = mapping.panels.map(({center})=>outlinePanels.reduce((nearest, panel)=>
-        center.distanceToSquared(panel.center) < center.distanceToSquared(nearest.center) ? panel : nearest));
-      surfaces.push(archiveSurface(outline, ordered));
+      const outlinePlacements = placements.map(placement=>{
+        const center = sourcePanels[placement.panel].center;
+        const panel = outlineSource.panels.reduce((nearest,candidate,index)=>
+          center.distanceToSquared(candidate.center) < center.distanceToSquared(outlineSource.panels[nearest].center)
+            ? index : nearest,0);
+        return {...placement,panel};
+      });
+      const arranged = arrangeArchivePanels(outline,outlineSource,outlinePlacements,axis,widthScale);
+      surfaces.push(archiveSurface(outline,arranged.panels));
     }
   }
   panelScales = mapping.panels.map(()=>({scale:1, from:1, start:0}));
@@ -197,7 +212,7 @@ function play(slot) {
   stop();
   selected = slot;
   scene.ring.userData.archivePaused = true;
-  const clip = clips[slot%clips.length];
+  const clip = clips[slot];
   panel.querySelector('.phone-archive-kind').textContent = clip.kind;
   panel.querySelector('h2').textContent = clip.title;
   panel.querySelector('.phone-archive-description').replaceChildren(
