@@ -1,4 +1,5 @@
-import { clamp, ease, mix, passageSpan, scrollRate } from './motion.js';
+import { clamp, ease, mix, passageEntryProgress, passageSpan, scrollRate } from './motion.js';
+import { storySection, visitorsRoot } from './visitors-dom.js';
 
 // The legacy renderer still reads its original story coordinates. Only the stone
 // interval gets extra space so the existing passage can play at its own pace.
@@ -10,7 +11,7 @@ const stone = {
 const finalRingEntry = .42 * passageSpan;
 const finalRingExit = .52 * passageSpan;
 const chapterStops = [0, stone.display, 2.50, 3.98, 5.32];
-export const startsInPassage = new URLSearchParams(window.location.search).get('entry') === 'passage';
+export const startsInPassage = Boolean(storySection) || new URLSearchParams(window.location.search).get('entry') === 'passage';
 
 function timeline() {
   const height = window.innerHeight;
@@ -42,10 +43,12 @@ function mapTimeline(value, from, to) {
 }
 
 // The opening leads into the tunnel at its first fully revealed frame.
-const passageEntry = stone.display + (stone.system - stone.display) / finalRingExit;
+const passageEntry = mix(stone.display, stone.system, passageEntryProgress / finalRingExit);
 const entryOffset = () => startsInPassage ? mapTimeline(passageEntry, 0, 1) : 0;
-export const storyAt = pixels => mapTimeline(pixels + entryOffset(), 1, 0);
-export const storyTop = position => Math.max(0, mapTimeline(position, 0, 1) - entryOffset());
+const sectionTop = () => storySection ? scrollY + storySection.getBoundingClientRect().top : 0;
+const localTop = position => Math.max(0, mapTimeline(position, 0, 1) - entryOffset());
+export const storyAt = pixels => mapTimeline(Math.max(0, pixels - sectionTop()) + entryOffset(), 1, 0);
+export const storyTop = position => sectionTop() + localTop(position);
 export const chapterTop = chapter => storyTop(chapterStops[chapter]);
 
 export function specimenView(position, paused) {
@@ -65,5 +68,6 @@ export function specimenView(position, paused) {
 }
 
 export function resizeStory() {
-  document.getElementById('scroll-story').style.height = `${storyTop(chapterStops.at(-1)) + innerHeight}px`;
+  const section = storySection ?? visitorsRoot.getElementById('scroll-story');
+  section.style.height = `${localTop(chapterStops.at(-1)) + innerHeight}px`;
 }

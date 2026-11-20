@@ -3,12 +3,12 @@
 @font-face{font-family:Display;src:url(/visitors/display.ttf) format("truetype");font-display:swap}* {
   box-sizing: border-box;
 }
-html {
+:host, html {
   background: var(--warm-paper);
   color: var(--blue-ink);
   --hover-ink: var(--blue-accent);
 }
-body {
+.visitors-view {
   margin: 0;
   font-family:
     Arial,
@@ -113,24 +113,6 @@ a {
   gap: 24px;
   align-items: center;
 }
-.explore-steps {
-  display: flex;
-  gap: 25px;
-}
-.explore-steps button {
-  font-size: 9px;
-  letter-spacing: 1px;
-  opacity: .55;
-  padding: 8px 0;
-  border-bottom: 1px solid transparent;
-}
-.explore-steps button span {
-  padding-left: 6px;
-}
-.explore-steps [aria-pressed=true] {
-  opacity: 1;
-  border-color: currentColor;
-}
 .layer-tabs {
   display: flex;
   gap: 18px;
@@ -192,19 +174,10 @@ a {
   background: #fceecd55;
   box-shadow: 0 0 0 5px #fceecd22;
 }
-.hotspot small {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
 .subtle span {
   width: 18px;
   height: 18px;
   font-size: 13px;
-}
-.subtle small {
-  font-size: 7px;
 }
 #inspector {
   position: fixed;
@@ -570,15 +543,6 @@ summary {
     left: 7vw;
     bottom: 15vh;
   }
-  .explore-steps {
-    gap: 17px;
-  }
-  .explore-steps button {
-    font-size: 7px;
-  }
-  .hotspot small {
-    font-size: 7px;
-  }
   #explore-note {
     right: 7vw;
     bottom: 28vh;
@@ -641,7 +605,7 @@ summary {
   #about-dialog {
     padding: 25px;
   }
-  body:is([data-chapter="2"], [data-chapter="3"]) #inspector {
+  .visitors-view:is([data-chapter="2"], [data-chapter="3"]) #inspector {
     background: #10195fed;
   }
   .source-numbers {
@@ -677,66 +641,44 @@ summary {
 .hotspot {
   transition: opacity .3s ease;
 }
-/* Only the new system labels; existing layout and type styles are retained. */
-#planet-labels{position:fixed;inset:0;z-index:4;pointer-events:none}
-.planet-name{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;font-size:9px;letter-spacing:1.1px;font-weight:600;padding:5px 8px;white-space:nowrap;text-shadow:0 0 5px var(--blue-ink)}
-.transitioning #planet-labels{opacity:0!important;pointer-events:none}
-.transitioning #planet-labels button{pointer-events:none}
-@media(max-width:760px){.planet-name{font-size:8px;letter-spacing:.7px;padding:5px}}
-
-
 /* The specimen layer supplies its own annotations. */
-body.specimen-visible .scene-caption { visibility: hidden; }
+.visitors-view.specimen-visible .scene-caption { visibility: hidden; }
 #world.specimen-covered { pointer-events: none; }
 
-body[data-chapter="2"] .scene-caption {
-  top: 17vh;
-  bottom: auto;
-}
-body[data-chapter="2"] :is(.scene-caption, .scene-tools, #planet-labels, #inspector),
-body:is([data-chapter="3"], [data-chapter="4"]) :is(.scene-caption, .scene-tools, #inspector, #heatmap-legend) {
+.visitors-view[data-chapter="2"] #inspector,
+.visitors-view:is([data-chapter="3"], [data-chapter="4"]) :is(.scene-caption, .scene-tools, #inspector, #heatmap-legend) {
   color: var(--warm-paper);
   text-shadow: 0 1px 2px var(--blue-ink), 0 0 1px var(--blue-ink);
 }
-body:is([data-chapter="2"], [data-chapter="3"]) .scene-tools button {
+.visitors-view[data-chapter="3"] .scene-tools button {
   text-shadow: inherit;
 }
-body:is([data-chapter="2"], [data-chapter="3"]) #facts > div {
+.visitors-view:is([data-chapter="2"], [data-chapter="3"]) #facts > div {
   border-color: #fceecd55;
 }
-body:is([data-chapter="1"], [data-chapter="2"]) .explore-steps button {
-  opacity: .8;
-}
-body:is([data-chapter="1"], [data-chapter="2"]) .explore-steps [aria-pressed=true] {
-  opacity: 1;
-}
-body:is(.specimen-visible, [data-chapter="2"], [data-chapter="3"]) {
+.visitors-view:is(.specimen-visible, [data-chapter="2"], [data-chapter="3"]) {
   --hover-ink: var(--blue-light);
 }
 #atlas, #explore-note, #about-dialog {
   --hover-ink: var(--blue-accent);
 }
-body:is(.specimen-visible, [data-chapter="2"], [data-chapter="3"]) :focus-visible {
+.visitors-view:is(.specimen-visible, [data-chapter="2"], [data-chapter="3"]) :focus-visible {
   outline-color: currentColor;
 }
-body[data-chapter="2"] .hotspot { color: var(--blue-ink); }
-body[data-chapter="2"] .hotspot span {
+.visitors-view[data-chapter="2"] .hotspot { color: var(--blue-ink); }
+.visitors-view[data-chapter="2"] .hotspot span {
   background: #fceecdeb;
   border-color: var(--blue-rule);
 }
-body[data-chapter="2"] .hotspot small {
-  color: var(--warm-paper);
-  text-shadow: 0 1px 2px var(--blue-ink), 0 0 1px var(--blue-ink);
-}
-body[data-chapter="2"] #explore-note {
+.visitors-view[data-chapter="2"] #explore-note {
   color: var(--blue-ink);
   background: #fceecdf5;
   border-color: var(--blue-rule);
   padding: 9px 13px;
 }
 
-body[data-chapter="2"] #world { cursor: grab; }
-body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
+.visitors-view[data-chapter="2"] #world { cursor: grab; }
+.visitors-view[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
 
 #arrival-note {
   margin: 14px 0 16px;
@@ -750,15 +692,15 @@ body[data-chapter="2"] #world[data-dragging] { cursor: grabbing; }
   font-size: 9px;
   letter-spacing: .4px;
 }
-body[data-chapter="3"] .scene-caption { bottom: calc(12vh + 185px); }
-body[data-chapter="3"] .scene-tools .action { border-color: var(--blue-light); }
-body[data-chapter="3"] .layer-tabs button:not([aria-pressed=true]) { opacity: .8; }
-body[data-chapter="4"] .scene-caption {
+.visitors-view[data-chapter="3"] .scene-caption { bottom: calc(12vh + 185px); }
+.visitors-view[data-chapter="3"] .scene-tools .action { border-color: var(--blue-light); }
+.visitors-view[data-chapter="3"] .layer-tabs button:not([aria-pressed=true]) { opacity: .8; }
+.visitors-view[data-chapter="4"] .scene-caption {
   top: max(64px, 8.5vh);
   bottom: auto;
   max-width: none;
 }
-body[data-chapter="4"] #scene-title { margin-top: 6px; }
+.visitors-view[data-chapter="4"] #scene-title { margin-top: 6px; }
 
 #heatmap-legend {
   position: fixed;
@@ -945,8 +887,8 @@ body[data-chapter="4"] #scene-title { margin-top: 6px; }
 .heatmap-ticks span:nth-child(4) { left: 75%; transform: translateX(-50%); }
 .heatmap-ticks span:last-child { right: 0; }
 @media (max-width:760px) {
-  body[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }
-  body[data-chapter="4"] .scene-caption { left: 7vw; }
+  .visitors-view[data-chapter="3"] .scene-caption { bottom: calc(15vh + 185px); }
+  .visitors-view[data-chapter="4"] .scene-caption { left: 7vw; }
   #heatmap-legend { right: 7vw; width: min(420px, 86vw); bottom: max(56px, 11vh); font-size: 13px; }
   #continent-controls {
     top: max(123px, calc(8.5vh + 59px));

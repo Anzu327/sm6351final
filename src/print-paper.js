@@ -1,7 +1,8 @@
+import { assetBase } from './asset-base.js';
 import { RepeatWrapping, TextureLoader } from 'three';
 
 let paper;
-export function loadPrintPaper(assetRoot = import.meta.env.BASE_URL) {
+export function loadPrintPaper(assetRoot = assetBase) {
   paper ??= new TextureLoader().loadAsync(
     assetRoot + 'visitors/solar/paper-grain.webp',
   ).then(texture => {

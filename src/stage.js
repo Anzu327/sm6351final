@@ -1,3 +1,4 @@
+import { assetBase } from './asset-base.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { paintSky } from './sky.js';
@@ -6,7 +7,7 @@ import { printSpecimenLayer } from './specimen-print.js';
 import { specimenCurtain } from './specimen-curtain.js';
 
 import { createRingLight, illustrate } from './illustration.js';
-import { clamp, ease, mix, passagePose, passageSpan } from './motion.js';
+import { clamp, ease, mix, passageEntryProgress, passagePose, passageSpan } from './motion.js';
 import { loadSpecimen, poseSpecimenCamera } from './specimen.js';
 
 const compositeShader = {
@@ -138,7 +139,7 @@ const compositeShader = {
   `,
 };
 
-export async function createStage(canvas, fallbackSky, embedded = false) {
+export async function createStage(canvas, fallbackSky, embedded = false, centerPassageEntry = false) {
   const context = canvas.getContext('webgl2', {
     alpha: embedded,
     antialias: false,
@@ -203,7 +204,7 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
   const loader = new GLTFLoader();
   const [specimen, ringAsset] = await Promise.all([
     loadSpecimen(renderer, embedded),
-    loader.loadAsync(import.meta.env.BASE_URL + 'models/igloo-transition-rings.glb'),
+    loader.loadAsync(assetBase + 'models/igloo-transition-rings.glb'),
   ]);
   const { rock } = specimen;
   specimenScene.add(rock, specimen.lines);
@@ -306,9 +307,16 @@ export async function createStage(canvas, fallbackSky, embedded = false) {
   function posePassage(scroll, pointer, seconds, motion) {
     const { cameraY, cameraZ, lookY, lookZ, roll, level, fov, pulse } = passagePose(scroll);
     const progress = scroll / passageSpan;
+    // Frame the full opening ring before easing back into the tunnel camera.
+    const framing = centerPassageEntry ? 1 - ease(passageEntryProgress, 2, scroll) : 0;
     passageCamera.fov = fov;
-    passageCamera.zoom = Math.min(1, aspect * 1.5);
-    passageCamera.updateProjectionMatrix();
+    passageCamera.zoom = Math.min(1, aspect * mix(1.5, 1, framing));
+    if (centerPassageEntry) {
+      const lift = height * .115 * passageCamera.zoom * framing;
+      passageCamera.setViewOffset(width, height, 0, lift, width, height);
+    } else {
+      passageCamera.updateProjectionMatrix();
+    }
     passageCamera.position.set(pointer.x * .026 * motion, cameraY, cameraZ);
     passageCamera.up.set(-Math.sin(roll), 0, -Math.cos(roll)).lerp(up, level).normalize();
     viewTarget.set(0, lookY, lookZ);

@@ -11,7 +11,7 @@
 
 ## 开发
 
-运行 `npm ci` 和 `npm run dev`，访问 `/sleep-well/index.html` 从头查看整合版。开场页面从 `sleep-well/opening.html` 构建，公开素材及原滚动脚本位于 `public/sleep-well/`。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
+运行 `npm ci` 和 `npm run dev`，访问 `/sleep-well/index.html` 从头查看整合版。整合页从 `sleep-well/index.html` 构建，公开素材及原滚动脚本位于 `public/sleep-well/`。修改后用 `npm run build` 更新 `dist/`，也可用 `npm run preview` 查看构建。收到的 `visitors-illustrated-v3(1).html` 是原始附件。
 
 地球章节采用新的 MetBull 2024-10 公开镜像：82,854 条陨石目录记录，其中 50,951 条有可用坐标，31,903 条无坐标仍可搜索。包括 76,372 条 Official、6,385 条 Provisional、97 条 Relict*；伪陨石、陨石坑等 771 条原始档案不参与统计。选中记录可查看命名状态。数据来源、固定版本和清理规则见 [目录来源说明](src/data/README.md)。
 
@@ -33,6 +33,7 @@
 
 - Kamensk-Uralsky 行车记录仪视频由 Aleksandr Ivanov 拍摄，本地版本调整了尺寸并移除了音轨。[Wikimedia Commons 原片](https://commons.wikimedia.org/wiki/File:Взрыв_метеорита_над_Челябинском_15_02_2013_avi-iCawTYPtehk.ogv) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)
 - Yekaterinburg 固定监控视频的本地版本调整了尺寸并移除了音轨。[Wikimedia Commons 原片与复用说明](https://commons.wikimedia.org/wiki/File:Chelyabinsk_meteor_security_camera_footage,_Yekaterinburg.webm)
+- 手机环新增的七段短片裁自用户提供的《卫报》新闻合辑，保留画幅和原音。播放器默认静音。各镜头的原始拍摄者及复用许可尚未核实。[《卫报》报道](https://www.theguardian.com/world/video/2013/feb/15/meteor-shards-russia-explosion-video)
 
 滚轮换算、两级缓动、展品的垂直镜头路径、转场视差、穿环镜头关键帧和三次畸变节点依据 [Igloo](https://www.igloo.inc/) 的公开前端代码重建。开场采用占位空景，之后衔接一个本地展品和三道圆环。陨石周围的线网依据原站的 18 点、每点最多 3 条连接及 0.35 秒伸缩逻辑，表面采用原站的 UV 轨迹注入和双缓冲扩散机制。遮罩、扰动和着色按本地模型与插画风格重建。
 

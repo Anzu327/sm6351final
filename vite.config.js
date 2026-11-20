@@ -3,6 +3,18 @@ import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 
 const catalogue = new URL('./src/data/meteorite-catalogue.json', import.meta.url);
+const visitorsView = new URL('./src/visitors-view.html', import.meta.url);
+const embedVisitorsView = {
+  name: 'embed-visitors-view',
+  transformIndexHtml: {
+    order: 'pre',
+    async handler(html) {
+      const marker = '<!-- visitors-view -->';
+      if (!html.includes(marker)) return;
+      return html.replace(marker, await readFile(visitorsView, 'utf8'));
+    },
+  },
+};
 const classCountsModule = '\0virtual:origins-class-counts';
 const originsClassCounts = {
   name: 'origins-class-counts',
@@ -26,13 +38,13 @@ const originsClassCounts = {
 };
 
 export default defineConfig({
-  plugins: [originsClassCounts],
+  plugins: [originsClassCounts, embedVisitorsView],
   build: {
     rollupOptions: {
       input: {
         specimen: fileURLToPath(new URL('./index.html', import.meta.url)),
         visitors: fileURLToPath(new URL('./visitors.html', import.meta.url)),
-        opening: fileURLToPath(new URL('./sleep-well/opening.html', import.meta.url)),
+        opening: fileURLToPath(new URL('./sleep-well/index.html', import.meta.url)),
       },
     },
   },

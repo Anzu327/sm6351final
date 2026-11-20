@@ -136,15 +136,15 @@
 .archive-source a { text-underline-offset: .32em; }
 .fallback .specimen, .fallback .reading, .fallback #hit-target { display: none; }
 .fallback .explore { top: auto; bottom: 19%; left: var(--edge); }
-body.no-model #detail-model { display: none; }
-body.no-model #detail { background: var(--cobalt); }
-body.no-model #detail-scroll { height: 100%; width: 100%; margin: 0; padding-left: var(--edge); }
+:is(body, .visitors-view).no-model #detail-model { display: none; }
+:is(body, .visitors-view).no-model #detail { background: var(--cobalt); }
+:is(body, .visitors-view).no-model #detail-scroll { height: 100%; width: 100%; margin: 0; padding-left: var(--edge); }
 @media (max-width: 720px) {
   .reading { display: none; }
   #detail { background: linear-gradient(#10195f20 43%, var(--cobalt) 49%); }
   #detail-model { inset: 0 0 51% 0; }
   #detail-scroll { height: 51%; width: 100%; margin-top: 49dvh; padding: 28px var(--edge) 56px; }
-  body.no-model #detail-scroll { margin-top: 0; padding-top: 100px; }
+  :is(body, .visitors-view).no-model #detail-scroll { margin-top: 0; padding-top: 100px; }
 }
 @media (prefers-reduced-motion: reduce) { #detail { transition-duration: 0s; } }
 
@@ -165,7 +165,7 @@ body.no-model #detail-scroll { height: 100%; width: 100%; margin: 0; padding-lef
   color: var(--accent);
   border-color: var(--accent);
 }
-body:has(#experience[data-story-specimen]) #detail-model span {
+:is(body, .visitors-view):has(#experience[data-story-specimen]) #detail-model span {
   color: var(--warm-paper);
 }
 #experience[data-story-specimen]:not(.fallback) #sky { visibility: hidden; }

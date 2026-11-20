@@ -1,3 +1,4 @@
+import { assetBase } from './asset-base.js';
 import { cobalt, lightBlue, paper } from './palette.js';
 import {
   BackSide, Color, CylinderGeometry, DoubleSide, Euler,
@@ -291,7 +292,7 @@ const visualFiles = [
   'asteroids', 'orbit-noise', 'solar-glow', 'comet-noise', 'ember', 'earth-flare', 'earth-water-normal',
 ];
 
-const solarAssets = import.meta.env.BASE_URL + 'visitors/solar/';
+const solarAssets = assetBase + 'visitors/solar/';
 
 async function loadSolarArt() {
   const textures = new TextureLoader();

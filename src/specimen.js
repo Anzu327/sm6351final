@@ -1,3 +1,4 @@
+import { assetBase } from './asset-base.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { illustrate } from './illustration.js';
@@ -26,7 +27,7 @@ export function poseSpecimenCamera(camera, width, aspect, scroll, focus, velocit
   return { center, dock };
 }
 
-export async function loadSpecimen(renderer, print, assetRoot = import.meta.env.BASE_URL) {
+export async function loadSpecimen(renderer, print, assetRoot = assetBase) {
   const loader = new GLTFLoader();
   const textureLoader = new THREE.TextureLoader();
   const [{ scene: model }, flow, facets] = await Promise.all([
