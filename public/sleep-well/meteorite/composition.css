@@ -13,6 +13,8 @@
 
 .composition {
   --annotation-ink: #fff0c9;
+  --plot-text: clamp(16px, 1.35vw, 22px);
+  --plot-tick: clamp(15px, 1.18vw, 19px);
   display: grid;
   grid-template-columns: minmax(0, 27fr) minmax(0, 73fr);
   column-gap: clamp(16px, 3.5vw, 76px);
@@ -60,28 +62,28 @@
   box-sizing: border-box;
   min-height: 100svh;
   align-content: center;
-  padding-block: clamp(3.25rem, 8svh, 5rem);
+  padding-block: clamp(44px, 8svh, 88px);
 }
 .composition__scene {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 16px clamp(12px, 2vw, 24px);
+  gap: 22px clamp(12px, 2vw, 24px);
   align-items: baseline;
 }
 .composition__step-number {
   color: var(--annotation-ink);
-  font: 500 clamp(13px, 1.25vw, 21px)/1 monospace;
+  font: 500 clamp(15px, 1.4vw, 22px)/1 monospace;
 }
 .composition__intro h3 {
   margin: 0;
   color: #f1eeff;
-  font: 400 clamp(32px, 4.55vw, 86px)/1.02 var(--serif, Editorial, Georgia, serif);
+  font: 400 clamp(34px, 4.55vw, 86px)/1.06 var(--serif, Editorial, Georgia, serif);
 }
 .composition__intro p {
   max-width: 56ch;
   margin: 12px 0 0;
   color: #cfdaff;
-  font: 400 clamp(16px, 1.65vw, 27px)/1.48 system-ui, sans-serif;
+  font: 400 clamp(18px, 1.65vw, 27px)/1.5 system-ui, sans-serif;
 }
 .composition__model {
   position: absolute;
@@ -99,29 +101,33 @@
   grid-column: 2;
   min-width: 0;
   display: grid;
-  gap: 16px;
+  gap: clamp(16px, 2vw, 28px);
+}
+.composition__charts:not(.composition__charts--stacked) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 355px), 1fr));
 }
 .composition__chart {
   min-width: 0;
   margin: 0;
-  padding: clamp(8px, 1.3vw, 20px);
+  padding: clamp(12px, 1.5vw, 24px);
   border-top: 1px solid #9cb8ff8a;
   background: #10195b60;
 }
 .composition__chart figcaption {
+  margin-bottom: 12px;
   color: #e6ebff;
-  font: 500 clamp(17px, 1.9vw, 30px)/1.2 system-ui, sans-serif;
+  font: 600 clamp(20px, 1.9vw, 32px)/1.25 system-ui, sans-serif;
 }
-@media (min-width: 980px) {
-  .composition__step:last-child {
-    padding-block-start: calc(clamp(3.25rem, 8svh, 5rem) + 5rem);
-  }
-  .composition__charts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .composition__chart:is(:only-child, [data-topic="earth"]) {
-    grid-column: 1 / -1;
-  }
+.composition__mineral-plots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  align-items: start;
+  gap: 20px clamp(16px, 2.5vw, 32px);
+}
+.composition__mineral-plots h4 {
+  margin: 0 0 12px;
+  color: #d3dfff;
+  font: 600 clamp(18px, 1.5vw, 24px)/1.3 system-ui, sans-serif;
 }
 
 .composition__graphic {
@@ -131,43 +137,118 @@
 }
 .composition__graphic text {
   fill: #d3dfff;
-  font: clamp(13px, 1.23vw, 20px) system-ui, sans-serif;
+  font: 450 var(--plot-text)/1.25 system-ui, sans-serif;
 }
-.composition__graphic .chart-axis text { fill: #b9cbf7; font-size: clamp(12px, 1.05vw, 18px); }
+.composition__graphic .chart-axis text {
+  fill: #cfdaff;
+  font-size: var(--plot-tick);
+  font-variant-numeric: tabular-nums;
+}
 .composition__graphic .chart-axis { color: #b9cbf7; }
 .composition__graphic .chart-axis :is(.domain, .tick line:not(.chart-grid)) { stroke: #9cb4e9; }
 .composition__graphic .chart-grid { stroke: #abc1ff40; stroke-dasharray: 2 3; }
 .composition__graphic .chart-label { font-weight: 500; }
-.composition__graphic :is(.chart-value, .chart-bar-value) { fill: var(--annotation-ink); font-weight: 650; }
-.composition__graphic .chart-bar-value { font-size: clamp(11px, 1vw, 17px); }
+.composition__graphic :is(.chart-value, .chart-bar-value) {
+  fill: var(--annotation-ink);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
 .composition__graphic .chart-area { fill: #789efa55; stroke: #a9bdff; stroke-width: 1.5; }
 .composition__graphic .chart-reference { stroke: #fff0c9; opacity: .72; stroke-dasharray: 4 4; }
 .composition__graphic :is(.chart-line, .chart-range) { fill: none; stroke: var(--annotation-ink); stroke-width: 2; }
 .composition__graphic .chart-track { stroke: #abc1ff55; }
 .composition__graphic .chart-interval { fill: #96b3ff; }
 .composition__graphic .chart-dot { fill: var(--annotation-ink); }
-.composition__graphic .chart-scatter { fill: #ffe9ab75; stroke: var(--annotation-ink); stroke-width: 1; }
+.grain-heatmap {
+  text-align: left;
+  color: #e6ebff;
+  font-family: system-ui, sans-serif;
+}
+.grain-heatmap figcaption { margin-bottom: 6px; text-align: left; }
+.grain-heatmap__guide {
+  margin: 0 0 14px;
+  color: #cfdaff;
+  font-size: clamp(13px, 1.15vw, 16px);
+  line-height: 1.5;
+}
+.grain-heatmap table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px 3px;
+  table-layout: fixed;
+  font-size: clamp(13px, 1.15vw, 16px);
+  font-variant-numeric: tabular-nums;
+}
+.grain-heatmap th,
+.grain-heatmap td { padding: 0; }
+.grain-heatmap__pair-column { width: 19%; }
+.grain-heatmap th:first-child {
+  padding-inline: 2px;
+  text-align: left;
+  font-weight: 550;
+}
+.grain-heatmap button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(4px, 1vw, 10px);
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #b4c7ff59;
+  border-radius: 5px;
+  background: #131e55;
+  color: #e6ebff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.grain-heatmap button span { color: #b9caff; }
+.grain-heatmap button:hover,
+.grain-heatmap [aria-sort] button { border-color: #b4c7ff; background: #283b79; }
+.grain-heatmap button:focus-visible { outline: 2px solid #fff0c9; outline-offset: 1px; }
+.grain-heatmap__cell {
+  display: block;
+  padding: 4px 2px;
+  border: 1px solid #c2d2ff24;
+  border-radius: 4px;
+  color: #f5f3ff;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.grain-heatmap__cell--light { color: #131831; }
+.grain-heatmap tfoot :is(th, td) { padding-top: 9px; vertical-align: top; }
+.grain-heatmap__ramp { height: 7px; border: 1px solid #c2d2ff40; border-radius: 2px; }
+.grain-heatmap__limits {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 3px;
+  padding-inline: 3px;
+  color: #d2dcfa;
+  font-size: clamp(11px, 1vw, 13px);
+}
+.grain-heatmap__source {
+  display: inline-block;
+  margin: 12px 4px 0;
+  color: #cfdaff;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 
 @media (max-width: 720px) {
   .composition {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    grid-template-columns: clamp(40px, 14vw, 88px) minmax(0, 1fr);
     gap: 12px;
     width: calc(100% - 20px);
   }
   .composition__scene {
-    gap: 14px 8px;
+    gap: 16px 8px;
   }
   .composition__charts { grid-column: 1 / -1; }
 }
 @media (max-width: 440px) {
-  .composition {
-    grid-template-columns: clamp(50px, 18vw, 78px) minmax(0, 1fr);
-    gap: 10px;
-  }
-  .composition__step-number { font-size: 11px; }
-}
-@media (min-width: 375px) and (max-width: 720px) {
-  .composition__graphic text { font-size: 14px; }
-  .composition__graphic .chart-axis text { font-size: 13px; }
+  .composition { gap: 10px; }
 }

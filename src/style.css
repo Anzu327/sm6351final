@@ -1,5 +1,12 @@
 @import './palette.css';
 
+@font-face {
+  font-family: Editorial;
+  src: url('/sleep-well/files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59d4_editorial-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
 .specimen-page, #experience, #detail {
   color-scheme: light;
   --ink: var(--blue-ink);
@@ -126,7 +133,7 @@
 #detail-scroll { height: 100%; width: 49%; margin-left: auto; overflow-y: auto; overscroll-behavior: contain; padding: clamp(96px, 18vh, 175px) var(--edge) 120px clamp(22px, 3vw, 54px); }
 #detail article { max-width: 530px; }
 .record-number { font: 12px/1.4 var(--mono); opacity: .76; }
-#detail h2 { font: 650 clamp(28px, 4.2vw, 58px)/1.08 system-ui, sans-serif; letter-spacing: -.035em; margin: 0; }
+#detail h2 { font: 400 clamp(28px, 4.2vw, 58px)/1.08 Editorial, Georgia, serif; letter-spacing: -.035em; margin: 0; }
 #detail h3 { font: 650 21px/1.2 system-ui, sans-serif; margin: 34px 0 10px; }
 #detail article > p:not(.record-number) { font: 16px/1.65 system-ui, sans-serif; }
 #detail article .translation { color: var(--blue-light); }

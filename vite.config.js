@@ -4,6 +4,23 @@ import { readFile } from 'node:fs/promises';
 import { meteoriteRegionCounts } from './scripts/meteorite-region-counts.js';
 
 const catalogue = new URL('./src/data/meteorite-catalogue.json', import.meta.url);
+const discoveryCountsModule = '\0virtual:meteorite-discovery-counts';
+const discoveryCounts = {
+  name: 'meteorite-discovery-counts',
+  resolveId(id) {
+    if (id === 'virtual:meteorite-discovery-counts') return discoveryCountsModule;
+  },
+  async load(id) {
+    if (id !== discoveryCountsModule) return;
+    this.addWatchFile(fileURLToPath(catalogue));
+    const { rows } = JSON.parse(await readFile(catalogue, 'utf8'));
+    const counts = { Fell: 0, Found: 0 };
+    for (const [, , , , , status] of rows) {
+      if (Object.hasOwn(counts, status)) counts[status]++;
+    }
+    return `export default ${JSON.stringify(counts)};`;
+  },
+};
 const visitorsPartials = {
   '<!-- visitors-view -->': new URL('./src/visitors-view.html', import.meta.url),
   '<!-- region-chord -->': new URL('./src/region-chord.html', import.meta.url),
@@ -19,27 +36,6 @@ const embedVisitorsView = {
       for (const [marker, content] of replacements) html = html.replace(marker, content);
       return html;
     },
-  },
-};
-const classCountsModule = '\0virtual:origins-class-counts';
-const originsClassCounts = {
-  name: 'origins-class-counts',
-  resolveId(id) {
-    if (id === 'virtual:origins-class-counts') return classCountsModule;
-  },
-  async load(id) {
-    if (id !== classCountsModule) return;
-    this.addWatchFile(fileURLToPath(catalogue));
-    const { rows } = JSON.parse(await readFile(catalogue, 'utf8'));
-    const counts = ['H5', 'L5', 'LL5'].map(name => ({ name, official: 0, fell: 0 }));
-    const byClass = new Map(counts.map(entry => [entry.name, entry]));
-    for (const [, , , , classification, recovery, , , naming] of rows) {
-      const count = byClass.get(classification);
-      if (!count || naming !== 'Official') continue;
-      count.official += 1;
-      if (recovery === 'Fell') count.fell += 1;
-    }
-    return `export default ${JSON.stringify(counts)};`;
   },
 };
 
@@ -62,7 +58,7 @@ const regionCounts = {
 };
 
 export default defineConfig({
-  plugins: [originsClassCounts, regionCounts, embedVisitorsView],
+  plugins: [regionCounts, discoveryCounts, embedVisitorsView],
   build: {
     rollupOptions: {
       input: {
