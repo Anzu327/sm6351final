@@ -97,4 +97,32 @@ export const featuredMeteorites = [
     source: 'https://www.lpi.usra.edu/meteor/?code=604',
     sourceLabel: 'Meteoritical Bulletin',
   },
+  // These selections use the catalogue's own name, location, and classification.
+  { id: '34491', region: 'Asia' },          // Fukang
+
+  { id: '5257', region: 'North America' },  // Canyon Diablo
+  { id: '18782', region: 'North America' }, // Peekskill
+
+  { id: '5015', region: 'South America' },  // Bendegó
+  { id: '45817', region: 'South America' }, // Carancas
+  { id: '45976', region: 'South America' }, // Cali
+  { id: '12025', region: 'South America' }, // Imilac
+  { id: '23162', region: 'South America' }, // Santa Catharina
+
+  { id: '10039', region: 'Europe' },       // Ensisheim
+  { id: '15426', region: 'Europe' },       // Marjalahti
+  { id: '74388', region: 'Europe' },       // Winchcombe
+  { id: '14718', region: 'Europe' },       // Łowicz
+  { id: '12335', region: 'Europe' },       // Knyahinya
+
+  { id: '16898', region: 'Africa' },       // Nakhla
+  { id: '15455', region: 'Africa' },       // Mbale
+  { id: '23884', region: 'Africa' },       // Tatahouine
+  { id: '48915', region: 'Africa' },       // Almahata Sitta
+
+  { id: '11872', region: 'Oceania' },      // Henbury
+  { id: '23897', region: 'Oceania' },      // Tenham
+  { id: '24326', region: 'Oceania' },      // Wolf Creek
+
+  { id: '24355', region: 'Antarctica' },   // Yamato 000593
 ];

@@ -1,74 +1,159 @@
-@font-face {
-  font-family: NM_Regular;
-  src: url('/sleep-well/files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59d1_nm-regularar.woff') format('woff');
-  font-weight: 400;
-  font-display: swap;
-}
 #region-chord {
-  --chord-background: #020e17;
-  --chord-rule: #9db8cb38;
-  --color: #f6ecdf;
-  --chord-body-font: var(--sans, NM_Regular, Arial, sans-serif);
-  --chord-heading-font: var(--serif, Editorial, Georgia, serif);
-  --chord-body-size: clamp(16px, 1.4vw, 22px);
+  --chord-background: #15217d;
+  --chord-text: #e3e6e9;
+  --chord-muted: #b5bac2;
+  --chord-rule: #c5d2ff55;
   position: relative;
   z-index: 40;
+  padding: clamp(28px, 5vw, 70px) clamp(12px, 4vw, 60px);
+  color: var(--chord-text);
+  font: 400 16px/1.4 var(--sans, 'Segoe UI', Arial, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+#region-chord::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--chord-background) url('/visitors/solar/paper-grain.webp') repeat;
+  background-size: 512px auto;
+  background-blend-mode: overlay;
+  pointer-events: none;
+}
+
+#visitors-story + #region-chord-anchor #region-chord {
+  box-shadow: 0 -2px var(--chord-background);
+}
+
+#region-chord-anchor.has-chart-transition {
+  margin-top: calc(-1 * var(--chart-overlap));
+  position: relative;
+  z-index: 41;
+}
+
+.has-chart-transition #region-chord {
   display: grid;
   align-items: center;
   min-height: 100svh;
-  padding: clamp(32px, 7vh, 110px) clamp(16px, 5vw, 110px);
-  background: var(--chord-background);
-  color: var(--color);
-  font: 400 var(--chord-body-size)/1.25 var(--chord-body-font);
-  font-variant-numeric: tabular-nums;
 }
-#visitors-story + #region-chord {
-  /* Cover the subpixel seam between the sticky map canvas and this section. */
-  box-shadow: 0 -2px var(--chord-background);
+
+.has-chart-transition .chord-inner {
+  width: min(100%, 880px, max(320px, calc(100svh - 190px)));
 }
+
+#region-chord.is-bridging {
+  transform: translateY(var(--chart-shift));
+  box-shadow: none;
+}
+
+#region-chord.is-bridging::before {
+  opacity: var(--chart-background-alpha);
+}
+
+.is-bridging :is(.chord-ring, .chord-sectors path) {
+  opacity: var(--chart-ring-alpha);
+}
+
+.is-bridging .chord-edge {
+  opacity: var(--chart-edge-alpha);
+  stroke-dasharray: 1;
+  stroke-dashoffset: var(--chart-edge-offset);
+}
+
+.is-bridging :is(#region-chord-title, .chord-node, .chord-group-label, .chord-center-label, .chord-footer, .chord-details) {
+  opacity: var(--chart-label-alpha);
+}
+
 .chord-inner {
-  width: min(100%, 1400px);
+  width: min(100%, 880px);
   margin-inline: auto;
 }
+
 #region-chord-title {
-  margin: 0;
-  border-bottom: 1px solid var(--chord-rule);
-  padding-bottom: 18px;
+  margin: 0 0 16px;
   color: inherit;
-  font: 400 clamp(36px, 4.7vw, 76px)/1.05 var(--chord-heading-font);
-  letter-spacing: -.025em;
+  font: 500 clamp(24px, 3.2vw, 39px)/1.2 var(--sans, 'Segoe UI', Arial, sans-serif);
 }
-.chord-layout {
-  display: grid;
-  grid-template-columns: minmax(152px, 1fr) minmax(0, min(620px, 64svh)) minmax(152px, 1fr);
-  align-items: center;
-  gap: clamp(16px, 3vw, 56px);
-  padding-block: clamp(14px, 2vh, 32px);
-}
-.chord-layout h3 {
-  margin: 0 0 7px;
-  padding-left: 9px;
-  color: inherit;
-  font: 600 clamp(18px, 1.6vw, 25px)/1.25 var(--chord-body-font);
-}
+
+
 .chord-chart {
   display: block;
   width: 100%;
+  height: auto;
 }
-.chord-ribbon {
-  fill-opacity: .62;
-  stroke: var(--chord-background);
-  stroke-width: .65px;
+
+.chord-ring {
+  fill: none;
+  stroke: var(--chord-rule);
+  stroke-width: 1.15;
 }
-.chord-ribbon:hover {
-  fill-opacity: 1;
+
+.chord-center-label {
+  fill: #858890;
+  font-size: 10px;
+  letter-spacing: 3px;
 }
-.chord-ribbon.muted, .chord-arc.muted {
-  opacity: .14;
+
+.chord-group-label {
+  fill: var(--chord-text);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
 }
-.chord-arc {
+
+.chord-edge {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.chord-edge.muted {
+  stroke-opacity: .075;
+}
+
+.chord-edge.highlighted, .chord-edge:hover {
+  stroke-opacity: .85;
+}
+
+.chord-node {
   cursor: pointer;
 }
+
+.chord-node line {
+  stroke-width: 1.5;
+}
+
+.chord-node text {
+  fill: #c7cdd4;
+  font-size: var(--chord-node-size, 17px);
+  transition: font-size 160ms ease;
+}
+
+.chord-node[aria-pressed='true'] text {
+  font-size: calc(var(--chord-node-size, 17px) * 1.25);
+  font-weight: 700;
+}
+
+.chord-node:focus { outline: none; }
+.chord-node:focus-visible text { text-decoration: underline; }
+
+.chord-node.muted {
+  opacity: .38;
+}
+
+.chord-node.highlighted text, .chord-node:hover text, .chord-node:focus-visible text {
+  fill: #fff;
+}
+
+.chord-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 53px;
+  color: var(--chord-muted);
+}
+
 #region-chord button {
   border: 0;
   color: inherit;
@@ -76,80 +161,91 @@
   font: inherit;
   cursor: pointer;
 }
-#region-chord button:focus-visible {
-  outline: 2px solid #8dc7f2;
-  outline-offset: -2px;
+
+#region-chord :is(button, summary):focus-visible {
+  outline: 2px solid #a8ff1a;
+  outline-offset: 3px;
 }
+
+#region-chord .chord-reset {
+  padding: 8px 10px;
+  color: var(--chord-text);
+}
+
+#region-chord .chord-reset:disabled {
+  visibility: hidden;
+}
+
+.chord-details {
+  border-top: 1px solid var(--chord-rule);
+  padding-top: 0;
+}
+
+.chord-details summary {
+  padding-block: 12px;
+  font: inherit;
+  letter-spacing: normal;
+  cursor: pointer;
+}
+
+.chord-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 4vw, 36px);
+}
+
+.chord-grid h3 {
+  margin: 0 0 4px;
+  font-size: 1em;
+}
+
 #region-chord .chord-options button {
   display: flex;
-  width: 100%;
   align-items: center;
-  gap: 8px;
-  min-height: 46px;
+  gap: 7px;
+  width: 100%;
+  min-height: 40px;
+  padding: 5px 4px;
   border-bottom: 1px solid var(--chord-rule);
-  padding: 5px 9px;
   text-align: left;
 }
+
 .chord-options button::before {
-  content: "";
-  flex: none;
-  width: 8px;
-  height: 8px;
+  content: '';
+  flex: 0 0 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--chord-color);
 }
-#region-chord .chord-options button:is(:hover, [aria-pressed="true"]) {
-  background: #8dc7f221;
+
+#region-chord .chord-options button:is(:hover, [aria-pressed='true']) {
+  background: #ffffff0d;
 }
-#region-chord .chord-options button[aria-pressed="true"] {
-  font-weight: 700;
-}
+
 .chord-options button.muted:not(:hover, :focus-visible) {
-  opacity: .62;
+  opacity: .58;
 }
+
 .chord-value {
   margin-left: auto;
   white-space: nowrap;
 }
-.chord-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--chord-rule);
-  padding-top: 8px;
-}
-#region-chord .chord-reset {
-  padding: 8px 9px;
-}
-#region-chord .chord-reset:disabled {
-  visibility: hidden;
-}
-@media (max-width: 740px) {
+
+@media (max-width: 580px) {
   #region-chord {
-    padding-block: 32px;
+    font-size: 14px;
   }
-  .chord-layout {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+
+  .chord-node text {
+    --chord-node-size: 25px;
   }
-  .chord-chart {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    width: min(100%, 320px, 35svh);
-    margin-inline: auto;
+
+  .chord-group-label {
+    font-size: 19px;
+    letter-spacing: .6px;
   }
-  #region-chord .chord-options button {
-    min-height: 36px;
-    padding-inline: 4px;
-    gap: 5px;
-  }
-  .chord-layout h3 {
-    padding-left: 4px;
-  }
-}
-@media (max-width: 359px) {
-  #region-chord {
-    --chord-body-size: 15px;
+
+  .chord-center-label {
+    font-size: 15px;
   }
 }

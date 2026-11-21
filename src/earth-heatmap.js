@@ -20,6 +20,17 @@ export function heatmapPose(position) {
   };
 }
 
+export function heatmapToChartPose(progress) {
+  return {
+    turn: 1,
+    morph: 1 - ease(.065, .43, progress),
+    heat: 1 - .68 * ease(.24, .67, progress),
+    surface: true,
+    globeYaw: -Math.PI * .72 * ease(.43, .93, progress),
+    globeTilt: -.16 * ease(.40, .60, progress),
+  };
+}
+
 // A single surface carries the coastline and density through the unfold.
 // The longitude arcs unfurl into the curved outline of the Equal Earth projection.
 export function createEarthHeatmap(baseMap, geography) {
@@ -150,8 +161,9 @@ export function createEarthHeatmap(baseMap, geography) {
     const frame = continentMap.update(pose.morph, camera.aspect, worldScale, dt);
     if (!mesh.visible) return;
     const height = 2 * camera.position.z * Math.tan(camera.fov * Math.PI / 360);
-    mesh.position.x = height * frame.x;
+    mesh.position.x = mix(pose.globeYaw === undefined ? 0 : earth.position.x, height * frame.x, pose.morph);
     mesh.position.y = mix(earth.position.y, height * frame.y, pose.morph);
+    mesh.rotation.set(0, pose.globeYaw ?? 0, pose.globeTilt ?? 0);
     uniforms.radius.value = earth.scale.x;
     uniforms.mapScale.value = height * frame.scale;
     uniforms.morph.value = clamp(pose.morph);
