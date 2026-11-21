@@ -5,13 +5,10 @@ import { area, line } from 'd3-shape';
 import { flight, orbit } from './origins-data.js';
 
 // D3 / Observable chart examples, adapted to render into the existing SVG.
-function chart(svg, height) {
-  const centered = svg.parentElement.hasAttribute('data-centered');
-  if (centered) height = 300;
-  // Leave vertical room for the selected label and its leader on short desktop viewports.
-  const scale = centered ? Math.min(1.4, Math.max(0.65, (innerHeight - 180) / height)) : 1;
-  // Layout width stays stable while the panel itself is animating.
-  const width = Math.floor(svg.clientWidth / scale);
+function chart(svg, minHeight, maxHeight = minHeight + 96) {
+  const width = svg.clientWidth;
+  const height = Math.round(Math.min(maxHeight, minHeight + Math.max(0, width - 265) * .38));
+  svg.replaceChildren();
   return { svg: select(svg).attr('viewBox', [0, 0, width, height]), width, height };
 }
 
@@ -29,14 +26,14 @@ function axes(svg, { x, y, left, right, bottom, xAxis, yAxis, xLabel, yLabel }) 
       .call(g => g.select('.domain').remove())
       .call(g => g.selectAll('.tick line').clone().attr('x2', right - left).attr('class', 'chart-grid'));
   }
-  if (yLabel) label(svg, left, 16, yLabel);
+  if (yLabel) label(svg, left, 22, yLabel);
   if (xLabel) label(svg, (left + right) / 2, bottom + 40, xLabel, 'middle');
 }
 
 // https://observablehq.com/@d3/area-chart
 // Popova et al., Science (2013), pre-atmospheric orbital elements.
 export function orbitArea(element) {
-  const { svg, width, height } = chart(element, 290);
+  const { svg, width, height } = chart(element, 300, 530);
   const left = 34, right = width - 16, bottom = height - 50;
   const { semiMajorAxis: a, eccentricity: e } = orbit;
   const data = Array.from({ length: 181 }, (_, i) => {
@@ -91,9 +88,10 @@ export function crustBars(element) {
     { oxide: 'MgO', values: [36.78, 46.22] },
   ];
   const series = ['Light lithology', 'Fusion crust'];
+  const stackLegend = width < 300;
   const fx = scaleBand(data.map(d => d.oxide), [left, right]).paddingInner(0.24).paddingOuter(0.1);
   const x = scaleBand(series, [0, fx.bandwidth()]).padding(0.12);
-  const y = scaleLinear([0, 55], [bottom, 62]);
+  const y = scaleLinear([0, 55], [bottom, stackLegend ? 80 : 62]);
   const color = scaleOrdinal(series, ['#8daafe', '#fff0c9']);
   axes(svg, { x: fx, y, left, right, bottom, yLabel: 'Oxides in olivine (wt%)',
     xAxis: axisBottom(fx).tickSizeOuter(0), yAxis: axisLeft(y).ticks(5).tickSizeOuter(0) });
@@ -107,7 +105,9 @@ export function crustBars(element) {
     .attr('x', d => x(d.name) + x.bandwidth() / 2).attr('y', d => y(d.value) - 6)
     .text(d => d.value.toFixed(1)).append('title').text(d => `${d.name}: ${d.value.toFixed(2)} wt%`);
   const legend = svg.append('g').selectAll('g').data(series).join('g')
-    .attr('transform', (_, i) => `translate(${left + 145 * i},28)`);
+    .attr('transform', (_, i) => stackLegend
+      ? `translate(${left},${35 + 19 * i})`
+      : `translate(${left + (right - left) * .46 * i},35)`);
   legend.append('rect').attr('width', 10).attr('height', 10).attr('y', 1).attr('fill', color);
   legend.append('text').attr('x', 15).attr('y', 11).text(d => d);
 }
@@ -123,7 +123,8 @@ export function veinRanges(element) {
   ];
   const x = scaleLog([8, 2500], [left, right]);
   const y = scalePoint(data.map(d => d.name), [70, 144]);
-  axes(svg, { x, left, right, bottom, xLabel: 'Impact melt vein width (µm, log scale)',
+  axes(svg, { x, left, right, bottom,
+    xLabel: width < 260 ? 'Vein width (µm, log scale)' : 'Impact melt vein width (µm, log scale)',
     xAxis: axisBottom(x).tickValues([10, 50, 100, 500, 2000]).tickFormat(d => d.toLocaleString('en')).tickSizeOuter(0) });
   const row = svg.append('g').selectAll('g').data(data).join('g')
     .attr('transform', d => `translate(0,${y(d.name)})`);

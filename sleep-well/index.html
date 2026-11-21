@@ -142,11 +142,7 @@ section {
 .the-balance__list,
 .note__hold,
 .note__fader,
-.ender__content,
-.cursor-insight__hold,
-.insights__hold,
-.insights__counter,
-.insigh-pannel__each {
+.ender__content {
 	display: grid;
 	grid-template-columns: 1fr;
 	place-items: center;
@@ -161,11 +157,7 @@ section {
 .the-balance__list>*,
 .note__hold>*,
 .note__fader>*,
-.ender__content>*,
-.cursor-insight__hold>*,
-.insights__hold>*,
-.insights__counter>*,
-.insigh-pannel__each>* {
+.ender__content>* {
 	grid-row-start: 1;
 	grid-column-start: 1;
 }
@@ -436,62 +428,26 @@ li.the-balance__ring {
 	mask-image: var(--mask);
 }
 
-.cursor-insight__bg {
-	transition: scale 0.6s cubic-bezier(0, 0.62, 0.22, 0.99);
+.cursor-insight {
+	visibility: hidden;
+	transform: none;
+	translate: -50% -50%;
+	display: grid;
+	place-items: center;
 }
 
-body:has(.is-cursor) .cursor-insight__bg {
-	scale: 1;
+.cursor-insight.is-tracking {
+	visibility: visible;
 }
 
-body:has(.is-cursor) .cursor-insight__text {
-	opacity: 1;
-}
-
-[data-iscursor] {
-	cursor: pointer;
-}
-
-.cursor-insight__text {
-	transition: opacity .3s ease-out;
+@media (any-pointer: coarse) and (not (any-pointer: fine)) {
+	.cursor-insight { display: none; }
 }
 
 .trg-sound__svg svg {
 	overflow: visible;
 }
 
-.insigh-pannel__each.is-active {
-	width: 2rem;
-}
-
-.is-active .insights__active-bg,
-.is-active .insigh-pannel__each__index {
-	opacity: 1;
-}
-
-.is-active .insights__dot {
-	opacity: 0;
-}
-
-.insigh-pannel {
-	overflow: hidden;
-	padding: 2rem 2rem 2rem 0.4rem;
-	display: flex;
-	align-items: center;
-	--webkit-mask: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) -0%, #000000 2%, #000000 95.77%, rgba(0, 0, 0, 0) 96.94%, rgba(0, 0, 0, 0) 100%);
-	mask: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) -0%, #000000 2%, #000000 95.77%, rgba(0, 0, 0, 0) 96.94%, rgba(0, 0, 0, 0) 100%);
-}
-
-.insigh-pannel__hold {
-	transform: translateX(-14.1rem);
-	transition: transform 0.5s cubic-bezier(0.04, 0.7, 0.32, 1.03);
-	position: relative;
-}
-
-
-.insigh-pannel:hover .insigh-pannel__hold {
-	transform: translateX(0rem);
-}
 .webgl-ready .preloader__span, .webgl-ready .preloader__dots {
 	opacity: 0 !important;
 	animation-play-state: paused;
@@ -714,9 +670,6 @@ body:has(.is-cursor) .cursor-insight__text {
 		font-size: calc(100vw / 900 * 10);
 	}
 
-	.insigh-pannel__hold {
-		transform: translateX(-11.2rem);
-	}
 }
 
 
@@ -727,9 +680,6 @@ body:has(.is-cursor) .cursor-insight__text {
 		font-size: calc(100vw / 900 * 10);
 	}
 
-	.insigh-pannel__hold {
-		transform: translateX(-11.1rem);
-	}
 }
 
 
@@ -739,9 +689,7 @@ body:has(.is-cursor) .cursor-insight__text {
 	html {
 		font-size: calc(100vw / 767 * 10);
 	}
-  .insights {
-  	height: calc(var(--vh)*100);
-  }
+
 
 	li.solutions__each {
 		flex-direction: column;
@@ -784,9 +732,6 @@ body:has(.is-cursor) .cursor-insight__text {
 		padding: 3.1rem;
 	}
 
-	.insigh-pannel__hold {
-		transform: translateX(-19.1rem);
-	}
 }
 
 p.parag,
@@ -824,7 +769,7 @@ p.parag,
     <rect x="0.5" y="0.5" width="59" height="82.5714" rx="29.5" stroke-width="2" opacity="0.35" stroke="var(--color)"/>
     <rect class="rect-solid" x="0.5" y="0.5" width="59" height="82.5714" rx="29.5" stroke-width="2" stroke="var(--color)"/>
     <rect x="7" y="7.78571" width="46" height="68" rx="23" stroke="var(--color)" stroke-width="2"/>
-</svg></div><div class="preloader__loading"><div class="preloader__span">Loading</div><div class="preloader__dots"></div><div class="preloader__dots"></div><div class="preloader__dots"></div><div class="preloader__dots"></div><div class="preloader__enter">Enter Site</div></div></div></div></div><a href="#top" aria-label="Back to the opening" class="main-logo w-inline-block"><span class="main-logo__svg visitors-emblem" aria-hidden="true">V</span></a><div class="cursor-insight"><div class="cursor-insight__hold"><div class="cursor-insight__follow"></div><div class="cursor-insight__bg"></div><div class="cursor-insight__text">Listen to field note</div></div></div><div class="trg-sound"><div class="trg-sound__hold"><div class="trg-sound__svg w-embed"><svg class="sound-svg" viewBox="0 0 10 5" width="100%">
+</svg></div><div class="preloader__loading"><div class="preloader__span">Loading</div><div class="preloader__dots"></div><div class="preloader__dots"></div><div class="preloader__dots"></div><div class="preloader__dots"></div><div class="preloader__enter">Enter Site</div></div></div></div></div><div class="cursor-insight" aria-hidden="true"><div class="cursor-insight__follow"></div></div><div class="trg-sound"><div class="trg-sound__hold"><div class="trg-sound__svg w-embed"><svg class="sound-svg" viewBox="0 0 10 5" width="100%">
   <polyline
     class="wave"
     vector-effect="non-scaling-stroke"
@@ -833,16 +778,12 @@ p.parag,
     stroke-width="2"
     points="0,2.5 1,2.5 2,2.5 3,2.5 4,2.5 5,2.5 6,2.5 7,2.5 8,2.5 9,2.5 10,2.5"
   ></polyline>
-</svg></div></div></div><div class="pattern"></div><div class="audios"><audio data-audio="wont_rest" class="audio-chapter audio__wont-rest"><source src="./meteorite/note-wont_rest.m4a" class="source_audio"/></audio><audio data-audio="sleep_maint" class="audio-chapter audio__wont-rest"><source src="./meteorite/note-sleep_maint.m4a" class="source_audio"/></audio><audio data-audio="its_preparation" class="audio-chapter audio__its_preparation"><source src="./meteorite/note-its_preparation.m4a" class="source_audio"/></audio><audio data-audio="mind_logoff" class="audio-chapter audio__mind_logoff"><source src="./meteorite/note-mind_logoff.m4a" class="source_audio"/></audio><audio data-audio="overheat" class="audio-chapter audio__overheat"><source src="./meteorite/note-overheat.m4a" class="source_audio"/></audio><audio data-audio="cant_dream" class="audio-chapter audio__cant_dream"><source src="./meteorite/note-cant_dream.m4a" class="source_audio"/></audio></div><canvas class="webgl"></canvas><div class="insights"><div class="insights__hold"><div class="insights__fader"></div><div class="insights__-content"><div class="insights__counter"><div class="insights__counter__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle class="index_path__opacity" opacity="0.1" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
-
-<circle class="index_path__solid" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
-</svg></div><div class="insights__counter__numbers"><div class="insights__counter__dyna">00</div><div class="insights__counter__static">/ 06</div></div></div><div class="insights__insight"><div class="insights__insight__text">The flash was recorded from several cities.</div></div></div></div></div><div class="insigh-pannel"><div class="insigh-pannel__hold"><div class="insights__text">Field notes</div><ul role="list" class="insights__indic-lis w-list-unstyled"><li data-insi-indic="its_preparation" class="insigh-pannel__each"><div class="insights__active-bg"></div><div class="insigh-pannel__each__index">1<br/></div><div class="insights__dot"></div></li><li data-insi-indic="wont_rest" class="insigh-pannel__each"><div class="insights__active-bg"></div><div class="insigh-pannel__each__index">2</div><div class="insights__dot"></div></li><li data-insi-indic="cant_dream" class="insigh-pannel__each"><div class="insights__active-bg"></div><div class="insigh-pannel__each__index">3<br/></div><div class="insights__dot"></div></li><li data-insi-indic="overheat" class="insigh-pannel__each"><div class="insights__active-bg"></div><div class="insigh-pannel__each__index">4</div><div class="insights__dot"></div></li><li data-insi-indic="mind_logoff" class="insigh-pannel__each"><div class="insights__active-bg"></div><div class="insigh-pannel__each__index">5</div><div class="insights__dot"></div></li><li data-insi-indic="sleep_maint" class="insigh-pannel__each"><div class="insights__active-bg"></div><div class="insigh-pannel__each__index">6</div><div class="insights__dot"></div></li></ul></div></div><div class="hero"><div class="hero__hold"><div class="hero__content"><div class="hero__subt"><div class="hero__subt__wrap"><div class="hero__subt__dot"></div><div class="hero__subt__text">CHELYABINSK · 15 FEBRUARY 2013</div><div class="hero__subt__dot"></div></div></div><div class="hero__title"><h1 class="hero__title__h1">VISITORS</h1></div><div class="hero__scroll"><div class="hero__scroll__wrap"><div class="hero__scroll__dot"><div class="hero__scroll__svg w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24" class="icon glyph"><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm3.71,9.71-3,3a1,1,0,0,1-1.42,0l-3-3a1,1,0,0,1,1.42-1.42L12,12.59l2.29-2.3a1,1,0,0,1,1.42,1.42Z" style="fill:var(--color-medium)"/></svg></div></div><div class="hero__scroll__text">Scroll to Explore</div></div></div></div></div></div><div class="spacer-fs section-blue scene-phone-before typog"><div class="typog__hold"><div class="typog__travel"><ul role="list" class="typog__words w-list-unstyled"><li class="typog__word"><div class="typog__word__text">One</div><div class="typog__word__text">Fireball</div><div class="typog__word__text">Left</div></li><li class="typog__word"><div class="typog__word__text">More</div><div class="typog__word__text">Than</div><div class="typog__word__text">One</div><div class="typog__word__text">Trace</div></li><li class="typog__word"><div class="typog__word__text">Behind</div><div class="typog__word__text">It</div></li><li class="typog__word typog__word-sun"><div class="typog__word__text">.</div></div></li></ul></div></div></div><div class="spacer-fs scene-phone"><div data-anima="parag" class="scene-phone__description"><div class="description descr-phone">A driver sees the fireball cross the sky through a windscreen.</div></div><div data-anima="parag" class="scene-phone__description scene-phone__description__left"><div class="description descr-phone">A fixed camera watches the ground light up.</div></div><div data-anima="parag" class="scene-phone__description"><div class="description descr-phone">Comparing different views helps researchers reconstruct the flight.</div></div></div><section class="introduction"><div class="introduction__hold"><div class="introduction__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
+</svg></div></div></div><div class="pattern"></div><canvas class="webgl"></canvas><div class="hero"><div class="hero__hold"><div class="hero__content"><div class="hero__subt"><div class="hero__subt__wrap"><div class="hero__subt__dot"></div><div class="hero__subt__text">CHELYABINSK · 15 FEBRUARY 2013</div><div class="hero__subt__dot"></div></div></div><div class="hero__title"><h1 class="hero__title__h1">VISITORS</h1></div><div class="hero__scroll"><div class="hero__scroll__wrap"><div class="hero__scroll__dot"><div class="hero__scroll__svg w-embed"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24" class="icon glyph"><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm3.71,9.71-3,3a1,1,0,0,1-1.42,0l-3-3a1,1,0,0,1,1.42-1.42L12,12.59l2.29-2.3a1,1,0,0,1,1.42,1.42Z" style="fill:var(--color-medium)"/></svg></div></div><div class="hero__scroll__text">Scroll to Explore</div></div></div></div></div></div><div class="spacer-fs section-blue scene-phone-before typog"><div class="typog__hold"><div class="typog__travel"><ul role="list" class="typog__words w-list-unstyled"><li class="typog__word"><div class="typog__word__text">One</div><div class="typog__word__text">Fireball</div><div class="typog__word__text">Left</div></li><li class="typog__word"><div class="typog__word__text">More</div><div class="typog__word__text">Than</div><div class="typog__word__text">One</div><div class="typog__word__text">Trace</div></li><li class="typog__word"><div class="typog__word__text">Behind</div><div class="typog__word__text">It</div></li><li class="typog__word typog__word-sun"><div class="typog__word__text">.</div></div></li></ul></div></div></div><div class="spacer-fs scene-phone"><div data-anima="parag" class="scene-phone__description"><div class="description descr-phone">A driver sees the fireball cross the sky through a windscreen.</div></div><div data-anima="parag" class="scene-phone__description scene-phone__description__left"><div class="description descr-phone">A fixed camera watches the ground light up.</div></div><div data-anima="parag" class="scene-phone__description"><div class="description descr-phone">Comparing different views helps researchers reconstruct the flight.</div></div></div><section class="introduction"><div class="introduction__hold"><div class="introduction__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle class="index_path__opacity" opacity="0.1" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 
 <circle class="index_path__solid" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 </svg></div><div class="section-index__index">01</div></div></div><div class="introduction__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">CHELYABINSK, RUSSIA</div></div></div><div class="introduction__descr"><div class="description intro-descr">At about 9:22 a.m., a fireball crossed the southern Urals. Its flash lit the ground and its shock wave shattered windows.<br>Where was this stone before it lit up the sky?</div></div></div></section>
-<div class="spacer-fs scene-tunnel"><div class="scene-tunnel__hold"><div data-insight="Most meteorites found on Earth come from fragments of asteroids." data-iscursor="" data-audio="its_preparation" class="title_serif title_serif__tunnel">Rewind time</div></div></div>
+<div class="spacer-fs scene-tunnel"><div class="scene-tunnel__hold"><div class="title_serif title_serif__tunnel">Rewind time</div></div></div>
 <div class="solution spacer-fs scene-follow section-blue" id="meteorite-origins" aria-labelledby="meteorite-origins-title"><div class="scene-path-follow__hold solution__hold"><div class="solution__travel"><div class="solution__hero"><div class="solution__hero__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle class="index_path__opacity" opacity="0.1" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 
@@ -876,7 +817,7 @@ p.parag,
 <li class="solutions__each origins-slide">
   <h3 class="origins-heading" id="origins-speed">The fireball slows</h3>
   <figure class="origins-chart" data-chart="speed" aria-labelledby="origins-speed"></figure>
-  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Last detection</p><output class="origins-number" data-reading-value>4.9 km/s</output><p data-reading-detail>13.6 km above the ground</p></div><p class="origins-context">First detected at 19.16 km/s</p></div>
+  <div class="origins-copy"><div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>Last detection</p><output class="origins-number" data-reading-value>4.9 km/s</output><p data-reading-detail>13.6 km above the ground</p></div><p class="origins-context">Four events through 11.85 s cluster around 19.2 km/s. The next event records 16.8 km/s.</p></div>
 </li>
 <li class="solutions__each origins-slide">
   <h3 class="origins-heading" id="origins-shock">The shock arrives later</h3>
@@ -886,19 +827,22 @@ p.parag,
 </ul></div></div></div>
 <section class="origins-feature origins-flight" aria-labelledby="origins-flight-title">
   <header>
-    <h2 class="origins-heading" id="origins-flight-title">Sixteen seconds in the sky</h2>
-    <p>Explore the fireball’s path across the Southern Urals.</p>
+    <h2 class="origins-heading" id="origins-flight-title">Chelyabinsk Fireball Trajectory</h2>
   </header>
-  <div class="origins-linked">
-    <figure class="origins-chart" data-chart="cameras" aria-label="Camera sites and reconstructed track">
-      <figcaption><span class="origins-key origins-key--video">Fireball filmed</span><span class="origins-key origins-key--shadow">Shadows measured</span></figcaption>
-    </figure>
-    <figure class="origins-chart" data-chart="altitude" aria-label="Fireball height over 16 seconds"></figure>
-  </div>
   <div class="origins-playhead">
-    <p class="origins-event-name" data-flight-name>Main brightness peak</p>
-    <output class="origins-number" for="origins-flight-time" data-flight-value>11.4 s · 29.7 km</output>
-    <input id="origins-flight-time" type="range" min="0" max="16" step="0.05" value="11.4" aria-label="Fireball event">
+    <div class="origins-timeline">
+      <label for="origins-flight-time">Flight time</label>
+      <input id="origins-flight-time" type="range" min="0" max="16" step="0.05" value="0">
+      <div class="origins-timeline-limits" aria-hidden="true"><span>0 s</span><span>16 s</span></div>
+    </div>
+    <div class="origins-flight-reading">
+      <output class="origins-number" for="origins-flight-time" data-flight-value>0 s · 97.1 km</output>
+      <p class="origins-event-name" data-flight-name>First detection</p>
+    </div>
+  </div>
+  <div class="origins-linked">
+    <figure class="origins-chart" data-chart="cameras" aria-label="Fireball path across the Southern Urals"></figure>
+    <figure class="origins-chart" data-chart="altitude" aria-label="Fireball height over 16 seconds"></figure>
   </div>
 </section>
 <section class="stats section-reboot section-blue"><div class="stats__top-decor w-embed"><svg width="100%" viewBox="0 0 1920 586" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -918,7 +862,7 @@ p.parag,
     <path class="stats__opac__line" d="M1032.3 0.0045166C1030.19 423.694 813.679 877.535 419.133 1437.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
     <path class="stats__opac__line" d="M1032.21 0.504517C1028.54 422.856 933.91 864.174 748.32 1438.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
     <path class="stats__opac__line" d="M1032.43 0.504517C1036.1 422.856 1130.73 864.174 1316.32 1438.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
-    <path class="stats__opac__line" d="M1032.32 0.0045166V1436.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
+    <path class="stats__opac__line" data-composition-link d="M1032.32 0.0045166V1436.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
     <path class="stats__opac__line" d="M1032.34 0.0045166C1034.45 423.694 1246.09 878.535 1640.63 1438.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
     <path class="stats__opac__line" d="M1032.35 0.0045166C1036.26 427.821 1380.25 867.645 2064.32 1438.5" stroke="var(--color-soft)" stroke-opacity="0.5"/>
 </svg></div><div class="onclock__spiral__center stats__spiral__center__pattern"><img src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp" loading="lazy" sizes="100vw" srcset="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-500.webp 500w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-800.webp 800w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-1080.webp 1080w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp 1232w" alt=""/></div></div><div class="stats__lines-decor"></div><div data-anima="texts" class="stats__text"><div class="stats__text__serif"><div class="title_serif">A fragment</div></div><div class="stats__text__sans"><div class="title_sans">of an asteroid.</div></div><div data-anima="parag" class="stats__text__parag"><p class="small-parag">The rock began far from Earth. Collisions can break larger asteroids apart, leaving fragments that travel around the Sun on their own orbits.</p></div></div><div class="stats__stats"><div class="stats_stats__pattern"><img src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp" loading="lazy" sizes="100vw" srcset="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-500.webp 500w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-800.webp 800w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture-p-1080.webp 1080w, ./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59c6_tunnel_texture.webp 1232w" alt=""/></div><div class="stats_stats__solid"></div><div class="stats_stats__border"></div>
@@ -936,50 +880,88 @@ p.parag,
     <a href="https://doi.org/10.1111/maps.13927" target="_blank" rel="noopener">Beard et al. · Table 6 ↗</a>
   </div>
 </figure>
-</div></div></section><section class="onclock section-blue" id="composition" aria-labelledby="composition-title"><div class="onclock__hold"><div class="onclock__top"><div class="onclock__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
+</div></div></section><section class="onclock section-blue" id="composition" aria-labelledby="composition-title">
+<svg class="composition__bridge" aria-hidden="true">
+  <defs>
+    <linearGradient id="composition-bridge-ink" gradientUnits="userSpaceOnUse" x1="0" x2="0">
+      <stop offset="0" stop-color="#bfceff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#bfceff" stop-opacity=".55"/>
+    </linearGradient>
+  </defs>
+  <path fill="none" stroke="url(#composition-bridge-ink)"/>
+</svg>
+<div class="onclock__hold"><div class="onclock__top"><div class="onclock__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle class="index_path__opacity" opacity="0.1" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 
 <circle class="index_path__solid" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 </svg></div><div class="section-index__index">03</div></div></div><div class="onclock__title"><div data-anima="texts" class="onclock__title__serif"><h2 class="title_serif" id="composition-title">Crossing Earth’s orbit.</h2></div></div></div><div class="composition">
-  <div class="composition__stage">
-  <div class="onclock__spiral__wrapper"><div class="onclock__spiral onclock__spiral__original"><div class="onclock__pendulum__svg onclock__lines__solid w-embed"><svg width="100%" viewBox="0 0 1324 1787" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0.320557 0C881.654 677.095 881.654 1073.18 0.320557 1809" stroke="var(--white)" stroke-opacity="1"/>
-<path d="M280.321 4C788.821 681.358 788.821 1073.5 280.321 1795" stroke="var(--white)" opacity="1"/>
-<path d="M479.321 0C722.321 662 722.321 1058.08 479.321 1809" stroke="var(--white)" stroke-opacity="1"/>
-<path d="M661.321 3.5V1788.5" stroke="var(--white)" stroke-opacity="1"/>
-<path d="M843.696 0C600.696 662 600.696 1058.08 843.696 1809" stroke="var(--white)" stroke-opacity="1"/>
-<path d="M1042.7 4C534.196 681.358 534.196 1073.5 1042.7 1795" stroke="var(--white)" stroke-opacity="1"/>
-<path d="M1322.7 0C441.362 677.095 441.362 1073.18 1322.7 1809" stroke="var(--white)" stroke-opacity="1"/>
-</svg></div><div class="onclock__pendulum__svg onclock__lines__opac w-embed"><svg width="100%" viewBox="0 0 1324 1787" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0.320557 0C881.654 677.095 881.654 1073.18 0.320557 1809" stroke="var(--color-soft)" stroke-opacity="0.35"/>
-<path d="M280.321 4C788.821 681.358 788.821 1073.5 280.321 1795" stroke="var(--color-soft)" opacity="0.35"/>
-<path d="M479.321 0C722.321 662 722.321 1058.08 479.321 1809" stroke="var(--color-soft)" stroke-opacity="0.35"/>
-<path d="M661.321 3.5V1788.5" stroke="var(--color-soft)" stroke-opacity="0.35"/>
-<path d="M843.696 0C600.696 662 600.696 1058.08 843.696 1809" stroke="var(--color-soft)" stroke-opacity="0.35"/>
-<path d="M1042.7 4C534.196 681.358 534.196 1073.5 1042.7 1795" stroke="var(--color-soft)" stroke-opacity="0.35"/>
-<path d="M1322.7 0C441.362 677.095 441.362 1073.18 1322.7 1809" stroke="var(--color-soft)" stroke-opacity="0.35"/>
-</svg></div></div></div>
-  <div class="onclock__spiral__boder composition__ring" aria-hidden="true"></div>
-  <canvas class="composition__model" role="img" aria-label="Illustrated 3D reconstruction of the Chelyabinsk main mass"></canvas>
-  <ul class="onclock__words" role="list" aria-label="Explore the Chelyabinsk meteorite">
-    <li class="onclock__word" style="--angle:30deg"><button type="button" class="onclock__word__text" data-topic="orbit">ORBIT</button></li>
-    <li class="onclock__word" style="--angle:90deg"><button type="button" class="onclock__word__text" data-topic="drift">DRIFT</button></li>
-    <li class="onclock__word" style="--angle:150deg"><button type="button" class="onclock__word__text" data-topic="sun">SUN</button></li>
-    <li class="onclock__word" style="--angle:210deg"><button type="button" class="onclock__word__text" data-topic="earth">EARTH</button></li>
-    <li class="onclock__word" style="--angle:270deg"><button type="button" class="onclock__word__text" data-topic="near">NEAR</button></li>
-    <li class="onclock__word" style="--angle:330deg"><button type="button" class="onclock__word__text" data-topic="pass">PASS</button></li>
-  </ul>
+  <div class="composition__specimen">
+    <canvas class="composition__model" role="img" aria-label="Illustrated 3D reconstruction of the Chelyabinsk main mass"></canvas>
+    <svg class="composition__route onclock__spiral__original" viewBox="0 0 2 100" preserveAspectRatio="none" aria-hidden="true">
+      <g class="onclock__lines__opac"><path d="M1 0V100"/></g>
+      <g class="onclock__lines__solid"><path d="M1 0V100"/></g>
+    </svg>
   </div>
-  <svg class="composition__leader" aria-hidden="true">
-    <path class="composition__leader-ink" pathLength="1"/>
-    <path class="composition__leader-hit"/>
-  </svg>
-  <span class="composition__leader-label" aria-hidden="true" hidden></span>
-  <aside class="composition__note" id="composition-note" aria-label="Meteorite chart" data-lenis-prevent hidden>
-    <svg class="composition__graphic" role="img"></svg>
-  </aside>
-</div>
-<div class="onclock__bottom"><div data-anima="parag" class="onclock__bottom__left"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">A FRAGMENT IN ORBIT</div></div><p class="parag">Once separated, a fragment follows its own orbit around the Sun. Over time gravitational encounters can change where that orbit takes it.</p></div><div data-anima="parag" class="encounter__bottom__right"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">AN ENCOUNTER WITH EARTH</div></div><p class="parag">Earth and the fragment reached the same point at the same time. The rock entered the atmosphere and broke apart.</p></div></div></div></section>
+  <ol class="composition__flow" role="list" aria-label="From orbit to meteorite">
+    <li class="composition__step">
+      <div class="composition__scene">
+        <span class="composition__step-number" aria-hidden="true">01</span>
+        <header class="composition__intro">
+          <h3>Orbit the Sun</h3>
+          <p>The rock traveled around the Sun on an elongated orbit that crossed Earth’s orbital path.</p>
+        </header>
+        <div class="composition__charts">
+          <figure class="composition__chart" data-topic="orbit">
+            <figcaption>Distance from the Sun</figcaption>
+            <svg class="composition__graphic" role="img"></svg>
+          </figure>
+        </div>
+      </div>
+    </li>
+    <li class="composition__step">
+      <div class="composition__scene">
+        <span class="composition__step-number" aria-hidden="true">02</span>
+        <header class="composition__intro">
+          <h3>Enter Earth’s atmosphere</h3>
+          <p>Earth and the rock reached the crossing point at the same time. The rock heated up and broke apart as it descended.</p>
+        </header>
+        <div class="composition__charts">
+          <figure class="composition__chart" data-topic="near">
+            <figcaption>Fireball altitude over time</figcaption>
+            <svg class="composition__graphic" role="img"></svg>
+          </figure>
+          <figure class="composition__chart" data-topic="pass">
+            <figcaption>Fusion crust and interior</figcaption>
+            <svg class="composition__graphic" role="img"></svg>
+          </figure>
+        </div>
+      </div>
+    </li>
+    <li class="composition__step">
+      <div class="composition__scene">
+        <span class="composition__step-number" aria-hidden="true">03</span>
+        <header class="composition__intro">
+          <h3>Examine the surviving rock</h3>
+          <p>Recovered fragments reveal which minerals the rock contains and preserve melt veins from earlier impacts.</p>
+        </header>
+        <div class="composition__charts">
+          <figure class="composition__chart" data-topic="earth">
+            <figcaption>Mineral abundances</figcaption>
+            <svg class="composition__graphic" role="img"></svg>
+          </figure>
+          <figure class="composition__chart" data-topic="drift">
+            <figcaption>Impact melt vein widths</figcaption>
+            <svg class="composition__graphic" role="img"></svg>
+          </figure>
+          <figure class="composition__chart" data-topic="sun">
+            <figcaption>Magnesium-to-iron ratios</figcaption>
+            <svg class="composition__graphic" role="img"></svg>
+          </figure>
+        </div>
+      </div>
+    </li>
+  </ol>
+</div></div></section>
 <section class="drop-cans scene-cans section-blue"><div class="drop-cans__hold"><div class="drop-cans__top"><div class="drop-cans__subt"><div class="subtitle"><div class="subtitle__dot"></div><div class="subtitle__text">AFTER THE AIRBURST</div></div></div><div data-anima="texts" class="drop-cans__title"><div class="drop-cans__title__serif"><div class="title_serif">Some fragments</div></div><div class="drop-cans__title__sans"><div class="title_sans">reach the ground.</div></div></div></div><div class="drop-cans__svg"><div class="cycle__cycle"><div class="cycle__circle cycle__circle3 w-embed"><svg width="100%" viewBox="0 0 1031 1030" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M515.5 0.413086C799.975 0.413086 1030.59 230.802 1030.59 515C1030.59 799.198 799.975 1029.59 515.5 1029.59C231.025 1029.59 0.413086 799.198 0.413086 515C0.413086 230.802 231.025 0.413086 515.5 0.413086Z" stroke="var(--color-soft)" stroke-width="1"/>
 </svg></div><div class="cycle__circle cycle__circle2 w-embed"><svg width="100%" viewBox="0 0 1031 1030" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1011,7 +993,7 @@ p.parag,
 </figure>
 </div></section>
 
-<div data-insight="Some meteorites preserve material from the early Solar System." data-iscursor="" data-audio="sleep_maint" class="spacer-fs scene-lamp"></div>
+<div class="spacer-fs scene-lamp"></div>
 <section class="importance section-blue"><div class="importance__hold"><div class="importance__top"><div class="importance__index"><div class="section-index"><div class="section-index__svg w-embed"><svg width="100%" viewBox="0 0 117 117" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle class="index_path__opacity" opacity="0.1" cx="58.5" cy="58.5" r="58" stroke="var(--color-soft)"/>
 
@@ -1047,7 +1029,7 @@ p.parag,
     <figure class="origins-chart" data-chart="classification" aria-label="Catalogue counts by classification"></figure>
     <div class="origins-reading" aria-live="polite" aria-atomic="true"><p data-reading-name>LL5</p><output class="origins-number" data-reading-value>3,315</output><p data-reading-detail>official records</p></div>
     <details class="origins-sources"><summary>Sources</summary>
-      <p>The speed profile uses seven trajectory events and reported speeds. Connected segments guide the eye between reported values. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=15" target="_blank" rel="noopener">Popova et al. · Science · Table S1 ↗</a></p>
+      <p>The speed profile uses seven trajectory events and reported speeds. Dashed segments link the four early events. Solid segments connect the reported values through the slowdown. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=15" target="_blank" rel="noopener">Popova et al. · Science · Table S1 ↗</a></p>
       <p>The shock clocks show one video observation at each of four sites. Delays use 03:20:32.2 UTC, the main brightness peak, as zero. The arcs encode elapsed time. <a href="https://www.meteorites.ru/menu/publication/popova_ea_2013_science.pdf#page=83" target="_blank" rel="noopener">Popova et al. · Science · Table S12 ↗</a></p>
       <p>Ages are from early Solar System samples. Caps show the reported uncertainty for calcium–aluminum-rich inclusions (CAIs) and for the endpoints of the dated chondrule span. <a href="https://pubmed.ncbi.nlm.nih.gov/23118187/" target="_blank" rel="noopener">Connelly et al. · Science ↗</a></p>
       <p>Ranges describe the minerals in the studied light and dark rock types. <a href="https://doi.org/10.1111/maps.13027" target="_blank" rel="noopener">Kaeter et al. · Meteoritics &amp; Planetary Science ↗</a></p>
@@ -1065,8 +1047,8 @@ p.parag,
     </template>
   </div>
 </section>
-
-
+<!-- region-chord -->
+<script type="module" src="/src/region-chord.js"></script>
 
 <script vite-ignore src="./files/d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js" type="text/javascript" crossorigin="anonymous"></script><script vite-ignore src="./files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/js/webflow.751e0867.7161e47da9598001.js" type="text/javascript" crossorigin="anonymous"></script><script>
 document.querySelector('.preloader-master').remove()
@@ -1081,9 +1063,28 @@ window.scrollTo(0,0);
 </script>
 
 <!-- <script type="module" defer crossorigin="" src="http://localhost:5173/main.js"></script>  -->
-<script type="module" vite-ignore crossorigin="" src="./files/sleep-well-creatives.netlify.app/assets/index-8YjIcPvu.js?v=continuous-story"></script>
+<script type="module" vite-ignore crossorigin="" src="./files/sleep-well-creatives.netlify.app/assets/index-8YjIcPvu.js?v=phone-screen"></script>
 
 <script type="module" vite-ignore src="./meteorite/story.js"></script>
+<script>
+{
+  const cursor = document.querySelector('.cursor-insight');
+  const hideCursor = () => cursor.classList.remove('is-tracking');
+  document.addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse') {
+      hideCursor();
+      return;
+    }
+    cursor.style.left = `${event.clientX}px`;
+    cursor.style.top = `${event.clientY}px`;
+    cursor.classList.add('is-tracking');
+  }, { passive: true });
+  document.addEventListener('pointerout', event => {
+    if (!event.relatedTarget) hideCursor();
+  });
+  window.addEventListener('blur', hideCursor);
+}
+</script>
 <template id="phone-archive-clips">
   <article data-video="./meteorite/dashcam.mp4" data-poster="./meteorite/dashcam.webp">
     <p>15 February 2013 · Dashcam</p>
