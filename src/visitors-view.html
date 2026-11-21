@@ -14,14 +14,9 @@
   </div>
 </div>
 <button id="earth-hotspot" class="hotspot subtle" hidden aria-label="Select Earth"><span>+</span></button>
-<svg id="continent-overlay" aria-hidden="true" hidden><g></g><g id="meteorite-pins"></g></svg>
+<svg id="continent-overlay" aria-label="Interactive map of the continents" hidden><g id="continent-regions"></g><g id="meteorite-pins"></g></svg>
 <nav id="continent-controls" aria-label="Explore the continents" hidden>
-  <div id="continent-menu"></div>
-  <div id="continent-detail" hidden>
-    <button type="button">← World map</button>
-    <strong aria-live="polite"></strong>
-    <div id="continent-featured" role="group" aria-label="Notable meteorites" hidden></div>
-  </div>
+  <p id="continent-hint" aria-live="polite">Select a continent on the map.</p>
 </nav>
 <svg id="meteorite-leader" aria-hidden="true" hidden><path></path><circle r="2.5"></circle></svg>
 <aside id="meteorite-card" aria-labelledby="meteorite-card-title" hidden>
@@ -30,12 +25,12 @@
   <h3 id="meteorite-card-title"></h3>
   <p class="meteorite-card-subtitle" lang="zh-Hans"></p>
   <p class="meteorite-card-location"></p>
+  <p class="meteorite-card-facts"></p>
   <figure class="meteorite-photo">
     <img alt="" decoding="async">
-    <figcaption><a class="meteorite-photo-credit" target="_blank" rel="noreferrer"></a><span> · </span><a class="meteorite-photo-license" target="_blank" rel="noreferrer"></a></figcaption>
+    <figcaption></figcaption>
   </figure>
   <p class="meteorite-card-story"></p>
-  <a class="meteorite-card-source" target="_blank" rel="noreferrer"></a>
 </aside>
 <div id="heatmap-legend" hidden aria-label="Heatmap scale. Logarithmic catalogue records per 100,000 square kilometers">
   <strong>50,951 LOCATED RECORDS</strong>

@@ -8,12 +8,9 @@ const centerY = .015;
 
 export function createContinentMap() {
   const panel = visitorsRoot.querySelector('#continent-controls');
-  const menu = visitorsRoot.querySelector('#continent-menu');
-  const detail = visitorsRoot.querySelector('#continent-detail');
-  const label = detail.querySelector('strong');
-  const back = detail.querySelector('button');
+  const hint = visitorsRoot.querySelector('#continent-hint');
   const overlay = visitorsRoot.querySelector('#continent-overlay');
-  const group = overlay.querySelector('g');
+  const group = overlay.querySelector('#continent-regions');
   const meteorites = createContinentMeteorites(overlay);
   const legend = visitorsRoot.querySelector('#heatmap-legend strong');
   const overviewLegend = legend.textContent;
@@ -25,24 +22,25 @@ export function createContinentMap() {
   let lastTransform;
 
   const choices = regions.map(region => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = region.name;
-    button.setAttribute('aria-pressed', 'false');
     const path = document.createElementNS(svgNamespace, 'path');
     path.setAttribute('d', region.path);
     path.setAttribute('fill-rule', 'evenodd');
     path.setAttribute('vector-effect', 'non-scaling-stroke');
+    path.setAttribute('role', 'button');
+    path.setAttribute('tabindex', '0');
+    path.setAttribute('aria-label', region.name);
+    path.setAttribute('aria-pressed', 'false');
     const title = document.createElementNS(svgNamespace, 'title');
     title.textContent = region.name;
     path.append(title);
     group.append(path);
-    menu.append(button);
-    const choice = { ...region, button, path };
-    button.addEventListener('click', () => select(choice));
-    path.addEventListener('click', () => select(choice));
-    button.addEventListener('focus', () => path.classList.add('highlighted'));
-    button.addEventListener('blur', () => path.classList.remove('highlighted'));
+    const choice = { ...region, path };
+    path.addEventListener('click', () => select(selected === choice ? null : choice));
+    path.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      select(selected === choice ? null : choice);
+    });
     return choice;
   });
 
@@ -50,19 +48,18 @@ export function createContinentMap() {
     if (choice === selected) return;
     const previous = selected;
     selected = choice;
-    detail.hidden = !choice;
-    label.textContent = choice?.name ?? '';
+    hint.textContent = choice
+      ? `${choice.name} · Select it again or press Esc for the world map.`
+      : 'Select a continent on the map.';
     meteorites.showRegion(choice?.name);
     legend.textContent = choice ? 'GLOBAL DENSITY SCALE' : overviewLegend;
     overlay.toggleAttribute('data-focused', Boolean(choice));
     for (const item of choices) {
-      item.path.classList.toggle('selected', item === choice);
-      item.button.setAttribute('aria-pressed', String(item === choice));
+      item.path.setAttribute('aria-pressed', String(item === choice));
     }
-    if (moveFocus) (choice?.button ?? previous?.button)?.focus({ preventScroll: true });
+    if (moveFocus) (choice?.path ?? previous?.path)?.focus({ preventScroll: true });
   }
 
-  back.addEventListener('click', () => select(null));
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !selected || !ready) return;
     event.preventDefault();
