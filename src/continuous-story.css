@@ -25,3 +25,10 @@ html:has(body.visitors-atlas-open, body.specimen-archive-lock) {
 #visitors-stage[inert] {
   pointer-events: none;
 }
+
+/* Keep the original WebGL canvas in the viewport while the chart overlaps it. */
+#visitors-stage.is-chart-bridging {
+  position: fixed;
+  inset: 0;
+  height: 100%;
+}

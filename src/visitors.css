@@ -86,6 +86,8 @@ a {
   pointer-events: none;
 }
 
+.chart-transition #world { background: #15217d; }
+
 .scene-caption {
   position: fixed;
   left: 4vw;

@@ -4179,7 +4179,7 @@ function _4(now) {
   T4 = now;
   const chartTransition = updateRegionChart();
   visitorsView.classList.toggle('chart-transition', Boolean(chartTransition));
-  if (chartTransition?.progress === 1 || (!firstFrame && !chartTransition?.returning && !visitorsInView())) return;
+  if (chartTransition?.progress === 1 || (!firstFrame && !chartTransition && !visitorsInView())) return;
   firstFrame = false;
   if (!A6) C4 += dt;
   const specimenRange = Math.min(O1, u8) < 2.30 && Math.max(O1, u8) > .68;
@@ -4243,7 +4243,6 @@ function _4(now) {
     (chartTransition ? heatmapToChartPose(chartTransition.progress) : heatmapPose(O1)).morph;
   J5.uniforms.solarTime.value = C4;
   m6.render(x4, ds);
-  if (chartTransition?.returning) chartTransition.paintReturn(canvas);
 
   if (!earthHotspot.hidden) e8(earthHotspot, q1.planets[1].body.getWorldPosition(new S), q1.cameras[2]);
 }
