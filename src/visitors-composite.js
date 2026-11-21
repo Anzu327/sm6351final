@@ -4,7 +4,7 @@ export const visitorsComposite = `
 varying vec2 vUv;
 uniform sampler2D a, b, solarDepth;
 uniform vec2 pixelSize;
-uniform float blend, aspect, portal, solarWeight, earthWeight, solarTime;
+uniform float blend, aspect, portal, solarWeight, earthWeight, solarTime, mapMorph;
 ${printPaper}
 
 float hash(vec2 p) {
@@ -86,7 +86,11 @@ void main() {
     }
     if (earthWeight > 0.) incoming = applyPaper(incoming,pixel,tooth,fine);
   } else if (earthWeight > 0.) {
-    outgoing = mix(outgoing,applyPaper(outgoing,pixel,tooth,fine),earthWeight);
+    float paperWeight = earthWeight;
+    if (mapMorph > 0. && texture2D(solarDepth,vUv).r < 1.) {
+      paperWeight *= 1.-mapMorph;
+    }
+    outgoing = mix(outgoing,applyPaper(outgoing,pixel,tooth,fine),paperWeight);
   } else {
     float grain = fine*.035;
     outgoing += grain*smoothstep(.015,.45,dot(outgoing,vec3(.2126,.7152,.0722)));

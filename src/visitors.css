@@ -69,6 +69,23 @@ a {
 .scene-interface {
   display: contents;
 }
+
+.visitors-view[data-chapter="3"] .scene-interface :is(.scene-caption, .scene-tools) {
+  display: none;
+}
+
+.chart-transition :is(.scene-caption, #heatmap-legend, #continent-controls, #meteorite-card, #meteorite-leader) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease, visibility 220ms;
+}
+
+.chart-transition #continent-overlay {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .scene-caption {
   position: fixed;
   left: 4vw;
@@ -827,33 +844,41 @@ summary {
   z-index: 2;
   pointer-events: none;
 }
-#continent-overlay path {
+#continent-regions > path {
   fill: #fff0c908;
-  stroke: #ffe9c480;
+  stroke: #a29bbb;
   stroke-width: .65;
   stroke-linejoin: round;
   pointer-events: visibleFill;
   touch-action: pan-y;
   cursor: pointer;
+  /* Chromium scales its native outline with the projected SVG geometry. */
+  outline: none;
 }
-#continent-overlay path:is(:hover, .highlighted) {
+#continent-regions > path:is(:hover, :focus-visible) {
   fill: #fff0c925;
-  stroke: #fff0c9;
+  stroke: #dcd2f5;
   stroke-width: 1.5;
 }
-#continent-overlay[data-focused] path {
+#continent-overlay[data-focused] #continent-regions > path {
   fill: #12184938;
   stroke: none;
 }
-#continent-overlay[data-focused] path:not(.selected):is(:hover, .highlighted) {
+#continent-overlay[data-focused] #continent-regions > path:is(:hover, :focus-visible) {
   fill: #fff0c925;
-  stroke: #fff0c9;
+  stroke: #dcd2f5;
 }
-#continent-overlay[data-focused] path.selected {
+#continent-overlay[data-focused] #continent-regions > path[aria-pressed="true"] {
   fill: none;
-  stroke: #ffe9c4b8;
+  stroke: #a29bbb;
   stroke-width: 1;
-  pointer-events: none;
+  pointer-events: visibleFill;
+}
+#continent-regions > path:focus-visible,
+#continent-overlay[data-focused] #continent-regions > path:focus-visible {
+  stroke: #dcd2f5;
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
 }
 #continent-controls {
   position: fixed;
@@ -862,41 +887,11 @@ summary {
   bottom: 9.5vh;
   width: min(46vw, 510px);
   color: var(--warm-paper);
+  pointer-events: none;
 }
-#continent-menu,
-#continent-detail {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-}
-#continent-controls button {
-  padding: 7px 11px;
-  border: 1px solid #a9bfff80;
-  border-radius: 3px;
-  background: #192164e8;
-  color: inherit;
-  font-size: 12px;
-}
-#continent-controls button:is(:hover, :focus-visible, [aria-pressed="true"]) {
-  background: var(--warm-paper);
-  color: var(--blue-ink);
-}
-#continent-controls button:focus-visible { outline: 2px solid var(--warm-paper); }
-#continent-detail { margin-top: 9px; }
-#continent-detail strong { font-size: 15px; letter-spacing: .02em; }
-#continent-featured {
-  display: flex;
-  flex: 0 0 100%;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-}
-#continent-featured button {
-  border-color: #ffdf92a0;
-}
-#continent-featured button[aria-expanded="true"] {
-  background: var(--warm-paper);
-  color: var(--blue-ink);
+#continent-hint {
+  margin: 0;
+  font-size: 14px;
 }
 .meteorite-pin .pin-hit {
   fill: transparent;
@@ -904,21 +899,27 @@ summary {
   touch-action: pan-y;
   cursor: pointer;
 }
+.meteorite-pin { outline: none; }
 .meteorite-pin:not([transform]) { display: none; }
-.meteorite-pin .pin-ring {
-  fill: #172060;
-  stroke: #fff2c3;
-  stroke-width: 1.6;
+.meteorite-pin .pin-drop {
+  fill: #0b1727;
+  stroke: #a8e4ee;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 1px 2px #060e16);
+  pointer-events: visiblePainted;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+.meteorite-pin .pin-center {
+  fill: #a8e4ee;
   pointer-events: none;
 }
-.meteorite-pin .pin-core {
-  fill: #ffdb87;
-  pointer-events: none;
+.meteorite-pin:is(:hover, :focus-visible) .pin-drop {
+  fill: #224e4b;
+  stroke-width: 2;
 }
-.meteorite-pin:is(:hover, .selected, .highlighted) .pin-ring {
-  fill: #856147;
-  stroke-width: 2.4;
-}
+.meteorite-pin.selected .pin-drop { fill: #ffce86; stroke: #dcd2f5; stroke-width: 2; }
+.meteorite-pin.selected .pin-center { fill: #232037; }
 #meteorite-leader {
   position: fixed;
   inset: 0;
@@ -940,14 +941,15 @@ summary {
   z-index: 6;
   top: max(125px, 15vh);
   right: 4vw;
-  width: min(315px, 37vw);
+  box-sizing: border-box;
+  width: min(350px, 37vw);
   max-height: calc(100vh - max(125px, 15vh) - 24px);
   overflow-y: auto;
   padding: 16px 18px;
-  color: var(--warm-paper);
-  background: #172163f5;
-  border: 1px solid #a9bfff90;
-  border-radius: 4px;
+  color: #27233e;
+  background: #f5e8d0;
+  border-inline-start: 6px solid #b68245;
+  box-shadow: 0 8px 32px #060e1670;
 }
 #meteorite-card[data-dock="left"] { left: 4vw; right: auto; }
 #meteorite-card button {
@@ -957,23 +959,30 @@ summary {
   font-size: 20px;
   width: 32px;
   height: 32px;
+  color: #302238;
 }
-#meteorite-card :is(button, a):focus-visible { outline: 2px solid var(--warm-paper); }
-#meteorite-card h3 { margin: 7px 36px 2px 0; font-size: 20px; }
+#meteorite-card button:focus-visible { outline: 2px solid #664719; outline-offset: 2px; }
+#meteorite-card .meteorite-card-kind { color: #744519; font-weight: 700; }
+#meteorite-card h3 {
+  margin: 7px 30px 2px 0;
+  font: 400 clamp(22px, 2.3vw, 32px)/1.08 Georgia, serif;
+  overflow-wrap: anywhere;
+}
 #meteorite-card p { margin: 6px 0; font-size: 13px; line-height: 1.45; }
-#meteorite-card .meteorite-card-location { color: #c6d5fa; font-size: 12px; }
-#meteorite-card a { display: inline-block; margin-top: 6px; font-size: 11px; text-decoration: underline; }
+#meteorite-card :is(.meteorite-card-location, .meteorite-card-facts) { color: #51445a; font-size: 12px; }
+#meteorite-card .meteorite-card-facts { border-block: 1px solid #98673f55; padding-block: 7px; }
 .meteorite-photo { margin: 10px 0 8px; }
 .meteorite-photo img {
   display: block;
   width: 100%;
   height: clamp(92px, 21vh, 177px);
   object-fit: contain;
-  background: #0c1335;
-  border: 1px solid #a9bfff65;
+  box-sizing: border-box;
+  padding: 6px;
+  background: #ded2bd;
+  border: 1px solid #98673f55;
 }
-.meteorite-photo figcaption { color: #c6d5fa; font-size: 10px; line-height: 1.3; }
-.meteorite-photo figcaption a { font-size: inherit; }
+.meteorite-photo figcaption { padding-top: 4px; color: #51445a; font-size: 11px; line-height: 1.3; }
 .heatmap-ramp {
   height: 10px;
   margin-top: 3px;
@@ -1010,13 +1019,6 @@ summary {
     left: 7vw;
     width: 86vw;
   }
-  #continent-controls button { min-height: 36px; }
-  #continent-menu {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 3px 3px 6px;
-  }
-  #continent-menu button { flex: none; white-space: nowrap; }
   #meteorite-card {
     top: auto;
     bottom: calc(max(56px, 11vh) + 87px);

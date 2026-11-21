@@ -6,10 +6,10 @@ import { featuredMeteorites } from './data/featured-meteorites.js';
 import featuredPhotos from './data/featured-photos.json';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
+const massFormat = new Intl.NumberFormat('en', { maximumSignificantDigits: 4 });
 
 export function createContinentMeteorites(overlay) {
   const pins = overlay.querySelector('#meteorite-pins');
-  const list = visitorsRoot.querySelector('#continent-featured');
   const card = visitorsRoot.querySelector('#meteorite-card');
   const leader = visitorsRoot.querySelector('#meteorite-leader');
   const line = leader.querySelector('path');
@@ -19,36 +19,49 @@ export function createContinentMeteorites(overlay) {
   const title = card.querySelector('h3');
   const subtitle = card.querySelector('.meteorite-card-subtitle');
   const location = card.querySelector('.meteorite-card-location');
+  const facts = card.querySelector('.meteorite-card-facts');
   const story = card.querySelector('.meteorite-card-story');
-  const source = card.querySelector('.meteorite-card-source');
   const photo = card.querySelector('.meteorite-photo img');
-  const credit = card.querySelector('.meteorite-photo-credit');
-  const license = card.querySelector('.meteorite-photo-license');
+  const caption = card.querySelector('.meteorite-photo figcaption');
   let active = null;
   let shown = [];
   let lastFrame = '';
 
   const entries = featuredMeteorites.flatMap(record => {
+    if (!featuredPhotos[record.id]) return [];
     const row = catalogue.rows.find(([id]) => id === record.id);
     if (!row || !Number.isFinite(row[6]) || !Number.isFinite(row[7])) return [];
-    const position = mapPoint(row[7], row[6]);
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = record.title;
-    button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-controls', card.id);
+    const [, name, year, mass, classification, status, lat, lon, , place] = row;
+    const position = mapPoint(lon, lat);
+    const displayTitle = record.title ?? name;
     const marker = document.createElementNS(svgNamespace, 'g');
     marker.classList.add('meteorite-pin');
-    marker.innerHTML = '<circle class="pin-hit" r="13"/><circle class="pin-ring" r="6"/><circle class="pin-core" r="2"/>';
+    marker.setAttribute('role', 'button');
+    marker.setAttribute('tabindex', '0');
+    marker.setAttribute('aria-label', displayTitle);
+    marker.setAttribute('aria-controls', card.id);
+    marker.setAttribute('aria-expanded', 'false');
+    marker.innerHTML = `
+      <circle class="pin-hit" r="14"/>
+      <path class="pin-drop" d="M0 0C-3 -4 -8 -8 -8 -13A8 8 0 1 1 8 -13C8 -8 3 -4 0 0Z"/>
+      <circle class="pin-center" cy="-13" r="2.3"/>`;
     const tooltip = document.createElementNS(svgNamespace, 'title');
-    tooltip.textContent = record.title;
+    tooltip.textContent = displayTitle;
     marker.append(tooltip);
     const hit = marker.querySelector('.pin-hit');
-    const entry = { ...record, classification: row[4], status: row[5], position, button, marker, hit };
-    button.addEventListener('click', () => open(entry));
+    const entry = {
+      ...record,
+      title: displayTitle,
+      date: record.date ?? String(year),
+      location: record.location ?? place,
+      classification, status, mass, lat, lon, position, marker, hit,
+    };
     marker.addEventListener('click', () => open(entry));
-    button.addEventListener('focus', () => marker.classList.add('highlighted'));
-    button.addEventListener('blur', () => marker.classList.remove('highlighted'));
+    marker.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      open(entry);
+    });
     return [entry];
   });
 
@@ -58,8 +71,8 @@ export function createContinentMeteorites(overlay) {
     card.hidden = true;
     leader.setAttribute('hidden', '');
     previous?.marker.classList.remove('selected');
-    previous?.button.setAttribute('aria-expanded', 'false');
-    if (restoreFocus) previous?.button.focus({ preventScroll: true });
+    previous?.marker.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) previous?.marker.focus({ preventScroll: true });
     return Boolean(previous);
   }
 
@@ -68,20 +81,20 @@ export function createContinentMeteorites(overlay) {
     active = entry;
     kind.textContent = entry.status === 'Fell' ? 'OBSERVED FALL' : 'RECORDED FIND';
     title.textContent = entry.title;
-    subtitle.textContent = entry.chinese;
+    subtitle.textContent = entry.chinese ?? '';
+    subtitle.hidden = !entry.chinese;
     location.textContent = `${entry.date} · ${entry.location} · ${entry.classification}`;
-    story.textContent = entry.story;
+    const coordinates = `${Math.abs(entry.lat).toFixed(2)}° ${entry.lat < 0 ? 'S' : 'N'}, ${Math.abs(entry.lon).toFixed(2)}° ${entry.lon < 0 ? 'W' : 'E'}`;
+    const mass = entry.mass >= 1000 ? `${massFormat.format(entry.mass / 1000)} kg` : `${massFormat.format(entry.mass)} g`;
+    facts.textContent = [entry.mass > 0 ? `Catalogue mass: ${mass}` : '', coordinates].filter(Boolean).join(' · ');
+    story.textContent = entry.story ?? '';
+    story.hidden = !entry.story;
     const image = featuredPhotos[entry.id];
     photo.alt = image.alt;
     photo.src = `${assetBase}visitors/featured/${entry.id}.webp`;
-    credit.href = image.source;
-    credit.textContent = image.author;
-    license.href = image.licenseUrl;
-    license.textContent = image.license;
-    source.href = entry.source;
-    source.textContent = `${entry.sourceLabel} ↗`;
+    caption.textContent = [image.label, image.author, image.license, 'Resized to WebP'].filter(Boolean).join(' · ');
     entry.marker.classList.add('selected');
-    entry.button.setAttribute('aria-expanded', 'true');
+    entry.marker.setAttribute('aria-expanded', 'true');
     card.hidden = false;
     updateLeader();
     closeButton.focus({ preventScroll: true });
@@ -107,7 +120,7 @@ export function createContinentMeteorites(overlay) {
       : (dock === 'right' ? box.left : box.right);
     const endY = narrow
       ? (dock === 'top' ? box.bottom : box.top)
-      : Math.min(box.bottom - 12, photo.getBoundingClientRect().top + 38);
+      : Math.min(box.bottom - 12, photo.getBoundingClientRect().top + 24);
     const path = narrow
       ? `M${x} ${y} L${endX} ${endY + (dock === 'top' ? 14 : -14)} V${endY}`
       : `M${x} ${y} L${endX + (dock === 'right' ? -18 : 18)} ${endY} H${endX}`;
@@ -122,9 +135,7 @@ export function createContinentMeteorites(overlay) {
     close();
     shown = entries.filter(entry => entry.region === name);
     for (const { marker } of shown) marker.removeAttribute('transform');
-    list.replaceChildren(...shown.map(entry => entry.button));
     pins.replaceChildren(...shown.map(entry => entry.marker));
-    list.hidden = shown.length === 0;
     lastFrame = '';
   }
 

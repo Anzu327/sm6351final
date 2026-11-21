@@ -11,6 +11,9 @@ const stone = {
 const finalRingEntry = .42 * passageSpan;
 const finalRingExit = .52 * passageSpan;
 const chapterStops = [0, stone.display, 2.50, 3.98, 5.32];
+const mapHold = .58;
+export const chartTransitionSpan = 2.50;
+let chartTransitionEnabled = false;
 export const startsInPassage = Boolean(storySection) || new URLSearchParams(window.location.search).get('entry') === 'passage';
 
 function timeline() {
@@ -69,5 +72,11 @@ export function specimenView(position, paused) {
 
 export function resizeStory() {
   const section = storySection ?? visitorsRoot.getElementById('scroll-story');
-  section.style.height = `${localTop(chapterStops.at(-1)) + innerHeight}px`;
+  const tail = chartTransitionEnabled ? 1 + mapHold + chartTransitionSpan : 1;
+  section.style.height = `${localTop(chapterStops.at(-1)) + tail * innerHeight}px`;
+}
+
+export function enableChartTransition() {
+  chartTransitionEnabled = true;
+  resizeStory();
 }
