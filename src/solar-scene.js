@@ -7,7 +7,7 @@ import {
   SphereGeometry, SRGBColorSpace, TextureLoader, Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { clamp, ease, earthArrivalPose, powerInOut } from './motion.js';
+import { chartReturnSpan, clamp, ease, earthArrivalPose, mix, outroFlightPoint, outroFlightProgress, powerInOut } from './motion.js';
 import { makeSolarBelt, makeSolarComet, makeSolarParticles } from './solar-atmosphere.js';
 import { earthLatitudePaint } from './earth-palette.js';
 import { createSolarMeteorShowers } from './meteor-arrivals.js';
@@ -460,8 +460,9 @@ export function createSolarScene(scene, camera) {
   const earthTarget = new Vector3();
   const earthView = new Vector3();
   const flareOffset = new Vector3();
+  const returnDirection = new Vector3();
 
-  function update({ p, time, mobile, yaw, pitch, step, dt, paused, pointer, orbit }) {
+  function update({ p, time, mobile, yaw, pitch, step, dt, paused, pointer, orbit, returnShot }) {
     clock.value = time;
     sun.rotation.y = time * .10;
     const viewportScale = Math.min(devicePixelRatio, 1.6) * (innerHeight / 900);
@@ -518,8 +519,9 @@ export function createSolarScene(scene, camera) {
 
     // Stay outside the surface. The projected sphere exceeds the diagonal;
     // no background or second globe is exposed during the material handoff.
-    const coverDistance = earth.size * Math.sqrt(1 + 1 / (Math.tan(15 * radians) * arrival.cover) ** 2);
-    const distance = arrivalOffset.length() * (coverDistance / arrivalOffset.length()) ** approach;
+    const halfFov = Math.tan(15 * radians);
+    const coverDistance = earth.size * Math.hypot(1, 1 / (halfFov * arrival.cover));
+    const distance = approachDistance(arrivalOffset.length(), coverDistance, approach);
     closeDirection.copy(arrivalDirection).lerp(frontDirection, center).normalize();
     arrivalPosition.copy(earthTarget).addScaledVector(closeDirection, distance);
     camera.position.lerp(arrivalPosition, center);
@@ -530,6 +532,25 @@ export function createSolarScene(scene, camera) {
     earth.body.rotation.x += (.15 + pitch - earth.body.rotation.x) * center;
     earth.body.rotation.y += (-2.6 + yaw + arrival.turn - earth.body.rotation.y) * center;
     earth.body.rotation.z *= 1 - center;
+    if (returnShot) {
+      const turn = ease(.59, .88, returnShot.progress);
+      const push = ease(.67, .91, returnShot.progress);
+      const latitude = mix(0, 54.9594 * radians, turn);
+      const longitude = mix(returnShot.longitude, 60.3221 * radians, turn);
+      const startDistance = earth.size * Math.hypot(1, innerHeight / (2 * returnShot.radius * halfFov));
+      const returnDistance = approachDistance(startDistance, coverDistance, push);
+      earth.body.rotation.set(0, -Math.PI / 2 - longitude, 0);
+      returnDirection.set(0, Math.sin(latitude), Math.cos(latitude));
+      camera.position.copy(earthTarget).addScaledVector(returnDirection, returnDistance);
+      camera.lookAt(earthTarget);
+      const scroll = -1 - (1 - returnShot.progress) * chartReturnSpan;
+      const [x, y] = outroFlightPoint(outroFlightProgress(scroll), .5, .5);
+      const track = ease(.66, .76, returnShot.progress) * (1 - ease(.85, .96, returnShot.progress));
+      camera.setViewOffset(innerWidth, innerHeight,
+        (x - .5) * innerWidth * .28 * track, (y - .5) * innerHeight * .22 * track, innerWidth, innerHeight);
+    } else if (camera.view?.enabled) {
+      camera.clearViewOffset();
+    }
     camera.updateMatrixWorld();
 
     const depth = -earthView.copy(earthTarget).applyMatrix4(camera.matrixWorldInverse).z;
@@ -556,4 +577,8 @@ export function createSolarScene(scene, camera) {
   }
 
   return { planets: planets.filter(planet => planet.name), belt, update, earthGeographyMap };
+}
+
+function approachDistance(start, end, progress) {
+  return start * (end / start) ** progress;
 }
