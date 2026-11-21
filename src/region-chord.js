@@ -3,6 +3,7 @@ import { scaleSqrt } from 'd3-scale';
 import { select } from 'd3-selection';
 import { arc, curveBundle, lineRadial } from 'd3-shape';
 import data from 'virtual:meteorite-region-counts';
+import { mountChelyabinskOutro } from './chelyabinsk-outro.js';
 import './region-chord.css';
 
 const format = new Intl.NumberFormat('en');
@@ -203,4 +204,6 @@ function renderBundling(section) {
   update();
 }
 
-renderBundling(document.getElementById('region-chord'));
+const regionChart = document.getElementById('region-chord');
+renderBundling(regionChart);
+mountChelyabinskOutro();

@@ -3903,7 +3903,7 @@ let I=new i0,Y=new tn(I,new D0({transparent:!0,depthWrite:!1,uniforms:{color:{va
   l[3].position.set(0, 0, coverDistance * (restDistance / coverDistance) ** arrival.reveal);
   l[3].lookAt(0, 0, 0);
   if (chartTransition) {
-    const fit = ease(.55, .82, chartTransition.progress);
+    const fit = chartTransition.returning ? 1 : ease(.55, .82, chartTransition.progress);
     const halfHeight = l[3].position.z * Math.tan(l[3].fov * Math.PI / 360);
     const worldPerPixel = 2 * halfHeight / innerHeight;
     const angularRadius = chartTransition.radius * worldPerPixel / l[3].position.z;
@@ -3911,6 +3911,13 @@ let I=new i0,Y=new tn(I,new D0({transparent:!0,depthWrite:!1,uniforms:{color:{va
     E.position.x = mix(E.position.x, (chartTransition.x - innerWidth / 2) * worldPerPixel, fit);
     E.position.y = mix(E.position.y, (innerHeight / 2 - chartTransition.y) * worldPerPixel, fit);
     E.scale.setScalar(mix(E.scale.x, fittedRadius, fit));
+  }
+  if (chartTransition?.returning > .45) {
+    solar.update({ ...state, p: 3.34, returnShot: {
+      progress: chartTransition.returning,
+      radius: chartTransition.radius,
+      longitude: -mapPose.globeYaw,
+    } });
   }
   M.visible = !mapPose.surface;
   heatmap.update(mapPose, l[3], E, dt);
@@ -4172,7 +4179,7 @@ function _4(now) {
   T4 = now;
   const chartTransition = updateRegionChart();
   visitorsView.classList.toggle('chart-transition', Boolean(chartTransition));
-  if (chartTransition?.progress === 1 || (!firstFrame && !visitorsInView())) return;
+  if (chartTransition?.progress === 1 || (!firstFrame && !chartTransition?.returning && !visitorsInView())) return;
   firstFrame = false;
   if (!A6) C4 += dt;
   const specimenRange = Math.min(O1, u8) < 2.30 && Math.max(O1, u8) > .68;
@@ -4216,9 +4223,10 @@ function _4(now) {
 
   // The specimen layer covers the cut from the opening to the solar system.
   const arrival = earthArrivalPose(O1, innerWidth / innerHeight);
-  const outgoing = O1 < 1.5 ? 0 : O1 < 3.72 ? 2 : 3;
-  const incoming = O1 >= 3.64 ? 3 : outgoing;
-  const blend = outgoing !== incoming ? arrival.blend : 0;
+  const solarReturn = chartTransition?.returning ? ease(.45, .62, chartTransition.returning) : 0;
+  const outgoing = solarReturn > 0 ? 2 : O1 < 1.5 ? 0 : O1 < 3.72 ? 2 : 3;
+  const incoming = solarReturn === 1 ? 2 : O1 >= 3.64 ? 3 : outgoing;
+  const blend = outgoing === incoming ? 0 : solarReturn > 0 ? 1 - solarReturn : arrival.blend;
   visitorsView.classList.toggle("transitioning", O1 > 3.30 && O1 < 3.96);
   m6.setRenderTarget(W9);
   m6.render(q1.scenes[outgoing], q1.cameras[outgoing]);
@@ -4235,6 +4243,7 @@ function _4(now) {
     (chartTransition ? heatmapToChartPose(chartTransition.progress) : heatmapPose(O1)).morph;
   J5.uniforms.solarTime.value = C4;
   m6.render(x4, ds);
+  if (chartTransition?.returning) chartTransition.paintReturn(canvas);
 
   if (!earthHotspot.hidden) e8(earthHotspot, q1.planets[1].body.getWorldPosition(new S), q1.cameras[2]);
 }
