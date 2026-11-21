@@ -1,19 +1,25 @@
-import { cellToBoundary, cellToLatLng, latLngToCell } from 'h3-js';
+import { cellToBoundary, cellToChildren, cellToLatLng, cellToParent, cellsToMultiPolygon, gridDisk, latLngToCell } from 'h3-js';
 import {
   Color, CylinderGeometry, DynamicDrawUsage, InstancedBufferAttribute, InstancedBufferGeometry,
   InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Quaternion,
   ShaderMaterial, Vector2, Vector3,
 } from 'three';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { radialLineInk } from './earth-palette.js';
 
 // Use the World Population demo's H3 resolution and three-globe's default
 // 20% cell margin. Approximate each footprint with a tapered instance.
 const cellResolution = 4;
+const regionResolution = 2;
 const cellFill = .8;
 const baseRadius = 1.006;
 const minHighlightHeight = .17;
 const minHighlightRadius = .0115;
 export const landingCellId = (lat, lon) => latLngToCell(lat, lon, cellResolution);
+const regionId = cellId => cellToParent(cellId, regionResolution);
+export const landingRegionId = (lat, lon) => regionId(landingCellId(lat, lon));
 
 function createRegionalGlow() {
   const plane = new PlaneGeometry(2, 2);
@@ -89,8 +95,13 @@ export function createLandingDensity(parent, pointOnSphere) {
   parent.add(columns);
   const glow = createRegionalGlow();
   parent.add(glow);
+  const outline = new LineSegments2(new LineSegmentsGeometry(), new LineMaterial({ color: '#ffe5f1', linewidth: 2 }));
+  outline.name = 'Selected meteorite region';
+  outline.visible = false;
+  parent.add(outline);
   let cells = [];
   let recordCells = [];
+  let regionRecords = new Map();
   let counted = new Uint8Array(0);
   let landedCount = 0;
   const transform = new Object3D();
@@ -109,6 +120,7 @@ export function createLandingDensity(parent, pointOnSphere) {
 
   function setRecords(records) {
     const bins = new Map();
+    regionRecords = new Map();
     recordCells = records.map(record => {
       const key = landingCellId(record.lat, record.lon);
       let cell = bins.get(key);
@@ -120,13 +132,18 @@ export function createLandingDensity(parent, pointOnSphere) {
           sum + normal.distanceTo(pointOnSphere(edgeLat, edgeLon, 1)), 0);
         const radius = cellFill * sumRadius / boundary.length;
         const rotation = new Quaternion().setFromUnitVectors(up, normal);
-        cell = { key, lat, lon, normal, rotation, radius, count: 0, height: 0, drawnHeight: 0, emphasis: 0, records: [] };
+        const regionKey = regionId(key);
+        cell = { key, regionKey, lat, lon, normal, rotation, radius, count: 0, height: 0, drawnHeight: 0, emphasis: 0, records: [] };
         bins.set(key, cell);
       }
       cell.records.push(record);
+      let regional = regionRecords.get(cell.regionKey);
+      if (!regional) regionRecords.set(cell.regionKey, regional = []);
+      regional.push(record);
       return cell;
     });
     hovered = selected = null;
+    outline.visible = false;
     cells = [...bins.values()];
     glow.geometry.instanceCount = 0;
     glow.visible = false;
@@ -148,6 +165,40 @@ export function createLandingDensity(parent, pointOnSphere) {
       recordCells[index].count++;
       landedCount++;
     }
+  }
+
+  function regionForCell(cell) {
+    const keys = new Set(gridDisk(cell.regionKey, 1));
+    const [lat, lon] = cellToLatLng(cell.regionKey);
+    const records = [...keys].flatMap(key => regionRecords.get(key) ?? []);
+    return { keys, lat, lon, records };
+  }
+
+  function select(cell, region) {
+    selected = cell;
+    outline.visible = Boolean(region);
+    if (!region) return;
+
+    // Trace the union of the same fine cells used to assign catalogue records.
+    const children = [...region.keys].flatMap(key => cellToChildren(key, cellResolution));
+    const points = [];
+    const alongEdge = new Vector3();
+    for (const polygon of cellsToMultiPolygon(children)) {
+      for (const ring of polygon) {
+        const vertices = ring.map(([lat, lon]) => pointOnSphere(lat, lon, 1));
+        for (let index = 0; index < vertices.length; index++) {
+          const start = vertices[index];
+          const end = vertices[(index + 1) % vertices.length];
+          for (let step = 0; step <= 2; step++) {
+            alongEdge.lerpVectors(start, end, step / 2).normalize().multiplyScalar(1.015);
+            points.push(alongEdge.x, alongEdge.y, alongEdge.z);
+            if (step === 1) points.push(alongEdge.x, alongEdge.y, alongEdge.z);
+          }
+        }
+      }
+    }
+    outline.geometry.dispose();
+    outline.geometry = new LineSegmentsGeometry().setPositions(points);
   }
 
   function pick(camera, x, y, width, height, tolerance) {
@@ -254,10 +305,9 @@ export function createLandingDensity(parent, pointOnSphere) {
   }
 
   return {
-    setRecords, land, update, pick,
+    setRecords, land, update, pick, regionForCell, select,
     setViewport(width, height) { glow.material.uniforms.viewport.value.set(width, height); },
     hover(cell) { hovered = cell; },
-    select(cell) { selected = cell; },
     get landedCount() { return landedCount; },
   };
 }
