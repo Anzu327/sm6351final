@@ -6,6 +6,8 @@
   position: relative;
   z-index: 40;
   padding: clamp(28px, 5vw, 70px) clamp(12px, 4vw, 60px);
+  /* The fading ::before layer owns the backdrop over the WebGL stage. */
+  background: transparent;
   color: var(--chord-text);
   font: 400 16px/1.4 var(--sans, 'Segoe UI', Arial, sans-serif);
   font-variant-numeric: tabular-nums;
