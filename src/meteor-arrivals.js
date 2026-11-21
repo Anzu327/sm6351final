@@ -310,7 +310,8 @@ export function createMeteorArrivals(earth, pointOnSphere) {
     density.update(1);
   }
 
-  return { setRecords, update, complete, pickRegion: density.pick, hoverRegion: density.hover, selectRegion: density.select,
+  return { setRecords, update, complete, pickRegion: density.pick, hoverRegion: density.hover,
+    regionForCell: density.regionForCell, selectRegion: density.select,
     get count() { return records.length; },
     get revealedCount() { return density.landedCount; } };
 }

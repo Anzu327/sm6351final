@@ -28,6 +28,10 @@
   font: 400 var(--chord-body-size)/1.25 var(--chord-body-font);
   font-variant-numeric: tabular-nums;
 }
+#visitors-story + #region-chord {
+  /* Cover the subpixel seam between the sticky map canvas and this section. */
+  box-shadow: 0 -2px var(--chord-background);
+}
 .chord-inner {
   width: min(100%, 1400px);
   margin-inline: auto;
