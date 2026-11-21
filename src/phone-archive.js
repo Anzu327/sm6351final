@@ -70,9 +70,42 @@ function paintPosters() {
   texture.needsUpdate = true;
 }
 
+function paintPhoneScreen({canvas, texture, aspect}, poster) {
+  const width = canvas.width = 512;
+  const height = canvas.height = Math.round(width / aspect);
+  const ctx = canvas.getContext('2d');
+  const inset = 32;
+  ctx.fillStyle = '#111a37';
+  ctx.fillRect(0, 0, width, height);
+  if (poster.naturalWidth) {
+    const scale = Math.min(
+      (width - inset * 2) / poster.naturalWidth,
+      (height - 196) / poster.naturalHeight
+    );
+    const imageWidth = poster.naturalWidth * scale;
+    const imageHeight = poster.naturalHeight * scale;
+    const imageTop = (height - imageHeight) / 2;
+    ctx.drawImage(poster, (width - imageWidth) / 2, imageTop, imageWidth, imageHeight);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f7ecc9';
+    ctx.font = '600 36px Georgia';
+    ctx.fillText('Chelyabinsk fireball', width / 2, imageTop - 24);
+    ctx.fillStyle = '#b6c8e7';
+    ctx.font = '500 20px system-ui';
+    ctx.fillText('DASHCAM  ·  15 FEBRUARY 2013', width / 2, imageTop + imageHeight + 36);
+  }
+  texture.needsUpdate = true;
+}
+
 function attach() {
   if (scene || !section.phoneArchiveScene || !clips.length) return;
   scene = section.phoneArchiveScene;
+  const { poster } = clips[0];
+  const updateScreen = () => paintPhoneScreen(scene.screen, poster);
+  poster.addEventListener('load', updateScreen, { once: true });
+  updateScreen();
+
   const faces = [];
   scene.ring?.traverse(node=>{
     if (node.isMesh && node.geometry.index) faces.push(node);

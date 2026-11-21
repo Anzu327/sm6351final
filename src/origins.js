@@ -2,7 +2,7 @@ import { scaleLinear } from 'd3-scale';
 import { pointer, select } from 'd3-selection';
 import { Delaunay } from 'd3-delaunay';
 import classCounts from 'virtual:origins-class-counts';
-import { cameras, flight, orbit, shockArrivals } from './origins-data.js';
+import { flight, orbit, shockArrivals } from './origins-data.js';
 import './origins.css';
 
 const plots = new Map();
@@ -12,8 +12,8 @@ const flightName = document.querySelector('[data-flight-name]');
 const flightValue = document.querySelector('[data-flight-value]');
 const recordControls = document.querySelectorAll('[data-records]');
 const formatCount = new Intl.NumberFormat('en');
-let activeEvent = 2;
-let previewEvent = null;
+const flightTimes = flight.map(event => event.time);
+const flightScales = new Map();
 let countMode = 'official';
 
 function label(svg, value, x, y, style, anchor = 'start') {
@@ -200,10 +200,16 @@ function speedPlot({ svg, width, height }) {
   }
   label(svg, 'Speed · km/s', 20, 28, 'origin-axis-text');
   const points = flight.map(event => [x(event.time), y(event.speed)]);
-  const path = points.map(point => point.join(',')).join(' ');
+  const lastBeforeSlowdown = 3; // End of thermal cloud formation in Table S1.
+  const earlyPoints = points.slice(0, lastBeforeSlowdown + 1);
+  const slowdownPoints = points.slice(lastBeforeSlowdown);
+  svg.append('polyline').attr('class', 'speed-early')
+    .attr('points', earlyPoints.join(' ')).attr('fill', 'none');
   for (const style of ['speed-halo', 'speed-trail']) {
-    svg.append('polyline').attr('class', style).attr('points', path).attr('fill', 'none');
+    svg.append('polyline').attr('class', style).attr('points', slowdownPoints.join(' ')).attr('fill', 'none');
   }
+  const earlyLabelX = (x(0) + earlyPoints.at(-1)[0]) / 2;
+  label(svg, '≈19.2 km/s', earlyLabelX, y(19.2) + 35, 'origin-axis-text', 'middle');
   const hitAreas = Delaunay.from(points).voronoi([x(0) - 16, y(20) - 16, width, bottom]);
   flight.forEach((event, index) => {
     const [px, py] = points[index];
@@ -260,83 +266,75 @@ function shockPlot({ svg, width, height }) {
 
 function cameraPlot({ svg, width, height }) {
   const degreeRatio = Math.cos(55 * Math.PI / 180);
-  const scale = Math.min((width - 83) / (7.2 * degreeRatio), (height - 76) / 3);
-  const x = lon => width / 2 + 12 + (lon - 61.5) * scale * degreeRatio;
-  const y = lat => height / 2 - 5 - (lat - 55.2) * scale;
-  label(svg, 'Southern Urals', 17, 27);
+  const left = 55;
+  const right = width - 20;
+  const top = 65;
+  const bottom = height - 44;
+  const scale = Math.min((right - left) / (7.4 * degreeRatio), (bottom - top) / 3);
+  const x = lon => (left + right) / 2 + (lon - 61.4) * scale * degreeRatio;
+  const y = lat => (top + bottom) / 2 - (lat - 55.2) * scale;
+  label(svg, 'Path across the Southern Urals', 18, 36);
   for (const lon of [58, 60, 62, 64]) {
     line(svg, x(lon), y(56.7), x(lon), y(53.7), 'origin-grid');
-    label(svg, `${lon}°E`, x(lon), y(53.7) + 23, 'origin-axis-text', 'middle');
+    label(svg, `${lon}°E`, x(lon), y(53.7) + 27, 'origin-axis-text', 'middle');
   }
   for (const lat of [54, 55, 56]) {
-    line(svg, x(57.9), y(lat), x(65.1), y(lat), 'origin-grid');
-    label(svg, `${lat}°N`, x(57.9) - 5, y(lat) + 5, 'origin-axis-text', 'end');
+    line(svg, x(57.7), y(lat), x(65.1), y(lat), 'origin-grid');
+    label(svg, `${lat}°N`, x(57.7) - 8, y(lat) + 6, 'origin-axis-text', 'end');
   }
-  svg.append('polyline')
-    .attr('points', flight.map(event => `${x(event.lon)},${y(event.lat)}`).join(' '))
-    .attr('class', 'origin-measure').attr('fill', 'none').attr('stroke-width', 2);
-  for (const [name, lat, lon, type] of cameras) {
-    const site = type === 'shadow'
-      ? svg.append('rect').attr('x', -3).attr('y', -3).attr('width', 6).attr('height', 6)
-        .attr('transform', `translate(${x(lon)},${y(lat)}) rotate(45)`)
-        .attr('fill', '#0c1853').attr('stroke', 'var(--origins-cream)')
-      : dot(svg, x(lon), y(lat), 3.6, 'origin-point');
-    site.append('title').text(name);
+
+  for (const [name, lon, lat, dy] of [
+    ['Chelyabinsk', 61.44473, 55.16633, -14],
+    ['Chebarkul', 60.40024, 54.99510, 50],
+  ]) {
+    line(svg, x(lon), y(lat), x(lon), y(lat) + dy - (dy > 0 ? 19 : -4), 'origin-grid');
+    dot(svg, x(lon), y(lat), 3, 'origin-city-dot');
+    label(svg, name, Math.max(74, x(lon)), y(lat) + dy, 'origin-city-label', 'middle');
   }
-  label(svg, 'Chelyabinsk', x(61.44473) + 10, y(55.16633) - 11);
-  label(svg, 'Chebarkul', x(60.40024) - 9, y(54.99510) + 23, '', 'end');
-  const points = flight.map(event => [x(event.lon), y(event.lat)]);
-  const nearest = Delaunay.from(points);
-  for (const [index, point] of points.entries()) {
-    dot(svg, ...point, 4, 'origin-flight-dot').attr('data-flight-marker', index);
-  }
-  svg.insert('rect', ':first-child').attr('class', 'origin-flight-area')
-    .attr('x', 0).attr('y', 38).attr('width', width).attr('height', height - 68);
-  const closest = event => {
-    const position = pointer(event, svg.node());
-    const index = nearest.find(...position);
-    return Math.hypot(position[0] - points[index][0], position[1] - points[index][1]) < 24 ? index : null;
-  };
-  svg.on('pointermove', function (event) {
-    const index = closest(event);
-    select(this).classed('is-near-track', index !== null);
-    if (event.pointerType !== 'touch') previewFlight(index);
-  }).on('pointerleave', () => previewFlight(null)).on('click', event => {
-    const index = closest(event);
-    if (index !== null) chooseEvent(index);
-  });
+
+  drawFlightTrack(svg, 'cameras', x, y, 'lon', 'lat');
 }
 
 function altitude({ svg, width, height }) {
-  const x = scaleLinear([0, 16], [47, width - 30]);
-  const y = scaleLinear([0, 100], [height - 60, 49]);
-  label(svg, 'Altitude (km)', 16, 27);
-  horizontalAxis(svg, x, [0, 8, 16], y(0), 'Seconds since first detection', y(100));
-  for (const km of [0, 50, 100]) {
+  const x = scaleLinear([0, 16], [55, width - 28]);
+  const y = scaleLinear([0, 100], [height - 81, 70]);
+  label(svg, 'Altitude (km)', 18, 36);
+  horizontalAxis(svg, x, [0, 4, 8, 12, 16], y(0), 'Seconds since first detection', y(100));
+  for (const km of [0, 25, 50, 75, 100]) {
     line(svg, x(0), y(km), x(16), y(km), 'origin-grid');
-    label(svg, km, x(0) - 8, y(km) + 5, 'origin-axis-text', 'end');
+    label(svg, km, x(0) - 8, y(km) + 6, 'origin-axis-text', 'end');
   }
-  svg.append('polyline')
-    .attr('points', flight.map(event => `${x(event.time)},${y(event.altitude)}`).join(' '))
-    .attr('class', 'origin-measure').attr('fill', 'none').attr('stroke-width', 2);
-  const cursor = line(svg, 0, y(100), 0, y(0), 'origin-flight-cursor', 1.5);
-  cursor.attr('data-flight-cursor', '');
-  for (const [index, event] of flight.entries()) {
-    dot(svg, x(event.time), y(event.altitude), 5, 'origin-flight-dot')
-      .attr('data-flight-marker', index);
+
+  line(svg, x(0), y(100), x(0), y(0), 'origin-flight-cursor', 1.5);
+  drawFlightTrack(svg, 'altitude', x, y, 'time', 'altitude');
+  for (const event of flight) {
+    dot(svg, x(event.time), y(event.altitude), 4, 'origin-flight-sample');
   }
-  svg.on('pointerleave', () => previewFlight(null));
-  // Use time bands for pointer selection so closely spaced events remain selectable.
-  for (const [index, event] of flight.entries()) {
-    const start = index === 0 ? 0 : (flight[index - 1].time + event.time) / 2;
-    const end = index === flight.length - 1 ? 16 : (event.time + flight[index + 1].time) / 2;
-    svg.append('rect').attr('class', 'origin-hit').attr('data-flight-event', index)
-      .attr('x', x(start) - (index === 0 ? 8 : 0)).attr('y', y(100) - 9)
-      .attr('width', x(end) - x(start) + (index === 0 || index === flight.length - 1 ? 8 : 0))
-      .attr('height', y(0) - y(100) + 9)
-      .on('pointerenter', event => { if (event.pointerType !== 'touch') previewFlight(index); })
-      .on('click', () => chooseEvent(index));
-  }
+  svg.select('.origin-flight-dot').raise();
+  svg.append('rect').attr('class', 'origin-hit')
+    .attr('x', x(0) - 8).attr('y', y(100) - 8)
+    .attr('width', x(16) - x(0) + 16).attr('height', y(0) - y(100) + 16)
+    .on('click', event => {
+      const [px] = pointer(event, svg.node());
+      const closest = flightTimes.reduce((best, time) =>
+        Math.abs(px - x(time)) < Math.abs(px - x(best)) ? time : best);
+      timeControl.value = Math.abs(px - x(closest)) <= 6 ? closest : x.invert(px);
+      updateFlight();
+    });
+}
+
+function drawFlightTrack(svg, name, x, y, horizontalKey, verticalKey) {
+  const project = (horizontal, vertical) => [x(horizontal), y(vertical)];
+  const point = event => project(event[horizontalKey], event[verticalKey]);
+  const points = flight.map(point);
+  const interpolateX = scaleLinear(flightTimes, flight.map(event => event[horizontalKey]));
+  const interpolateY = scaleLinear(flightTimes, flight.map(event => event[verticalKey]));
+  flightScales.set(name, time => project(interpolateX(time), interpolateY(time)));
+
+  svg.append('polyline').attr('class', 'origin-flight-track')
+    .attr('points', points.join(' '));
+  svg.append('polyline').attr('class', 'origin-flight-travel');
+  dot(svg, ...points[0], 8, 'origin-flight-dot');
 }
 
 function classification({ svg, width, height }) {
@@ -365,8 +363,8 @@ const charts = {
   orbit: [orbitPlot, 410, 'Chelyabinsk and approximate Earth orbits, projected onto the ecliptic plane'],
   speed: [speedPlot, 398, 'Reported speed over time at seven fireball events'],
   shock: [shockPlot, 398, 'Time from the main brightness peak to the shock wave at four observation sites'],
-  cameras: [cameraPlot, 350, 'Calibrated fireball camera positions, shadow measurements and reconstructed fireball positions'],
-  altitude: [altitude, 350, 'Reconstructed fireball altitude from 97.1 km at first detection to 13.6 km at 16 seconds'],
+  cameras: [cameraPlot, 470, 'Reconstructed fireball path across the Southern Urals, from east to west'],
+  altitude: [altitude, 470, 'Reconstructed fireball altitude from 97.1 km at first detection to 13.6 km at 16 seconds'],
   classification: [classification, 276, 'Catalogue counts by class'],
 };
 
@@ -434,7 +432,11 @@ function redraw(name) {
   const width = Math.round(plot.figure.clientWidth);
   if (!width) return;
   const [draw, targetHeight, description] = charts[name];
-  const height = name === 'orbit' ? Math.min(targetHeight, Math.round(Math.max(248, width * .76))) : targetHeight;
+  let height = targetHeight;
+  if (name === 'orbit') height = Math.min(targetHeight, Math.round(Math.max(248, width * .76)));
+  if (name === 'cameras' || name === 'altitude') {
+    height = Math.round(Math.max(320, Math.min(targetHeight, width * .82)));
+  }
   const svg = plot.svg.attr('viewBox', `0 0 ${width} ${height}`).attr('aria-label', description);
   svg.on('pointerleave pointermove click', null).selectAll('*').remove();
   draw({ svg, width, height });
@@ -442,40 +444,27 @@ function redraw(name) {
   if (name === 'altitude' || name === 'cameras') updateFlight();
 }
 
+const altitudeAtTime = scaleLinear(flightTimes, flight.map(event => event.altitude));
+
 function updateFlight() {
-  const index = previewEvent ?? activeEvent;
-  const event = flight[index];
-  const selected = flight[activeEvent];
-  timeControl.value = selected.time;
-  timeControl.setAttribute('aria-valuetext', `${selected.name}, ${selected.time} seconds, ${selected.altitude} kilometers`);
-  flightName.textContent = event.name;
-  flightValue.textContent = `${event.time} s · ${event.altitude} km`;
-  flightSection.dataset.flightTime = event.time;
-  for (const name of ['altitude', 'cameras']) {
-    const svg = plots.get(name)?.svg;
-    if (!svg) continue;
-    const markers = svg.selectAll('[data-flight-marker]');
-    markers.classed('is-active', (_, i) => i === index)
-      .attr('r', (_, i) => i === index ? 9 : 4)
-      .attr('data-active-time', (_, i) => i === index ? event.time : null);
-    const point = markers.nodes()[index];
-    if (point) {
-      const x = point.getAttribute('cx');
-      svg.select('[data-flight-cursor]').attr('x1', x).attr('x2', x);
-    }
+  const time = Number(timeControl.value);
+  const event = flight.find(event => event.time === time);
+  const altitude = altitudeAtTime(time).toFixed(1);
+  const detail = event?.name ?? 'Interpolated position';
+  timeControl.setAttribute('aria-valuetext', `${time} seconds, ${altitude} kilometers, ${detail}`);
+  flightName.textContent = detail;
+  flightValue.textContent = `${time} s · ${altitude} km`;
+  flightSection.dataset.flightTime = time;
+
+  const passedTimes = flightTimes.filter(sampleTime => sampleTime < time);
+  for (const [name, positionAt] of flightScales) {
+    const svg = plots.get(name).svg;
+    const [x, y] = positionAt(time);
+    svg.select('.origin-flight-dot').attr('cx', x).attr('cy', y);
+    svg.select('.origin-flight-cursor').attr('x1', x).attr('x2', x);
+    svg.select('.origin-flight-travel')
+      .attr('points', [...passedTimes, time].map(positionAt).join(' '));
   }
-}
-
-function previewFlight(index) {
-  if (previewEvent === index) return;
-  previewEvent = index;
-  updateFlight();
-}
-
-function chooseEvent(index) {
-  activeEvent = index;
-  previewEvent = null;
-  updateFlight();
 }
 
 const resize = new ResizeObserver(entries => {
@@ -494,19 +483,7 @@ for (const figure of document.querySelectorAll('[data-chart]')) {
   redraw(name);
   resize.observe(figure);
 }
-chooseEvent(activeEvent);
-timeControl.addEventListener('input', () => {
-  const target = Number(timeControl.value);
-  const closest = flight.reduce((best, event, index) =>
-    Math.abs(event.time - target) < Math.abs(flight[best].time - target) ? index : best, 0);
-  chooseEvent(closest);
-});
-timeControl.addEventListener('keydown', event => {
-  const step = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[event.key];
-  if (!step) return;
-  event.preventDefault();
-  chooseEvent(Math.max(0, Math.min(flight.length - 1, activeEvent + step)));
-});
+timeControl.addEventListener('input', updateFlight);
 
 for (const button of recordControls) {
   button.addEventListener('click', () => {

@@ -1,0 +1,157 @@
+@font-face {
+  font-family: Editorial;
+  src: url('/sleep-well/files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59d4_editorial-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: NM_Regular;
+  src: url('/sleep-well/files/cdn.prod.website-files.com/68fcf9490b2a28caaa0e59bc/68fcf9490b2a28caaa0e59d1_nm-regularar.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+#region-chord {
+  --chord-background: #020e17;
+  --chord-rule: #9db8cb38;
+  --color: #f6ecdf;
+  --chord-body-font: var(--sans, NM_Regular, Arial, sans-serif);
+  --chord-heading-font: var(--serif, Editorial, Georgia, serif);
+  --chord-body-size: clamp(16px, 1.4vw, 22px);
+  position: relative;
+  z-index: 40;
+  display: grid;
+  align-items: center;
+  min-height: 100svh;
+  padding: clamp(32px, 7vh, 110px) clamp(16px, 5vw, 110px);
+  background: var(--chord-background);
+  color: var(--color);
+  font: 400 var(--chord-body-size)/1.25 var(--chord-body-font);
+  font-variant-numeric: tabular-nums;
+}
+.chord-inner {
+  width: min(100%, 1400px);
+  margin-inline: auto;
+}
+#region-chord-title {
+  margin: 0;
+  border-bottom: 1px solid var(--chord-rule);
+  padding-bottom: 18px;
+  color: inherit;
+  font: 400 clamp(36px, 4.7vw, 76px)/1.05 var(--chord-heading-font);
+  letter-spacing: -.025em;
+}
+.chord-layout {
+  display: grid;
+  grid-template-columns: minmax(152px, 1fr) minmax(0, min(620px, 64svh)) minmax(152px, 1fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 56px);
+  padding-block: clamp(14px, 2vh, 32px);
+}
+.chord-layout h3 {
+  margin: 0 0 7px;
+  padding-left: 9px;
+  color: inherit;
+  font: 600 clamp(18px, 1.6vw, 25px)/1.25 var(--chord-body-font);
+}
+.chord-chart {
+  display: block;
+  width: 100%;
+}
+.chord-ribbon {
+  fill-opacity: .62;
+  stroke: var(--chord-background);
+  stroke-width: .65px;
+}
+.chord-ribbon:hover {
+  fill-opacity: 1;
+}
+.chord-ribbon.muted, .chord-arc.muted {
+  opacity: .14;
+}
+.chord-arc {
+  cursor: pointer;
+}
+#region-chord button {
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+#region-chord button:focus-visible {
+  outline: 2px solid #8dc7f2;
+  outline-offset: -2px;
+}
+#region-chord .chord-options button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  border-bottom: 1px solid var(--chord-rule);
+  padding: 5px 9px;
+  text-align: left;
+}
+.chord-options button::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chord-color);
+}
+#region-chord .chord-options button:is(:hover, [aria-pressed="true"]) {
+  background: #8dc7f221;
+}
+#region-chord .chord-options button[aria-pressed="true"] {
+  font-weight: 700;
+}
+.chord-options button.muted:not(:hover, :focus-visible) {
+  opacity: .62;
+}
+.chord-value {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.chord-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--chord-rule);
+  padding-top: 8px;
+}
+#region-chord .chord-reset {
+  padding: 8px 9px;
+}
+#region-chord .chord-reset:disabled {
+  visibility: hidden;
+}
+@media (max-width: 740px) {
+  #region-chord {
+    padding-block: 32px;
+  }
+  .chord-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .chord-chart {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: min(100%, 320px, 35svh);
+    margin-inline: auto;
+  }
+  #region-chord .chord-options button {
+    min-height: 36px;
+    padding-inline: 4px;
+    gap: 5px;
+  }
+  .chord-layout h3 {
+    padding-left: 4px;
+  }
+}
+@media (max-width: 359px) {
+  #region-chord {
+    --chord-body-size: 15px;
+  }
+}

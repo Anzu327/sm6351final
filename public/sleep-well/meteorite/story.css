@@ -6,18 +6,6 @@
   width: max-content;
   min-width: 20rem;
 }
-.visitors-emblem {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 1;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-family: Editorial, Georgia, serif;
-  font-size: clamp(15px, 2.1vw, 29px);
-  color: var(--soft);
-  background: #202a79;
-}
 .solutions__each__media .solutions__each__video {
   width: 100%;
   height: 100%;

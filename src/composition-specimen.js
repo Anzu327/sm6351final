@@ -129,7 +129,7 @@ async function mount() {
     }
     const extent = Math.hypot(right - left, top - bottom) / 2;
     const fit = Math.min(1, .96 / extent);
-    // Shift the projected silhouette to the ring center as its outline changes.
+    // Shift the projected silhouette to the canvas center as its outline changes.
     const matrix = camera.projectionMatrix.elements;
     matrix[0] *= fit;
     matrix[5] *= fit;
@@ -243,8 +243,8 @@ async function mount() {
     clearPointer();
   }
 
-  section.addEventListener('pointermove', onPointerMove, { passive: true });
-  section.addEventListener('pointerleave', clearPointer);
+  canvas.addEventListener('pointermove', onPointerMove, { passive: true });
+  canvas.addEventListener('pointerleave', clearPointer);
   addEventListener('blur', clearPointer);
   reducedMotion.addEventListener('change', schedule);
   addEventListener('pagehide', () => {
@@ -269,7 +269,7 @@ async function mount() {
     visible = entry.isIntersecting;
     if (visible) schedule();
     else stop();
-  }).observe(section);
+  }).observe(canvas);
 
   loadPrintPaper(assetRoot).then(texture => {
     uniforms.paperGrain.value = texture;
@@ -286,4 +286,4 @@ const preload = new IntersectionObserver(([entry]) => {
     console.warn('Could not display the composition specimen', error);
   });
 }, { rootMargin: '200px' });
-preload.observe(section);
+preload.observe(canvas);

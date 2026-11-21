@@ -102,10 +102,22 @@
 .origin-target:focus-visible { outline: none; }
 .origin-target:focus-visible .origin-hit,
 .origin-target[aria-pressed=true] .origin-hit { stroke: var(--origins-gold); stroke-width: 2; }
-.origin-flight-area { fill: transparent; }
-[data-chart=cameras] svg.is-near-track { cursor: pointer; }
-.origin-flight-dot { fill: var(--origins-blue); pointer-events: none; stroke: #101c55; stroke-width: 2; }
-.origin-flight-dot.is-active { fill: var(--origins-gold); stroke: var(--origins-cream); }
+.origin-flight-track,
+.origin-flight-travel {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.origin-flight-track { stroke: #adbfff; }
+.origin-flight-travel { stroke: var(--origins-gold); }
+.origin-flight-sample, .origin-city-dot { fill: var(--origins-blue); }
+.origin-flight-dot {
+  fill: var(--origins-gold);
+  stroke: var(--origins-cream);
+  stroke-width: 2;
+  pointer-events: none;
+}
 .origin-flight-cursor { stroke: var(--origins-gold); stroke-dasharray: 4 5; pointer-events: none; }
 
 [data-chart=exposure].origins-chart {
@@ -172,48 +184,58 @@
   background: var(--dark-blue);
 }
 .origins-feature header { margin-bottom: clamp(22px, 3vw, 48px); }
-.origins-flight { z-index: 1; }
-.origins-linked { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 15px; align-items: stretch; }
-.origins-linked figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 20px;
-  padding: 5px 18px 16px;
+.origins-flight {
+  z-index: 1;
+  padding-inline: clamp(12px, 2.5vw, 64px);
 }
-.origins-key { color: var(--origins-cream); font-size: 18px; line-height: 1.25; }
-.origins-key::before {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  margin-right: 8px;
-  content: '';
-  background: var(--origins-blue);
-  border-radius: 50%;
+.origins-flight header { margin-bottom: clamp(18px, 2vw, 36px); }
+.origins-linked {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 1.2vw, 24px);
 }
-.origins-key--shadow::before {
-  border: 1.5px solid var(--origins-cream);
-  border-radius: 0;
-  background: none;
-  transform: rotate(45deg);
-}
+.origins-linked svg text { font-size: clamp(21px, 1.85vw, 34px); }
+.origins-linked .origin-axis-text,
+.origins-linked .origin-city-label { font-size: clamp(19px, 1.45vw, 24px); }
 
 .origins-playhead {
   display: grid;
-  grid-template-columns: minmax(205px, auto) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(245px, 26%);
   align-items: center;
-  gap: 7px 28px;
-  margin-top: 22px;
+  gap: 12px 32px;
+  margin-bottom: 22px;
 }
-.origins-playhead .origins-number { grid-column: 1; margin: 0; }
-.origins-playhead .origins-event-name { color: var(--origins-cream); font-size: 23px; line-height: 1.22; margin: 0; }
-.origins-playhead input {
-  grid-area: 1 / 2 / 3 / 3;
+.origins-timeline label {
+  display: block;
+  color: var(--origins-cream);
+  font-size: clamp(20px, 1.65vw, 28px);
+  line-height: 1.15;
+}
+.origins-timeline input {
   display: block;
   width: 100%;
   min-height: 44px;
   margin: 0;
   accent-color: var(--origins-gold);
-  cursor: pointer;
+  cursor: ew-resize;
+}
+.origins-timeline-limits {
+  display: flex;
+  justify-content: space-between;
+  color: var(--origins-blue);
+  font-size: 18px;
+  line-height: 1.1;
+}
+.origins-timeline-limits span { color: inherit; }
+.origins-playhead .origins-number { margin: 0; }
+.origins-playhead .origins-event-name {
+  margin: 4px 0 0;
+  color: var(--origins-cream);
+  font-size: clamp(18px, 1.55vw, 24px);
+  line-height: 1.2;
+}
+@media (max-width: 850px) {
+  .origins-linked, .origins-playhead { grid-template-columns: minmax(0, 1fr); }
 }
 .origins-feature .origins-switch {
   display: flex;
@@ -260,10 +282,7 @@
   .origins-heading { font-size: clamp(32px, 8vw, 53px); }
   .origins-chart svg text, .origins-chart .origin-axis-text { font-size: 18px; }
   .origins-reading { min-height: 140px; }
-  .origins-linked, .origins-playhead { grid-template-columns: minmax(0, 1fr); }
-  .origins-playhead input { grid-area: auto; }
-  .origins-linked figcaption { padding: 4px 12px 13px; gap: 8px 14px; }
-  .origins-feature { padding-inline: 18px; }
+  .origins-feature:not(.origins-flight) { padding-inline: 18px; }
 }
 @media (max-height: 525px) and (orientation: landscape) {
   #meteorite-origins .origins-slide {
@@ -277,6 +296,7 @@
 }
 .speed-halo { stroke: #83aeff; stroke-width: 14; filter: blur(8px); opacity: .65; }
 .speed-trail { stroke: #c4d7ff; stroke-width: 2.5; stroke-linejoin: round; }
+.speed-early { stroke: var(--origins-blue); stroke-width: 1.5; stroke-dasharray: 5 6; opacity: .6; }
 .speed-hit, .shock-label-hit { fill: transparent; }
 .speed-guide { stroke: var(--origins-gold); stroke-dasharray: 2 6; opacity: 0; }
 .speed-ring { fill: #121c59; stroke: var(--origins-blue); stroke-width: 1.25; opacity: 0; }
