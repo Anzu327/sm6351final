@@ -1,10 +1,9 @@
-import { atmosphericLine, crustBars, grainScatter, mineralRanges, orbitArea, veinRanges } from './composition-charts.js';
+import { atmosphericLine, bindGrainHeatmap, crustBars, mineralRanges, orbitArea, veinRanges } from './composition-charts.js';
 import { ease } from './motion.js';
 
 const topics = {
   orbit: [orbitArea, 'Area chart of modeled distance from the Sun, from 0.74 to 2.79 AU'],
   drift: [veinRanges, 'Impact melt vein widths on a log scale: fine 10 to 100, coarse 500 to 2,000 micrometers'],
-  sun: [grainScatter, 'Scatterplot of magnesium-to-iron ratios in 13 paired olivine and chromite samples'],
   earth: [mineralRanges, 'Modal mineral abundance: olivine 50–60%, pyroxene 20–30%, plagioclase and glass 5–10%, opaque minerals 5–10%'],
   near: [atmosphericLine, 'Altitude over time: first detected at 97.1 km, main brightness peak at 29.7 km, last detected at 13.6 km'],
   pass: [crustBars, 'Grouped bar chart of silicon, iron, and magnesium oxides in olivine from light lithology and fusion crust'],
@@ -16,18 +15,18 @@ export function bindComposition(section) {
       const width = target.clientWidth;
       if (!width || target.dataset.chartWidth === String(width)) continue;
 
-      const [render] = topics[target.parentElement.dataset.topic];
+      const [render] = topics[target.closest('.composition__chart').dataset.topic];
       render(target);
       target.dataset.chartWidth = width;
     }
   });
 
-  for (const panel of section.querySelectorAll('.composition__chart')) {
-    const graphic = panel.querySelector('.composition__graphic');
-    const [, label] = topics[panel.dataset.topic];
+  for (const graphic of section.querySelectorAll('.composition__graphic')) {
+    const [, label] = topics[graphic.closest('.composition__chart').dataset.topic];
     graphic.setAttribute('aria-label', label);
     chartResize.observe(graphic);
   }
+  bindGrainHeatmap(section.querySelector('.grain-heatmap'));
 
   const track = section.querySelector('.composition');
   const rail = track.querySelector('.composition__specimen');

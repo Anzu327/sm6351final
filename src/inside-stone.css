@@ -1,82 +1,76 @@
-.importance .importance__beats { display: none !important; }
-
-.stone-chart {
-  width: min(92%, 1040px);
-  margin: 20px auto 30px;
-  scroll-margin-top: 70px;
-  color: #fff0c9;
-  font: 700 13px/1.45 var(--sans, Arial), sans-serif;
-}
-.stone-chart__stage { position: relative; }
-.stone-chart svg { display: block; width: 100%; }
-.stone-chart__stone {
-  position: absolute;
-  left: var(--stone-x);
-  top: var(--stone-y);
-  width: 21%;
-  aspect-ratio: 1;
-  opacity: var(--stone-opacity, 0);
-  transform: translate(-50%, calc(-50% + var(--stone-offset, 0px)));
-  pointer-events: none;
-}
-.stone-chart__tracking { pointer-events: none; }
-.stone-chart__line {
-  fill: none;
-  stroke: #abc1ff;
-  stroke-width: 1.3;
-  stroke-dasharray: 1;
-}
-.stone-chart__tracking circle { fill: #fff0c9; stroke: #96b3ff; stroke-width: 1.25; }
-.stone-chart__sector { cursor: pointer; outline: none; }
-.stone-chart__face path { stroke: #bedbb0; stroke-width: 1; }
-.stone-chart__hit { fill: transparent; }
-.stone-chart__depth { pointer-events: none; }
-.stone-chart__sector text {
-  fill: #fff0c9;
-  stroke: #102c29;
-  stroke-width: 2;
-  paint-order: stroke;
-  font-size: 15px;
-  pointer-events: none;
+.stone-chart svg {
+  display: block;
+  width: min(100%, 350px);
+  height: auto;
+  margin-inline: auto;
+  font: 700 23px/1 system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
-.stone-chart__leader {
-  fill: none;
-  stroke: #fff0c9;
+.stone-chart__sector { cursor: pointer; }
+.stone-chart__sector:focus { outline: none; }
+.stone-chart__sector path {
+  stroke: #eeedfcbd;
   stroke-width: 1;
-  opacity: .85;
+}
+.stone-chart__sector text {
+  fill: #182347;
   pointer-events: none;
 }
+.stone-chart__sector:is(:hover, :focus-visible, [aria-expanded="true"]) path {
+  stroke: #fff5d6;
+  stroke-width: 2.5;
+}
+.stone-chart__sector:focus-visible path {
+  stroke-dasharray: 4 2;
+}
+
+.stone-chart__legend {
+  width: min(100%, 350px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 14px auto 0;
+  padding: 0;
+  list-style: none;
+  color: #e6ebff;
+  font: 500 clamp(16px, 1.25vw, 19px)/1.35 system-ui, sans-serif;
+}
+.stone-chart__legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.stone-chart__legend li::before {
+  content: "";
+  display: block;
+  flex: 0 0 11px;
+  height: 11px;
+  align-self: start;
+  margin-top: .28em;
+  border-radius: 50%;
+  background: var(--mineral-color);
+}
+
 .stone-chart__detail {
   position: relative;
-  box-sizing: border-box;
-  width: min(320px, 65%);
-  margin: 0 0 12px max(0px, calc(var(--card-x) - min(160px, 32.5%)));
-  padding: 14px 36px 14px 16px;
-  font-size: 18px;
-  background: #141b57;
+  margin-top: 8px;
+  padding: 12px 46px 12px 14px;
   border: 1px solid #abc1ff70;
-  border-top-color: #fff0c9;
+  background: #141b57;
+  color: #fff0c9;
+  font: 450 clamp(16px, 1.25vw, 19px)/1.45 system-ui, sans-serif;
 }
-.stone-chart__detail strong { font-size: 21px; }
-.stone-chart__detail p { margin: 4px 0 0; color: #cbd5f5; }
+.stone-chart__detail p { margin: 0; color: #d3dfff; }
 .stone-chart__detail button {
   position: absolute;
-  top: 5px;
-  right: 6px;
-  background: transparent;
+  top: 3px;
+  right: 3px;
+  width: 40px;
+  height: 40px;
   border: none;
+  background: transparent;
   color: inherit;
-  font: inherit;
+  font: 500 20px/1 system-ui, sans-serif;
   cursor: pointer;
-}
-@media (max-width: 600px) {
-  .stone-chart__stone { width: 21%; }
-  .stone-chart__sector text { font-size: 17px; }
-}
-
-.stone-chart__title {
-  margin: 0 0 12px;
-  color: #fff0c9;
-  font: 700 clamp(22px, 3vw, 34px)/1.2 var(--sans, Arial), sans-serif;
 }

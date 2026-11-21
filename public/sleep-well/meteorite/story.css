@@ -86,7 +86,7 @@ body.phone-card-hover, body.phone-card-hover * { cursor: pointer; }
 .phone-archive-info h2 {
   margin: 14px 0 12px;
   color: inherit;
-  font: 650 clamp(29px, 2.6vw, 38px)/1.12 system-ui, sans-serif;
+  font: 400 clamp(29px, 2.6vw, 38px)/1.12 Editorial, Georgia, serif;
   text-wrap: balance;
 }
 .phone-archive-info p {

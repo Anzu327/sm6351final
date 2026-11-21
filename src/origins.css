@@ -40,7 +40,6 @@
   text-wrap: balance;
 }
 .origins-context { color: var(--origins-blue); }
-.origins-classification .origins-reading { margin-top: 18px; }
 
 .origins-slide .origins-chart { grid-area: chart; }
 .origins-slide .origins-heading { grid-area: title; align-self: end; }
@@ -237,24 +236,99 @@
 @media (max-width: 850px) {
   .origins-linked, .origins-playhead { grid-template-columns: minmax(0, 1fr); }
 }
-.origins-feature .origins-switch {
+.origins-discovery { box-sizing: border-box; }
+.origins-discovery-symbols { position: absolute; }
+.origins-discovery-cases {
+  display: grid;
+  align-items: center;
+  gap: clamp(26px, 5vw, 86px);
+  max-width: 1080px;
+}
+.origins-discovery-chart {
+  display: grid;
+  place-items: center;
+  width: min(100%, 338px);
+  justify-self: center;
+}
+.origins-discovery-chart > * { grid-area: 1 / 1; }
+.origins-discovery-chart > svg { display: block; width: 100%; }
+.origins-discovery-chart path {
+  fill: var(--origins-blue);
+  cursor: pointer;
+  transition: opacity 180ms ease;
+}
+.origins-discovery-chart path[data-kind=Fell] { fill: var(--origins-gold); }
+.origins-discovery-chart path.is-muted { opacity: .34; }
+.origins-discovery-reading {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+  pointer-events: none;
+}
+.origins-discovery-reading strong {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.05em;
+}
+.origins-discovery-reading span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.origins-discovery-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1.35em;
+  height: 1.35em;
+  color: var(--origins-blue);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.origins-discovery-reading .origins-discovery-icon { font-size: clamp(25px, 3vw, 34px); }
+[data-kind=Fell] > .origins-discovery-icon,
+[data-discovery=Fell] > .origins-discovery-icon { color: var(--origins-gold); }
+.origins-discovery-case {
+  border-top: 1px solid var(--origins-grid);
+  padding-top: 16px;
+}
+.origins-discovery-case + .origins-discovery-case { margin-top: 25px; }
+.origins-discovery-cases h3 {
+  margin: 0 0 8px;
+  font-size: clamp(23px, 2.1vw, 32px);
+}
+.origins-discovery-case button {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 14px;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  padding: 8px 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
-.origins-switch button {
-  min-height: 44px;
-  padding: 8px 15px;
-  border: 1px solid var(--origins-grid);
-  border-radius: 99px;
-  color: var(--origins-cream);
-  font-size: 16px;
+.origins-discovery-case button:is(:hover, [aria-pressed=true]) { color: var(--origins-gold); }
+.origins-discovery-case [data-discovery-count] {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
 }
-.origins-switch button[aria-pressed=true] {
-  color: #0c1853;
-  background: var(--origins-gold);
+@media (prefers-reduced-motion: reduce) {
+  .origins-discovery-chart path { transition: none; }
 }
+.origins-discovery-cases p {
+  margin: 0;
+  max-width: 45ch;
+  font-size: clamp(19px, 1.8vw, 27px);
+  line-height: 1.45;
+}
+.origins-discovery .origins-sources { font-size: clamp(19px, 1.6vw, 23px); }
 .origins-feature :focus-visible,
 .origins-slide :focus-visible:not(.origin-target) {
   outline: 2px solid var(--origins-gold);
@@ -262,15 +336,7 @@
 }
 
 @media (min-width: 768px) {
-  .origins-classification {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    column-gap: clamp(28px, 4vw, 72px);
-  }
-  .origins-classification header,
-  .origins-classification .origins-switch,
-  .origins-classification .origins-sources { grid-column: 1 / -1; }
-  .origins-classification .origins-reading { align-self: center; }
+  .origins-discovery-cases { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
 }
 
 @media (max-width: 767px) {
@@ -280,6 +346,7 @@
     padding: 14px 18px;
   }
   .origins-heading { font-size: clamp(32px, 8vw, 53px); }
+  .origins-discovery-chart { width: min(100%, 266px); }
   .origins-chart svg text, .origins-chart .origin-axis-text { font-size: 18px; }
   .origins-reading { min-height: 140px; }
   .origins-feature:not(.origins-flight) { padding-inline: 18px; }

@@ -1,7 +1,8 @@
 import { scaleLinear } from 'd3-scale';
 import { pointer, select } from 'd3-selection';
 import { Delaunay } from 'd3-delaunay';
-import classCounts from 'virtual:origins-class-counts';
+import { arc, pie } from 'd3-shape';
+import discoveryCounts from 'virtual:meteorite-discovery-counts';
 import { flight, orbit, shockArrivals } from './origins-data.js';
 import './origins.css';
 
@@ -10,11 +11,8 @@ const flightSection = document.querySelector('.origins-flight');
 const timeControl = document.querySelector('#origins-flight-time');
 const flightName = document.querySelector('[data-flight-name]');
 const flightValue = document.querySelector('[data-flight-value]');
-const recordControls = document.querySelectorAll('[data-records]');
-const formatCount = new Intl.NumberFormat('en');
 const flightTimes = flight.map(event => event.time);
 const flightScales = new Map();
-let countMode = 'official';
 
 function label(svg, value, x, y, style, anchor = 'start') {
   return svg.append('text').attr('class', style).attr('x', x).attr('y', y)
@@ -337,25 +335,6 @@ function drawFlightTrack(svg, name, x, y, horizontalKey, verticalKey) {
   dot(svg, ...points[0], 8, 'origin-flight-dot');
 }
 
-function classification({ svg, width, height }) {
-  const max = countMode === 'official' ? 13000 : 200;
-  const ticks = countMode === 'official' ? [0, 6000, 12000] : [0, 100, 200];
-  const x = scaleLinear([0, max], [66, width - 62]);
-  const floor = height - 57;
-  horizontalAxis(svg, x, ticks, floor, 'Catalogue entries', 22, value => formatCount.format(value));
-  classCounts.forEach((entry, index) => {
-    const y = 45 + index * (floor - 43) / classCounts.length;
-    const end = x(entry[countMode]);
-    const count = formatCount.format(entry[countMode]);
-    const row = target(svg, entry.name, entry.name, count, countMode === 'official' ? 'official records' : 'observed falls');
-    hitRect(row, 9, y - 25, width - 18, 51);
-    label(row, entry.name, 18, y + 7);
-    row.append('rect').attr('x', x(0)).attr('y', y - 13).attr('width', end - x(0))
-      .attr('height', 26).attr('rx', 3).attr('class', 'origin-selected');
-  });
-  svg.attr('aria-label', classCounts.map(entry => `${entry.name} ${formatCount.format(entry[countMode])}`).join(', '));
-}
-
 const charts = {
   chronology: [chronology, 323, 'Ages of the earliest dated solids and chondrules, in millions of years before present'],
   minerals: [minerals, 332, 'Olivine 50–60%, pyroxene 20–30%, feldspar and glass 5–10%, opaque phases 5–10%'],
@@ -365,10 +344,9 @@ const charts = {
   shock: [shockPlot, 398, 'Time from the main brightness peak to the shock wave at four observation sites'],
   cameras: [cameraPlot, 470, 'Reconstructed fireball path across the Southern Urals, from east to west'],
   altitude: [altitude, 470, 'Reconstructed fireball altitude from 97.1 km at first detection to 13.6 km at 16 seconds'],
-  classification: [classification, 276, 'Catalogue counts by class'],
 };
 
-const defaultMark = { exposure: 'estimate', orbit: 'encounter', speed: '6', shock: 'Chelyabinsk', classification: 'LL5' };
+const defaultMark = { exposure: 'estimate', orbit: 'encounter', speed: '6', shock: 'Chelyabinsk' };
 
 function bindMarks(plot, name) {
   const marks = plot.svg.selectAll('.origin-target');
@@ -485,12 +463,53 @@ for (const figure of document.querySelectorAll('[data-chart]')) {
 }
 timeControl.addEventListener('input', updateFlight);
 
-for (const button of recordControls) {
-  button.addEventListener('click', () => {
-    countMode = button.dataset.records;
-    for (const control of recordControls) {
-      control.setAttribute('aria-pressed', String(control === button));
-    }
-    redraw('classification');
-  });
+const discovery = document.querySelector('.origins-discovery');
+const discoveryButtons = [...discovery.querySelectorAll('[data-discovery]')];
+const discoveryKinds = discoveryButtons.map(button => ({
+  key: button.dataset.discovery,
+  name: button.querySelector('span').textContent,
+  count: discoveryCounts[button.dataset.discovery],
+  button,
+}));
+const discoveryTotal = discoveryKinds.reduce((sum, kind) => sum + kind.count, 0);
+const witnessed = discoveryCounts.Fell;
+const discoveryReading = discovery.querySelector('.origins-discovery-reading');
+const discoveryIcon = discoveryReading.querySelector('use');
+const discoveryShare = discovery.querySelector('[data-discovery-share]');
+const discoveryDescription = discovery.querySelector('[data-discovery-description]');
+const formatShare = new Intl.NumberFormat('en', { style: 'percent', maximumFractionDigits: 1 });
+const formatCount = new Intl.NumberFormat('en');
+const discoveryArc = arc().innerRadius(111).outerRadius(152);
+const discoveryPaths = select(discovery.querySelector('.origins-discovery-chart > svg')).append('g')
+  .attr('transform', 'translate(160,160)')
+  .selectAll('path')
+  .data(pie().sort(null).value(kind => kind.count)(discoveryKinds))
+  .join('path')
+  .attr('data-kind', slice => slice.data.key)
+  .attr('d', discoveryArc);
+
+let selectedDiscovery = null;
+
+function updateDiscovery(kind = null) {
+  selectedDiscovery = kind === selectedDiscovery ? null : kind;
+  const iconKind = selectedDiscovery?.key ?? 'Fell';
+  discoveryReading.dataset.kind = iconKind;
+  discoveryIcon.setAttribute('href', `#discovery-icon-${iconKind}`);
+  discoveryShare.textContent = selectedDiscovery
+    ? formatShare.format(selectedDiscovery.count / discoveryTotal)
+    : `≈ 1 in ${formatCount.format(Math.round(discoveryTotal / witnessed))}`;
+  discoveryDescription.textContent = selectedDiscovery
+    ? selectedDiscovery.name
+    : 'of these meteorites were seen falling';
+  discoveryPaths.classed('is-muted', slice => Boolean(selectedDiscovery && selectedDiscovery !== slice.data));
+  for (const entry of discoveryKinds) {
+    entry.button.setAttribute('aria-pressed', String(selectedDiscovery === entry));
+  }
 }
+
+for (const kind of discoveryKinds) {
+  kind.button.querySelector('[data-discovery-count]').textContent = formatCount.format(kind.count);
+  kind.button.addEventListener('click', () => updateDiscovery(kind));
+}
+discoveryPaths.on('click', (_event, slice) => updateDiscovery(slice.data));
+updateDiscovery();
