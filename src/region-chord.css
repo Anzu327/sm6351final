@@ -40,15 +40,15 @@
   transform: translateY(var(--chart-shift, 0px));
 }
 
-.region-return-canvas {
+#region-chord-anchor.is-returning::before {
+  content: '';
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  background: #0c1234;
+  opacity: var(--chart-return-fade);
   pointer-events: none;
 }
 
-.region-return-canvas[hidden] { display: none; }
 #region-chord-anchor.is-returned { background: #0c1234; }
 .is-returned #region-chord { visibility: hidden; }
 

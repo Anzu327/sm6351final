@@ -1,4 +1,5 @@
 import { chartReturnSpan, clamp, ease, mix } from './motion.js';
+import { storyStage } from './visitors-dom.js';
 import { chartTransitionSpan, enableChartTransition } from './visitors-timeline.js';
 
 export function createRegionChartTransition() {
@@ -8,9 +9,7 @@ export function createRegionChartTransition() {
   const section = anchor.querySelector('#region-chord');
   const panel = section.querySelector('.chord-panel');
   const svg = panel.querySelector('svg');
-  const returnCanvas = anchor.querySelector('.region-return-canvas');
-  const context = returnCanvas.getContext('2d', { alpha: false });
-  const frame = { progress: 0, returning: 0, x: 0, y: 0, radius: 0, paintReturn };
+  const frame = { progress: 0, returning: 0, x: 0, y: 0, radius: 0 };
   let span;
   let returnSpan;
   let lastDistance;
@@ -29,18 +28,6 @@ export function createRegionChartTransition() {
   addEventListener('resize', resize);
   new ResizeObserver(resize).observe(section);
 
-  function paintReturn(source) {
-    if (returnCanvas.width !== source.width || returnCanvas.height !== source.height) {
-      returnCanvas.width = source.width;
-      returnCanvas.height = source.height;
-    }
-    context.globalAlpha = 1;
-    context.fillStyle = '#0c1234';
-    context.fillRect(0, 0, source.width, source.height);
-    context.globalAlpha = 1 - ease(.92, 1, frame.returning);
-    context.drawImage(source, 0, 0);
-  }
-
   return function update() {
     const distance = anchor.getBoundingClientRect().top;
     if (distance === lastDistance) return frame.progress ? frame : null;
@@ -53,10 +40,12 @@ export function createRegionChartTransition() {
     const progress = leaving ? mix(1, .64, ease(0, .51, returning)) : entry;
     frame.progress = progress;
     frame.returning = leaving ? returning : 0;
+    storyStage?.classList.toggle('is-chart-bridging', moving);
     section.classList.toggle('is-bridging', moving);
     anchor.classList.toggle('is-returned', finished);
+    anchor.classList.toggle('is-returning', leaving);
+    anchor.style.setProperty('--chart-return-fade', ease(.92, 1, returning));
     section.inert = moving || finished;
-    returnCanvas.hidden = !leaving;
     const pinTop = Math.min(0, innerHeight - sectionHeight);
     let shift = finished ? 0 : Math.max(0, pinTop - distance);
     if (leaving) {
