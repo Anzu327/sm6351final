@@ -204,7 +204,7 @@ export async function createStage(canvas, fallbackSky, embedded = false, centerP
   const loader = new GLTFLoader();
   const [specimen, ringAsset] = await Promise.all([
     loadSpecimen(renderer, embedded),
-    loader.loadAsync(assetBase + 'models/igloo-transition-rings.glb'),
+    loader.loadAsync(assetBase + 'models/transition-rings.glb'),
   ]);
   const { rock } = specimen;
   specimenScene.add(rock, specimen.lines);

@@ -2,7 +2,7 @@
 set -eu
 cd -- "${0:A:h}"
 
-if [[ ! -f dist/sleep-well/index.html || ! -f dist/visitors.html ]]; then
+if [[ ! -f dist/story/index.html || ! -f dist/visitors.html ]]; then
   printf '%s\n' '找不到整合版的构建文件。请先运行 npm run build。'
   exit 1
 fi
@@ -22,7 +22,7 @@ class PreviewServer(http.server.ThreadingHTTPServer):
 
 handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory="dist")
 with PreviewServer(("127.0.0.1", 0), handler) as server:
-    url = f"http://127.0.0.1:{server.server_port}/sleep-well/index.html"
+    url = f"http://127.0.0.1:{server.server_port}/story/index.html"
     print(f"VISITORS · Chelyabinsk：{url}\n在这个窗口按 Ctrl+C 关闭服务器。", flush=True)
     webbrowser.open(url)
     try:

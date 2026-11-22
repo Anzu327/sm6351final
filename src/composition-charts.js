@@ -30,7 +30,6 @@ function axes(svg, { x, y, left, right, bottom, xAxis, yAxis, xLabel, yLabel }) 
   if (xLabel) label(svg, (left + right) / 2, bottom + 45, xLabel, 'middle');
 }
 
-// https://observablehq.com/@d3/area-chart
 // Popova et al., Science (2013), pre-atmospheric orbital elements.
 export function orbitArea(element) {
   const { svg, width, height } = chart(element, 300, 530);
@@ -56,7 +55,6 @@ export function orbitArea(element) {
   label(svg, x(180), y(apses[1].distance) - 12, `Aphelion ${apses[1].distance.toFixed(2)} AU`, 'middle', 'chart-value');
 }
 
-// https://observablehq.com/@d3/line-chart
 // Popova et al., Table S1. Times are seconds since first detection.
 export function atmosphericLine(element) {
   const { svg, width, height } = chart(element, 290);
@@ -80,7 +78,6 @@ export function atmosphericLine(element) {
   label(svg, right, y(13.6) + 20, '13.6 km', 'end', 'chart-value');
 }
 
-// https://observablehq.com/@d3/grouped-bar-chart
 // Kaeter et al., Table 1. Mean oxide concentrations in olivine, wt%.
 export function crustBars(element) {
   const { svg, width, height } = chart(element, 330);
@@ -118,7 +115,6 @@ export function crustBars(element) {
   legend.append('text').attr('x', 19).attr('y', 14).text(d => d);
 }
 
-// https://observablehq.com/@d3/dot-plot
 // Righter et al., Petrography and Mineralogy. Both ranges converted to µm.
 export function veinRanges(element) {
   const { svg, width, height } = chart(element, 250);
@@ -143,7 +139,6 @@ export function veinRanges(element) {
     .attr('text-anchor', 'end').text(d => d.range);
 }
 
-// https://observablehq.com/@d3/horizontal-bar-chart
 // Kaeter et al., Petrography. Modal proportions remain ranges.
 export function mineralRanges(element) {
   const { svg, width, height } = chart(element, 300);

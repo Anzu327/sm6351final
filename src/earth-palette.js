@@ -4,7 +4,7 @@ export const densityInk = [
   '#aba6d8', '#c697d0', '#e19ecb', '#ffd4e8',
 ];
 
-// Warm YlOrRd swatches, as used by the Globe.gl World Population example.
+// Warm YlOrRd swatches for regional counts.
 export const radialLineInk = [
   '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026',
 ];
@@ -14,7 +14,7 @@ export const heatmapInk = [
   '#87db3a', '#f3e238', '#ff8c20', '#df240b',
 ];
 
-// Monolith's Earth uses local model Y to mix sRGB pigments before lighting.
+// The Earth shader uses local model Y to mix sRGB pigments before lighting.
 export const earthLatitudePaint = `
   vec3 earthSeaPigment(float height) {
     return mix(vec3(156.,190.,218.),vec3(173.,150.,203.),height)/255.;

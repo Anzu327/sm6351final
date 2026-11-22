@@ -1,0 +1,97 @@
+.story-references {
+  --color: #f7ead4;
+  position: relative;
+  z-index: 43;
+  width: 100%;
+  overflow: visible;
+  padding: clamp(48px, 8vw, 112px) clamp(18px, 6vw, 92px);
+  color: var(--color);
+  background: #0c1234;
+}
+
+.story-references__inner {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.story-references h2 {
+  margin: 0 0 clamp(28px, 5vw, 56px);
+  color: var(--color);
+  font: 400 clamp(44px, 6vw, 84px)/1.05 Editorial, Georgia, serif;
+  text-transform: none;
+}
+
+.story-references__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+
+.story-references__group {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 24px);
+  padding-top: 16px;
+  border-top: 1px solid #f7ead44d;
+}
+
+.story-references__icon {
+  width: clamp(27px, 3vw, 36px);
+  height: auto;
+  margin-top: 15px;
+  fill: none;
+  stroke: #d8bb8b;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.story-references ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-references a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 11px clamp(12px, 1.5vw, 20px);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--color);
+  background: #f7ead40d;
+  font: 400 clamp(20px, 1.8vw, 26px)/1.25 Editorial, Georgia, serif;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.story-references a::after {
+  content: '';
+  width: 15px;
+  aspect-ratio: 1;
+  background: currentColor;
+  clip-path: polygon(34% 0, 100% 0, 100% 66%, 89% 66%, 89% 19%, 9% 100%, 0 91%, 81% 11%, 34% 11%);
+}
+
+.story-references a:is(:hover, :focus-visible) {
+  border-color: #d8bb8b;
+  color: #fff1d8;
+  background: #f7ead41c;
+}
+
+.story-references a:focus-visible {
+  outline: 2px solid #d8bb8b;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .story-references__grid { grid-template-columns: minmax(0, 1fr); }
+}

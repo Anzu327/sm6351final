@@ -5,6 +5,7 @@ import { arc, curveBundle, lineRadial } from 'd3-shape';
 import data from 'virtual:meteorite-region-counts';
 import { mountChelyabinskOutro } from './chelyabinsk-outro.js';
 import './region-chord.css';
+import './story-references.css';
 
 const format = new Intl.NumberFormat('en');
 const sum = values => values.reduce((total, value) => total + value, 0);

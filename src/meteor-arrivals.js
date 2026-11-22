@@ -2,7 +2,6 @@ import { BufferAttribute, BufferGeometry, Color, Group, Points, ShaderMaterial, 
 import { createLandingDensity } from './landing-density.js';
 import { densityInk } from './earth-palette.js';
 
-// Motion reference: https://mappa.js.org/docs/animated-meteorite-landings.html
 // Catalogue coordinates determine the endpoints. Incoming paths and playback
 // order are illustrative: neither trajectories nor fall times are reconstructed.
 const interval = .115;
