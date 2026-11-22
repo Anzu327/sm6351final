@@ -32,3 +32,59 @@ html:has(body.visitors-atlas-open, body.specimen-archive-lock) {
   inset: 0;
   height: 100%;
 }
+
+/* Keep the page controls above the sticky story stage. */
+.body .trg-sound,
+#story-fullscreen {
+  z-index: 41;
+}
+
+#story-fullscreen {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #eef0ff;
+  cursor: pointer;
+}
+
+#story-fullscreen svg {
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+#story-fullscreen svg,
+#story-fullscreen path {
+  color: inherit;
+}
+
+#story-fullscreen:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -5px;
+}
+
+.is-loading #story-fullscreen {
+  z-index: 100;
+  color: #2451b5;
+}
+
+#story-fullscreen[hidden],
+#story-fullscreen .fullscreen-exit {
+  display: none;
+}
+
+:root:fullscreen #story-fullscreen .fullscreen-enter {
+  display: none;
+}
+
+:root:fullscreen #story-fullscreen .fullscreen-exit {
+  display: inline;
+}

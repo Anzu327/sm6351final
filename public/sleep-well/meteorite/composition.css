@@ -159,84 +159,162 @@
 .composition__graphic .chart-track { stroke: #abc1ff55; }
 .composition__graphic .chart-interval { fill: #96b3ff; }
 .composition__graphic .chart-dot { fill: var(--annotation-ink); }
-.grain-heatmap {
+.mineral-balance {
   text-align: left;
   color: #e6ebff;
   font-family: system-ui, sans-serif;
 }
-.grain-heatmap figcaption { margin-bottom: 6px; text-align: left; }
-.grain-heatmap__guide {
-  margin: 0 0 14px;
+.mineral-balance figcaption { margin-bottom: 4px; text-align: left; }
+.mineral-balance__guide {
+  margin: 0;
   color: #cfdaff;
-  font-size: clamp(13px, 1.15vw, 16px);
-  line-height: 1.5;
+  font-size: clamp(15px, 1.3vw, 20px);
 }
-.grain-heatmap table {
+.mineral-balance__plot {
+  --label-width: clamp(100px, 13vw, 176px);
+  --label-gap: 16px;
+  display: grid;
+  gap: 12px;
+  margin-block: clamp(22px, 3vw, 38px) 20px;
+}
+.mineral-balance__axis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  margin-inline-start: calc(var(--label-width) + var(--label-gap));
+  color: #d3dfff;
+  font-size: clamp(14px, 1.2vw, 18px);
+  line-height: 1.15;
+}
+.mineral-balance__axis span { display: grid; justify-items: start; gap: 7px; }
+.mineral-balance__axis span:nth-child(2) { justify-items: center; text-align: center; }
+.mineral-balance__axis span:last-child { justify-items: end; text-align: right; }
+.mineral-balance__axis b {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #acbdf583;
+  border-radius: 9px;
+  background: #131e55;
+  color: #f1eeff;
+  font-size: 17px;
+  font-weight: 650;
+}
+.mineral-balance__axis span:nth-child(2) b { border-radius: 50%; }
+.mineral-balance__row {
+  display: grid;
+  grid-template-columns: var(--label-width) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--label-gap);
+}
+.mineral-balance__row h4 {
+  margin: 0;
+  font-size: clamp(17px, 1.7vw, 24px);
+  font-weight: 650;
+}
+.mineral-balance__track {
+  position: relative;
+  height: clamp(30px, 3.2vw, 47px);
+  border-radius: 6px;
+  background: linear-gradient(90deg, #b5c4ff20 50%, #b5c4ff0d 50%);
+  box-shadow: inset 0 0 0 1px #adc0ff37;
+}
+.mineral-balance__track::before {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  border-left: 1px dashed #dbe4ffad;
+  content: "";
+}
+.mineral-balance__range {
+  position: absolute;
+  inset: 24% calc(100% - var(--range-end, 0%)) 24% var(--range-start, 0%);
+  border-inline: 2px solid #f5f0ff;
+  border-radius: 3px;
+  background: #a5bcff;
+}
+.mineral-balance__track[data-range="chromite"] .mineral-balance__range { background: #edc583; }
+
+.mineral-balance__details { border-top: 1px solid #b4c7ff45; }
+.mineral-balance__details summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 48px;
+  color: #e6ebff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mineral-balance__details summary::-webkit-details-marker { display: none; }
+.mineral-balance__toggle {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #acbdf583;
+  border-radius: 50%;
+}
+.mineral-balance__toggle::before,
+.mineral-balance__toggle::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+.mineral-balance__toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
+.mineral-balance__details[open] .mineral-balance__toggle::after { display: none; }
+.mineral-balance table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 4px 3px;
-  table-layout: fixed;
-  font-size: clamp(13px, 1.15vw, 16px);
+  border-collapse: collapse;
+  font-size: clamp(14px, 1.2vw, 17px);
   font-variant-numeric: tabular-nums;
 }
-.grain-heatmap th,
-.grain-heatmap td { padding: 0; }
-.grain-heatmap__pair-column { width: 19%; }
-.grain-heatmap th:first-child {
-  padding-inline: 2px;
+.mineral-balance caption {
+  padding: 4px 0 10px;
+  color: #cfdaff;
   text-align: left;
-  font-weight: 550;
 }
-.grain-heatmap button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: clamp(4px, 1vw, 10px);
+.mineral-balance th,
+.mineral-balance td {
+  padding: 5px 3px;
+  border-bottom: 1px solid #b4c7ff28;
+  text-align: center;
+}
+.mineral-balance th:first-child { text-align: left; }
+.mineral-balance button {
   width: 100%;
   min-height: 44px;
+  padding: 4px;
   border: 1px solid #b4c7ff59;
   border-radius: 5px;
   background: #131e55;
-  color: #e6ebff;
+  color: inherit;
   font: inherit;
-  font-weight: 650;
   cursor: pointer;
 }
-.grain-heatmap button span { color: #b9caff; }
-.grain-heatmap button:hover,
-.grain-heatmap [aria-sort] button { border-color: #b4c7ff; background: #283b79; }
-.grain-heatmap button:focus-visible { outline: 2px solid #fff0c9; outline-offset: 1px; }
-.grain-heatmap__cell {
-  display: block;
-  padding: 4px 2px;
-  border: 1px solid #c2d2ff24;
-  border-radius: 4px;
-  color: #f5f3ff;
-  text-align: center;
-  font-weight: 600;
-  line-height: 1.25;
-}
-.grain-heatmap__cell--light { color: #131831; }
-.grain-heatmap tfoot :is(th, td) { padding-top: 9px; vertical-align: top; }
-.grain-heatmap__ramp { height: 7px; border: 1px solid #c2d2ff40; border-radius: 2px; }
-.grain-heatmap__limits {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 3px;
-  padding-inline: 3px;
-  color: #d2dcfa;
-  font-size: clamp(11px, 1vw, 13px);
-}
-.grain-heatmap__source {
+.mineral-balance button span { margin-inline-start: 3px; color: #b9caff; }
+.mineral-balance button:hover,
+.mineral-balance [aria-sort] button { border-color: #b4c7ff; background: #283b79; }
+.mineral-balance :is(summary, button, a):focus-visible { outline: 2px solid #fff0c9; outline-offset: 2px; }
+.mineral-balance__source {
   display: inline-block;
-  margin: 12px 4px 0;
+  margin: 12px 0 0;
   color: #cfdaff;
-  font-size: 13px;
+  font-size: 14px;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
+@media (max-width: 540px) {
+  .mineral-balance__axis { margin-inline-start: 0; }
+  .mineral-balance__row { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .mineral-balance__plot { gap: 14px; }
+}
 
 @media (max-width: 720px) {
   .composition {

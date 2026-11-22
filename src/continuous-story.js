@@ -3,6 +3,29 @@ import specimenStyles from './style.css?inline';
 import { storySection, storyStage, visitorsRoot } from './visitors-dom.js';
 import { resizeStory } from './visitors-timeline.js';
 
+const fullscreenButton = document.getElementById('story-fullscreen');
+if (document.fullscreenEnabled) {
+  fullscreenButton.hidden = false;
+  document.addEventListener('fullscreenchange', () => {
+    const label = document.fullscreenElement ? 'Exit fullscreen' : 'Enter fullscreen';
+    fullscreenButton.setAttribute('aria-label', label);
+    fullscreenButton.title = label;
+  });
+  fullscreenButton.addEventListener('click', async event => {
+    // The opening soundtrack starts on the first click that reaches the body.
+    event.stopPropagation();
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (error) {
+      console.warn('Could not change fullscreen mode', error);
+    }
+  });
+}
+
 const style = document.createElement('style');
 style.textContent = visitorsStyles + specimenStyles + '#scroll-story { height: 0; }';
 visitorsRoot.prepend(style);

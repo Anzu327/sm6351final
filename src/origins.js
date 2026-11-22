@@ -10,7 +10,8 @@ const plots = new Map();
 const flightSection = document.querySelector('.origins-flight');
 const timeControl = document.querySelector('#origins-flight-time');
 const flightName = document.querySelector('[data-flight-name]');
-const flightValue = document.querySelector('[data-flight-value]');
+const flightSeconds = document.querySelector('[data-flight-seconds]');
+const flightAltitude = document.querySelector('[data-flight-altitude]');
 const flightTimes = flight.map(event => event.time);
 const flightScales = new Map();
 
@@ -246,6 +247,7 @@ function shockPlot({ svg, width, height }) {
   dot(svg, cx, cy, 6, 'shock-flash');
   label(svg, 'Flash', cx, cy + 36, '', 'middle');
 
+  const rowHeight = 58;
   shockArrivals.forEach(({ name, delay, detection }, index) => {
     const radius = outer - (outer - inner) * index / (shockArrivals.length - 1);
     const theta = angle(delay);
@@ -256,9 +258,13 @@ function shockPlot({ svg, width, height }) {
     mark.append('path').attr('class', 'shock-arc').attr('d', arc(radius, theta));
     mark.append('path').attr('class', 'shock-hit').attr('d', arc(radius, end));
     dot(mark, px, py, 6, 'shock-tip');
-    const row = 103 + index * 58;
-    hitRect(mark, textX - 8, row - 27, width - textX, 42).attr('class', 'shock-label-hit');
+    const row = 103 + index * rowHeight;
+    const labelWidth = width - textX;
+    hitRect(mark, textX - 8, row - 27, labelWidth, 42).attr('class', 'shock-label-highlight');
     label(mark, name, textX, row, 'shock-city');
+    mark.append('rect').attr('class', 'shock-label-hit')
+      .attr('x', textX - 8).attr('y', row - 36)
+      .attr('width', labelWidth).attr('height', rowHeight);
   });
 }
 
@@ -430,8 +436,10 @@ function updateFlight() {
   const altitude = altitudeAtTime(time).toFixed(1);
   const detail = event?.name ?? 'Interpolated position';
   timeControl.setAttribute('aria-valuetext', `${time} seconds, ${altitude} kilometers, ${detail}`);
-  flightName.textContent = detail;
-  flightValue.textContent = `${time} s · ${altitude} km`;
+  if (flightName.textContent !== detail) flightName.textContent = detail;
+  const seconds = time.toFixed(2);
+  if (flightSeconds.textContent !== seconds) flightSeconds.textContent = seconds;
+  if (flightAltitude.textContent !== altitude) flightAltitude.textContent = altitude;
   flightSection.dataset.flightTime = time;
 
   const passedTimes = flightTimes.filter(sampleTime => sampleTime < time);

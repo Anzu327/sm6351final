@@ -178,37 +178,29 @@ const grainPairs = [
   ['LK 1', 2.6288, 0.1163], ['LK 2', 2.6411, 0.1251],
 ].map(([id, olivine, chromite]) => ({ id, olivine, chromite }));
 
-export function bindGrainHeatmap(figure) {
+export function bindMineralBalance(figure) {
   const table = select(figure).select('table');
   const controls = table.selectAll('button[data-mineral]');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  const palettes = {
-    olivine: ['#202b59', '#475b99', '#8ba6f0'],
-    chromite: ['#332a3d', '#765132', '#e7bb72'],
-  };
-  const columns = Object.entries(palettes).map(([key, palette]) => {
+  const minerals = ['olivine', 'chromite'];
+  // Convert Mg/Fe to Mg/(Mg + Fe) so both minerals share a linear balance with equality at 50%.
+  const magnesiumPercent = ratio => (100 * ratio) / (1 + ratio);
+  for (const key of minerals) {
     const values = grainPairs.map(pair => pair[key]);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const middle = (min + max) / 2;
-    const scale = table.select(`[data-scale="${key}"]`);
-    scale.append('div').attr('class', 'grain-heatmap__ramp').attr('aria-hidden', 'true')
-      .style('background', `linear-gradient(90deg, ${palette.join(', ')})`);
-    const limits = scale.append('div').attr('class', 'grain-heatmap__limits');
-    limits.selectAll('span').data([min, max]).join('span').text(value => value.toFixed(4));
-    return { key, darkInkAt: min + (max - min) * .7, color: scaleLinear([min, middle, max], palette) };
-  });
+    const track = figure.querySelector(`[data-range="${key}"]`);
+    const comparison = min > 1 ? 'More magnesium than iron in every pair.'
+      : max < 1 ? 'More iron than magnesium in every pair.' : '';
+    track.setAttribute('aria-label', `Magnesium-to-iron ratios range from ${min.toFixed(4)} to ${max.toFixed(4)}. ${comparison}`.trim());
+    track.style.setProperty('--range-start', `${magnesiumPercent(min)}%`);
+    track.style.setProperty('--range-end', `${magnesiumPercent(max)}%`);
+  }
 
   const rows = table.select('tbody').selectAll('tr').data(grainPairs, pair => pair.id).join('tr');
   rows.append('th').attr('scope', 'row').text(pair => pair.id);
-  rows.selectAll('td').data(pair => columns.map(({ key, darkInkAt, color }) => ({
-    value: pair[key],
-    color: color(pair[key]),
-    darkInk: pair[key] > darkInkAt,
-  }))).join('td').append('span').attr('class', 'grain-heatmap__cell')
-    .classed('grain-heatmap__cell--light', cell => cell.darkInk)
-    .style('background-color', cell => cell.color)
-    .text(cell => cell.value.toFixed(4));
+  rows.selectAll('td').data(pair => minerals.map(key => pair[key]))
+    .join('td').text(value => value.toFixed(4));
 
   let active = '';
   let direction = -1;

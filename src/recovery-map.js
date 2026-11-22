@@ -48,11 +48,10 @@ function mountRecoveryMap(figure) {
   function draw() {
     const width = plot.clientWidth;
     if (!width) return;
-    const height = Math.max(265, Math.min(460, width * .57));
+    const height = Math.max(280, Math.min(610, width * .54));
     const narrow = width < 440;
-    const staggerTicks = width < 320;
-    const left = 78, right = width - 15, top = 20;
-    const bottom = height - (staggerTicks ? 62 : 44);
+    const left = narrow ? 60 : 84, right = width - 12, top = 20;
+    const bottom = height - 38;
     const lonSpan = 1.52, midLon = 60.96, midLat = 54.998;
     // Local equirectangular projection, with the latitude scale corrected at 55°N.
     const scale = Math.min((right-left)/lonSpan, (bottom-top)*Math.cos(55*Math.PI/180)/.45);
@@ -71,12 +70,12 @@ function mountRecoveryMap(figure) {
     for (const lon of [60.5, 61, 61.5]) {
       const px = x(lon);
       grid.append('line').attr('x1', px).attr('x2', px).attr('y1', top).attr('y2', bottom);
-      label(`${lon.toFixed(1)}°E`, px, bottom + (staggerTicks && lon === 61 ? 49 : 25), 'middle');
+      if (lon !== 61) label(`${lon.toFixed(1)}°E`, px, bottom + 25, 'middle');
     }
     for (const lat of [54.8, 55, 55.2]) {
       const py = y(lat);
       grid.append('line').attr('x1', left).attr('x2', right).attr('y1', py).attr('y2', py);
-      label(`${lat.toFixed(1)}°N`, left - 7, py + 4, 'end');
+      if (lat !== 55) label(`${lat.toFixed(1)}°N`, left - 7, py + 4, 'end');
     }
 
     const lake = [x(60.3221), y(54.9594)];
@@ -109,12 +108,18 @@ function mountRecoveryMap(figure) {
     displayed = active;
     readout.replaceChildren();
     if (!active) return;
-    const rows = [active.title, coordinates(active)];
-    if (active.id === 'C14') rows.push('Found 23 Apr 2013');
-    for (const text of rows) {
-      const row = document.createElement('span');
-      row.textContent = text;
-      readout.append(row);
+    if (active.id || active.peak) {
+      const title = document.createElement('strong');
+      title.textContent = active.title;
+      readout.append(title);
+    }
+    const location = document.createElement('span');
+    location.textContent = coordinates(active);
+    readout.append(location);
+    if (active.id === 'C14') {
+      const date = document.createElement('span');
+      date.textContent = 'Found 23 Apr 2013';
+      readout.append(date);
     }
   }
 
