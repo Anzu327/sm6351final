@@ -18,7 +18,6 @@ function renderBundling(section) {
   const labels = [...regions, ...classes];
   const split = regions.length;
   const totals = [...counts.map(sum), ...classes.map((_, i) => sum(counts.map(row => row[i])))];
-  const total = sum(totals.slice(0, split));
   const isRegion = index => index < split;
   const regionGroup = name => {
     if (name === 'North America' || name === 'South America') return 'Americas';
@@ -66,15 +65,10 @@ function renderBundling(section) {
   const opacity = scaleSqrt().domain(weightDomain).range([.26, .53]);
   const bundle = lineRadial().curve(curveBundle.beta(.85)).angle(node => node.x).radius(node => node.y);
   const chart = select(section.querySelector('.chord-chart'));
-  const countLabel = section.querySelector('.chord-count');
-  const reset = section.querySelector('.chord-reset');
   let selected = null;
   let hovered = null;
-  let selectionControl = null;
 
   chart.append('circle').attr('class', 'chord-ring').attr('r', radius);
-  chart.append('text').attr('class', 'chord-center-label').attr('text-anchor', 'middle')
-    .attr('dy', '.35em').text('REGION × CLASS');
 
   const edges = chart.append('g').attr('aria-hidden', 'true').selectAll('path')
     .data(links).join('path')
@@ -97,7 +91,8 @@ function renderBundling(section) {
     .selectAll('g').data(sectors).join('g');
   ring.append('path').attr('d', sectorArc).attr('fill', group => group.color);
   ring.append('text').attr('class', 'chord-group-label').attr('text-anchor', 'middle')
-    .attr('transform', ({ angle }) => {
+    .attr('transform', ({ name, angle }) => {
+      if (name === 'Other locations') angle += radians(22);
       const distance = radius + 168;
       const flip = angle > halfTurn / 2 && angle < halfTurn * 1.5 ? 180 : 0;
       return `translate(${Math.sin(angle) * distance},${-Math.cos(angle) * distance}) rotate(${degrees(angle) + flip})`;
@@ -114,34 +109,28 @@ function renderBundling(section) {
     .on('pointerleave', () => showHover(null))
     .on('focus', (_, node) => showHover(node.data.i))
     .on('blur', () => showHover(null))
-    .on('click', (event, node) => toggle(node.data.i, event.currentTarget))
+    .on('click', (_, node) => toggle(node.data.i))
     .on('keydown', (event, node) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      toggle(node.data.i, event.currentTarget);
+      toggle(node.data.i);
     });
   radialNodes.append('line').attr('x1', -20).attr('x2', 3)
     .attr('stroke', node => node.parent.data.color);
-  radialNodes.append('text').attr('dy', '.32em')
-    .attr('x', node => node.x < halfTurn ? 10 : -10)
+  const wrappedNames = new Set(['North America', 'South America', 'Other classes']);
+  radialNodes.append('text')
     .attr('text-anchor', node => node.x < halfTurn ? 'start' : 'end')
     .attr('transform', node => node.x < halfTurn ? null : 'rotate(180)')
-    .text(node => node.data.name);
-
-  const buttons = labels.map((label, i) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.style.setProperty('--chord-color', nodes.get(i).parent.data.color);
-    const name = document.createElement('span');
-    name.textContent = label;
-    const count = document.createElement('span');
-    count.className = 'chord-value';
-    button.append(name, count);
-    button.addEventListener('click', () => toggle(i, button));
-    const side = isRegion(i) ? '.chord-regions' : '.chord-classes';
-    section.querySelector(`${side} .chord-options`).append(button);
-    return { button, count };
-  });
+    .each(function (node) {
+      const { name } = node.data;
+      const lines = wrappedNames.has(name) ? name.split(' ') : [name];
+      select(this).selectAll('tspan').data(lines).join('tspan')
+        .attr('x', node.x < halfTurn ? 10 : -10)
+        .attr('dy', (_, index) => index ? '1.05em' : lines.length > 1 ? '-.2em' : '.32em')
+        .text(line => line);
+    });
+  chart.append('text').attr('class', 'chord-center-label').attr('text-anchor', 'middle')
+    .attr('dy', '.35em').text('REGION × CLASS');
 
   function between(a, b) {
     if (isRegion(a) === isRegion(b)) return 0;
@@ -161,44 +150,22 @@ function renderBundling(section) {
     showConnections();
   }
 
-  function toggle(index, control) {
+  function toggle(index) {
     selected = selected === index ? null : index;
-    selectionControl = selected === null ? null : control;
     update();
   }
 
   function update() {
     showConnections();
     radialNodes.attr('aria-pressed', ({ data: { i } }) => String(i === selected));
-    buttons.forEach(({ button, count }, index) => {
-      const muted = selected !== null && selected !== index && isRegion(selected) === isRegion(index);
-      const value = selected === null || selected === index ? totals[index] : between(selected, index);
-      button.classList.toggle('muted', muted);
-      button.setAttribute('aria-pressed', String(index === selected));
-      count.textContent = muted ? '' : format.format(value);
-    });
-    countLabel.textContent = selected === null
-      ? `${format.format(total)} records`
-      : `${labels[selected]} · ${format.format(totals[selected])} records`;
-    reset.disabled = selected === null;
   }
 
-  function clearSelection(restoreFocus) {
-    const control = selectionControl;
-    selected = hovered = selectionControl = null;
-    update();
-    if (restoreFocus && control) {
-      control.focus({ preventScroll: true });
-      showHover(null);
-    }
-  }
-
-  reset.addEventListener('click', () => clearSelection(true));
   section.addEventListener('keydown', event => {
     if (event.key === 'Escape' && selected !== null) {
       event.preventDefault();
       event.stopPropagation();
-      clearSelection(false);
+      selected = hovered = null;
+      update();
     }
   });
   update();

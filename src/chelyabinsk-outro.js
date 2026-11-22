@@ -52,7 +52,6 @@ export function mountChelyabinskOutro() {
     } catch (error) {
       console.warn('The Chelyabinsk closing scene is using its photograph.', error);
       renderer?.dispose();
-      section.removeAttribute('data-motion');
     }
     schedule();
   }
@@ -78,7 +77,7 @@ export function mountChelyabinskOutro() {
     const p = clamp(-frame.top / Math.max(1, frame.height - stageRect.height));
     const flight = outroFlightProgress(scroll);
     const rockAlpha = ease(0, .10, flight);
-    const museumReveal = rock ? ease(outroFlightEnd + .18, outroFlightEnd + .70, scroll) : 0;
+    const museumReveal = ease(outroFlightEnd + .06, outroFlightEnd + .48, scroll);
     const party = ease(.54, .83, p) * museumReveal;
 
     stage.style.setProperty('--outro-room', ease(-1.20, -.89, scroll));

@@ -1,6 +1,6 @@
 import { chartReturnSpan, clamp, ease, mix } from './motion.js';
 import { storyStage } from './visitors-dom.js';
-import { chartTransitionSpan, enableChartTransition } from './visitors-timeline.js';
+import { chartHoldSpan, chartTransitionSpan, enableChartTransition } from './visitors-timeline.js';
 
 export function createRegionChartTransition() {
   const anchor = document.getElementById('region-chord-anchor');
@@ -14,12 +14,13 @@ export function createRegionChartTransition() {
   let returnSpan;
   let lastDistance;
   let sectionHeight = 0;
+  const labelRevealStart = .86;
   function resize() {
     sectionHeight = section.offsetHeight;
     anchor.style.setProperty('--chart-overlap', `${innerHeight}px`);
     span = chartTransitionSpan * innerHeight;
     returnSpan = chartReturnSpan * innerHeight;
-    anchor.style.setProperty('--chart-return-span', `${returnSpan + .28 * innerHeight}px`);
+    anchor.style.setProperty('--chart-tail', `${returnSpan + chartHoldSpan * innerHeight}px`);
     lastDistance = undefined;
   }
   anchor.classList.add('has-chart-transition');
@@ -33,7 +34,8 @@ export function createRegionChartTransition() {
     if (distance === lastDistance) return frame.progress ? frame : null;
     lastDistance = distance;
     const entry = distance <= 1 ? 1 : clamp(1 - distance / span);
-    const returning = clamp((-distance - Math.max(0, sectionHeight - innerHeight) - .28 * innerHeight) / returnSpan);
+    const pinTop = Math.min(0, innerHeight - sectionHeight);
+    const returning = clamp((pinTop - chartHoldSpan * innerHeight - distance) / returnSpan);
     const leaving = returning > 0 && returning < 1;
     const finished = returning === 1;
     const moving = leaving || (entry > 0 && entry < 1);
@@ -45,14 +47,10 @@ export function createRegionChartTransition() {
     anchor.classList.toggle('is-returned', finished);
     anchor.classList.toggle('is-returning', leaving);
     anchor.style.setProperty('--chart-return-fade', ease(.92, 1, returning));
-    section.inert = moving || finished;
-    const pinTop = Math.min(0, innerHeight - sectionHeight);
+    // Labels become interactive as soon as they start to appear, in either direction.
+    section.inert = progress <= labelRevealStart || finished;
     let shift = finished ? 0 : Math.max(0, pinTop - distance);
-    if (leaving) {
-      const bounds = panel.getBoundingClientRect();
-      const chartCenter = bounds.top + bounds.height / 2 - section.getBoundingClientRect().top;
-      shift += (innerHeight / 2 - chartCenter - pinTop) * ease(0, .27, returning);
-    } else if (moving) {
+    if (moving && !leaving) {
       shift = -distance;
     }
     section.style.setProperty('--chart-shift', `${shift}px`);
@@ -66,14 +64,15 @@ export function createRegionChartTransition() {
       '--chart-ring-alpha': ease(.64, .85, progress),
       '--chart-edge-alpha': ease(.70, .83, progress),
       '--chart-edge-offset': 1 - edge,
-      '--chart-label-alpha': ease(.86, 1, progress),
+      '--chart-label-alpha': ease(labelRevealStart, 1, progress),
     };
     for (const [name, value] of Object.entries(styles)) section.style.setProperty(name, value);
 
     const bounds = panel.getBoundingClientRect();
     const ring = svg.querySelector('.chord-ring');
     frame.x = bounds.left + bounds.width / 2;
-    frame.y = bounds.top + bounds.height / 2;
+    const center = bounds.top + bounds.height / 2;
+    frame.y = leaving ? mix(center, innerHeight / 2, ease(.22, .45, returning)) : center;
     frame.radius = bounds.width * Number(ring?.getAttribute('r') ?? 330) / svg.viewBox.baseVal.width;
     return frame;
   };
