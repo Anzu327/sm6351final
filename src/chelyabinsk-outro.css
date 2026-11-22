@@ -1,108 +1,76 @@
+@import './palette.css';
+
 .chelyabinsk-outro {
-  --outro-ink: #f7ead4;
+  --outro-ink: var(--soft, #fef1d0);
   position: relative;
   z-index: 42;
-  isolation: isolate;
   color: var(--outro-ink);
-  background: #122063;
+  background: var(--cobalt);
 }
 
-.chelyabinsk-outro[data-motion] { height: 330svh; }
+.chelyabinsk-outro[data-motion] {
+  height: 145svh;
+}
 
 .outro-stage {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
-  align-content: start;
-  padding: 28px clamp(18px, 6vw, 92px);
-  background: #0c1234;
+  place-items: center;
+  min-height: 100svh;
+  padding: 32px clamp(22px, 6vw, 92px);
+  box-sizing: border-box;
+  isolation: isolate;
 }
 
 [data-motion] .outro-stage {
   position: fixed;
   inset: 0;
-  display: block;
-  padding: 0;
-  overflow: hidden;
   visibility: hidden;
   pointer-events: none;
+}
+
+[data-motion] .outro-stage.is-visible {
+  visibility: visible;
+}
+
+/* The existing solar canvas sits directly behind the closing text. */
+.chelyabinsk-outro[data-shared-sky][data-motion] {
   background: transparent;
 }
 
-[data-motion] .outro-stage.is-visible { visibility: visible; }
-
-[data-motion] .outro-stage::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: var(--outro-room, 0);
-  background:
-    radial-gradient(ellipse at 50% 37%, #48568a3d, transparent 58%),
-    linear-gradient(155deg, #17246d, #0c1234);
-}
-
-.outro-wake, .outro-canvas { display: none; }
-
-[data-motion] :is(.outro-museum, .outro-specimen) {
-  position: absolute;
-  left: 50%;
-  top: 43%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.outro-specimen { display: block; width: min(100%, 460px); height: auto; border-radius: 3px; }
-.outro-museum { display: block; width: 100%; max-width: 1100px; height: auto; order: 2; border-radius: 3px; }
-
-[data-motion] .outro-museum {
-  width: min(96vw, 1100px, calc(68svh * var(--museum-aspect, 1.777)));
-  mask-image: linear-gradient(90deg, transparent, black var(--museum-reveal, 0%), black calc(100% - var(--museum-reveal, 0%)), transparent);
-  z-index: 1;
-}
-
-[data-motion] :is(.outro-wake, .outro-canvas) {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-
-[data-motion] .outro-wake { filter: drop-shadow(0 0 4px #bcd3fbd4); }
-[data-motion] .outro-specimen { width: min(54vw, 46vh, 460px); z-index: 2; }
-
-@media (prefers-reduced-motion: no-preference) {
-  [data-motion] .outro-canvas.is-hovering { animation: outro-hover 4.8s ease-in-out infinite; }
-}
-
-@keyframes outro-hover {
-  50% { transform: translateY(clamp(-6px, -.55svh, -2px)); }
+.chelyabinsk-outro:not([data-shared-sky][data-motion]) .outro-stage {
+  background: var(--cobalt);
 }
 
 .outro-caption {
-  color: var(--outro-ink);
-  order: 3;
+  width: min(100%, 880px);
+  margin: 0;
   text-align: center;
 }
 
-[data-motion] .outro-caption {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  width: min(90%, 700px);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  opacity: 0;
+.outro-caption :is(blockquote, p) {
+  margin: 0;
 }
 
-.outro-caption h2 { margin: 0; font: 400 clamp(29px, 5.3vw, 72px)/1 Georgia, serif; }
+.outro-caption blockquote {
+  padding: 0;
+  border: 0;
+}
 
-@media (max-height: 630px) {
-  [data-motion] .outro-museum { width: min(96vw, calc(60svh * var(--museum-aspect, 1.5))); top: 39%; }
-  .outro-caption h2 { font-size: clamp(26px, 6svh, 43px); }
+.outro-caption :is(p, figcaption) {
+  color: var(--outro-ink);
+}
+
+.outro-caption p {
+  font: 400 clamp(26px, 4.4vw, 64px)/1.2 Editorial, Georgia, serif;
+  text-wrap: balance;
+}
+
+.outro-caption figcaption {
+  margin-top: clamp(18px, 3vw, 32px);
+  font: 400 clamp(22px, 2.6vw, 36px)/1.2 Editorial, Georgia, serif;
+}
+
+[data-motion] :is(.outro-caption blockquote, .outro-caption figcaption) {
+  opacity: 0;
 }

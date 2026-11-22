@@ -4,7 +4,8 @@ import { chartHoldSpan, chartTransitionSpan, enableChartTransition } from './vis
 
 export function createRegionChartTransition() {
   const anchor = document.getElementById('region-chord-anchor');
-  if (!anchor || matchMedia('(prefers-reduced-motion: reduce)').matches) return () => null;
+  const outro = document.getElementById('chelyabinsk-outro');
+  if (!anchor || !outro || matchMedia('(prefers-reduced-motion: reduce)').matches) return () => null;
 
   const section = anchor.querySelector('#region-chord');
   const panel = section.querySelector('.chord-panel');
@@ -26,6 +27,7 @@ export function createRegionChartTransition() {
   anchor.classList.add('has-chart-transition');
   resize();
   enableChartTransition();
+  outro.dataset.sharedSky = '';
   addEventListener('resize', resize);
   new ResizeObserver(resize).observe(section);
 
@@ -38,15 +40,14 @@ export function createRegionChartTransition() {
     const returning = clamp((pinTop - chartHoldSpan * innerHeight - distance) / returnSpan);
     const leaving = returning > 0 && returning < 1;
     const finished = returning === 1;
+    const closing = finished && outro.getBoundingClientRect().bottom > 0;
     const moving = leaving || (entry > 0 && entry < 1);
-    const progress = leaving ? mix(1, .64, ease(0, .51, returning)) : entry;
+    const progress = leaving || closing ? mix(1, .64, ease(0, .51, returning)) : entry;
     frame.progress = progress;
-    frame.returning = leaving ? returning : 0;
-    storyStage?.classList.toggle('is-chart-bridging', moving);
+    frame.returning = leaving || closing ? returning : 0;
+    storyStage?.classList.toggle('is-chart-bridging', moving || closing);
     section.classList.toggle('is-bridging', moving);
     anchor.classList.toggle('is-returned', finished);
-    anchor.classList.toggle('is-returning', leaving);
-    anchor.style.setProperty('--chart-return-fade', ease(.92, 1, returning));
     // Labels become interactive as soon as they start to appear, in either direction.
     section.inert = progress <= labelRevealStart || finished;
     let shift = finished ? 0 : Math.max(0, pinTop - distance);
@@ -54,9 +55,11 @@ export function createRegionChartTransition() {
       shift = -distance;
     }
     section.style.setProperty('--chart-shift', `${shift}px`);
-    if (!moving) {
-      return entry ? frame : null;
+    if (finished && !closing) {
+      frame.progress = 0;
+      return null;
     }
+    if (!moving && !closing) return entry ? frame : null;
     const edge = ease(.72, .975, progress);
     const alpha = ease(.73, 1, progress);
     const styles = {

@@ -4,7 +4,7 @@ export const visitorsComposite = `
 varying vec2 vUv;
 uniform sampler2D a, b, solarDepth;
 uniform vec2 pixelSize;
-uniform float blend, aspect, portal, solarWeight, earthWeight, solarTime, mapMorph;
+uniform float blend, aspect, portal, solarWeight, solarFade, earthWeight, solarTime, mapMorph;
 ${printPaper}
 
 float hash(vec2 p) {
@@ -16,19 +16,20 @@ float viewDepth(vec2 coord) {
   return .1*150./(150.-z*149.9);
 }
 
-vec3 drawSolar(vec2 uv, float tooth) {
+vec3 drawSolar(sampler2D image, vec2 uv, float tooth, bool skyOnly) {
   vec2 pixel = gl_FragCoord.xy;
   // Keep the pencil tooth fixed to the paper as geometry moves across it.
   float fleck = hash(floor(pixel*.78));
   // DeferredChromaticAberration uses three barrel samples with a .03 maximum.
   vec2 radial = uv-.5;
   vec2 spread = radial*dot(radial,radial)*.01;
-  vec3 center = texture2D(a,uv).rgb;
-  vec3 first = texture2D(a,uv+spread).rgb;
-  vec3 second = texture2D(a,uv+spread*2.).rgb;
+  vec3 center = texture2D(image,uv).rgb;
+  vec3 first = texture2D(image,uv+spread).rgb;
+  vec3 second = texture2D(image,uv+spread*2.).rgb;
   const float spectrumWeight = .72974005;
   vec3 printColor = vec3((center.r+first.r*spectrumWeight)/(1.+spectrumWeight),
                         (first.g+second.g)*.5,second.b);
+  if (skyOnly) return printColor;
 
   // DeferredOutline updates its displacement at 4 fps. Its depth kernel runs
   // on the displaced sample while the underlying color and paper stay still.
@@ -41,8 +42,8 @@ vec3 drawSolar(vec2 uv, float tooth) {
   float closest = min(min(viewDepth(point-dx),viewDepth(point+dx)),
                       min(viewDepth(point-dy),viewDepth(point+dy)));
   float silhouette = smoothstep(.014,.078,(depth-closest)/max(closest,1.));
-  vec3 colorX = texture2D(a,point+dx).rgb;
-  vec3 colorY = texture2D(a,point+dy).rgb;
+  vec3 colorX = texture2D(image,point+dx).rgb;
+  vec3 colorY = texture2D(image,point+dy).rgb;
   float colorBreak = max(length(center-colorX),length(center-colorY));
   float stroke = max(silhouette*.66,smoothstep(.075,.37,colorBreak)*.38);
   vec3 pigment = min(center,min(colorX,colorY));
@@ -76,14 +77,16 @@ void main() {
   vec3 incoming = texture2D(b,vUv).rgb;
   float tooth = paperTooth(pixel);
   if (solarWeight > 0.) {
-    vec3 pigment = drawSolar(vUv,tooth);
+    vec3 pigment = drawSolar(a,vUv,tooth,false);
+    float fiber = paperTooth(pixel*.54+vec2(1024.,512.)*.23);
+    float darkPaper = 1. + (tooth-.48)*.92 + (fiber-.48)*.38 + fine*.12;
     if (viewDepth(vUv) > 149.) {
       // Modulate the dark paper so its blue does not wash out in linear light.
-      float fiber = paperTooth(pixel*.54+vec2(1024.,512.)*.23);
-      outgoing = pigment * (1. + (tooth-.48)*.92 + (fiber-.48)*.38 + fine*.12);
+      outgoing = pigment * darkPaper;
     } else {
       outgoing = applyPaper(pigment,pixel,tooth,fine);
     }
+    if (solarFade > 0.) outgoing = mix(outgoing,drawSolar(b,vUv,tooth,true)*darkPaper,solarFade);
     if (earthWeight > 0.) incoming = applyPaper(incoming,pixel,tooth,fine);
   } else if (earthWeight > 0.) {
     float paperWeight = earthWeight;
