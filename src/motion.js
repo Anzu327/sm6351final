@@ -16,9 +16,10 @@ export const ease = (start, end, value) => {
 };
 export const powerInOut = (t, power) => t < .5 ? (2 * t) ** power / 2 : 1 - (2 - 2 * t) ** power / 2;
 
-export const chartReturnSpan = 2.65;
-export const outroFlightStart = -1.86;
-export const outroFlightEnd = .66;
+export const chartReturnSpan = 1.55;
+// Start the flight during the last third of the return, which ends one viewport before the outro.
+export const outroFlightStart = -1 - .32 * chartReturnSpan;
+export const outroFlightEnd = .34;
 export const outroFlightProgress = scroll => fraction(scroll, outroFlightStart, outroFlightEnd - outroFlightStart);
 
 export function outroFlightPoint(progress, landingX, landingY) {

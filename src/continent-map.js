@@ -7,7 +7,6 @@ const svgNamespace = 'http://www.w3.org/2000/svg';
 const centerY = .015;
 
 export function createContinentMap() {
-  const panel = visitorsRoot.querySelector('#continent-controls');
   const hint = visitorsRoot.querySelector('#continent-hint');
   const overlay = visitorsRoot.querySelector('#continent-overlay');
   const group = overlay.querySelector('#continent-regions');
@@ -50,7 +49,7 @@ export function createContinentMap() {
     selected = choice;
     hint.textContent = choice
       ? `${choice.name} · Select it again or press Esc for the world map.`
-      : 'Select a continent on the map.';
+      : 'World map.';
     meteorites.showRegion(choice?.name);
     legend.textContent = choice ? 'GLOBAL DENSITY SCALE' : overviewLegend;
     overlay.toggleAttribute('data-focused', Boolean(choice));
@@ -70,7 +69,6 @@ export function createContinentMap() {
     const unfolded = morph >= .999;
     if (ready !== unfolded) {
       ready = unfolded;
-      panel.hidden = !ready;
       overlay.toggleAttribute('hidden', !ready);
       if (!ready && selected) select(null, false);
     }

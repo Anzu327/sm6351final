@@ -15,11 +15,14 @@ export function createContinentMeteorites(overlay) {
   const line = leader.querySelector('path');
   const end = leader.querySelector('circle');
   const closeButton = card.querySelector('button');
+  const content = card.querySelector('.meteorite-card-content');
   const kind = card.querySelector('.meteorite-card-kind');
   const title = card.querySelector('h3');
-  const subtitle = card.querySelector('.meteorite-card-subtitle');
+  const date = card.querySelector('.meteorite-card-date');
   const location = card.querySelector('.meteorite-card-location');
-  const facts = card.querySelector('.meteorite-card-facts');
+  const classification = card.querySelector('.meteorite-card-classification');
+  const mass = card.querySelector('.meteorite-card-mass');
+  const coordinates = card.querySelector('.meteorite-card-coordinates');
   const story = card.querySelector('.meteorite-card-story');
   const photo = card.querySelector('.meteorite-photo img');
   const caption = card.querySelector('.meteorite-photo figcaption');
@@ -79,23 +82,28 @@ export function createContinentMeteorites(overlay) {
   function open(entry) {
     close();
     active = entry;
-    kind.textContent = entry.status === 'Fell' ? 'OBSERVED FALL' : 'RECORDED FIND';
+    const fell = entry.status === 'Fell';
+    const status = fell ? 'Observed fall' : 'Recorded find';
+    card.dataset.recordStatus = fell ? 'fall' : 'find';
+    kind.textContent = `${status}. `;
+    date.parentElement.title = status;
     title.textContent = entry.title;
-    subtitle.textContent = entry.chinese ?? '';
-    subtitle.hidden = !entry.chinese;
-    location.textContent = `${entry.date} · ${entry.location} · ${entry.classification}`;
-    const coordinates = `${Math.abs(entry.lat).toFixed(2)}° ${entry.lat < 0 ? 'S' : 'N'}, ${Math.abs(entry.lon).toFixed(2)}° ${entry.lon < 0 ? 'W' : 'E'}`;
-    const mass = entry.mass >= 1000 ? `${massFormat.format(entry.mass / 1000)} kg` : `${massFormat.format(entry.mass)} g`;
-    facts.textContent = [entry.mass > 0 ? `Catalogue mass: ${mass}` : '', coordinates].filter(Boolean).join(' · ');
+    date.textContent = entry.date;
+    location.textContent = entry.location;
+    classification.textContent = entry.classification;
+    coordinates.textContent = `${Math.abs(entry.lat).toFixed(2)}° ${entry.lat < 0 ? 'S' : 'N'}, ${Math.abs(entry.lon).toFixed(2)}° ${entry.lon < 0 ? 'W' : 'E'}`;
+    mass.parentElement.hidden = !(entry.mass > 0);
+    mass.textContent = entry.mass >= 1000 ? `${massFormat.format(entry.mass / 1000)} kg` : `${massFormat.format(entry.mass)} g`;
     story.textContent = entry.story ?? '';
     story.hidden = !entry.story;
     const image = featuredPhotos[entry.id];
     photo.alt = image.alt;
     photo.src = `${assetBase}visitors/featured/${entry.id}.webp`;
-    caption.textContent = [image.label, image.author, image.license, 'Resized to WebP'].filter(Boolean).join(' · ');
+    caption.textContent = [image.label, image.author, image.license, 'Resized'].filter(Boolean).join(' · ');
     entry.marker.classList.add('selected');
     entry.marker.setAttribute('aria-expanded', 'true');
     card.hidden = false;
+    content.scrollTop = 0;
     updateLeader();
     closeButton.focus({ preventScroll: true });
   }
@@ -110,17 +118,21 @@ export function createContinentMeteorites(overlay) {
       return;
     }
     const narrow = innerWidth <= 760;
-    const dock = narrow
-      ? (y > innerHeight * .52 ? 'top' : 'bottom')
+    // On phones, leave room for the map title above and the selected pin beside the card.
+    const dock = narrow ? (y > (innerHeight + 96) / 2 ? 'top' : 'bottom')
       : (x < innerWidth / 2 ? 'right' : 'left');
     if (card.dataset.dock !== dock) card.dataset.dock = dock;
+    if (narrow) {
+      const pinEdge = dock === 'top' ? y - 24 : y + 14;
+      card.style.setProperty('--meteorite-pin-edge', `${pinEdge}px`);
+    }
     const box = card.getBoundingClientRect();
     const endX = narrow
       ? box.left + (x < innerWidth / 2 ? .65 : .35) * box.width
       : (dock === 'right' ? box.left : box.right);
     const endY = narrow
       ? (dock === 'top' ? box.bottom : box.top)
-      : Math.min(box.bottom - 12, photo.getBoundingClientRect().top + 24);
+      : box.top + box.height * .45;
     const path = narrow
       ? `M${x} ${y} L${endX} ${endY + (dock === 'top' ? 14 : -14)} V${endY}`
       : `M${x} ${y} L${endX + (dock === 'right' ? -18 : 18)} ${endY} H${endX}`;
