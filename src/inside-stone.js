@@ -29,7 +29,6 @@ const close = detail.querySelector('button');
 
 // Follow Observable's D3 pie chart: flat sectors with a contrasting stroke
 // and a separate arc generator to position the labels inside each sector.
-// https://observablehq.com/@d3/pie-chart/2
 const sectors = pie().sort(null).value(mineral => mineral.value)(minerals);
 const face = arc().innerRadius(0).outerRadius(145);
 const labelPosition = arc().innerRadius(93).outerRadius(93);

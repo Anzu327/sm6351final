@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { accent, cobalt, ink, lightBlue, paper } from './palette.js';
-import { specimenVertexShader, specimenFragmentShader, stoneInks } from '../public/sleep-well/meteorite/printed-material.js';
+import { specimenVertexShader, specimenFragmentShader, stoneInks } from '../public/story/meteorite/printed-material.js';
 
 // Both meshes share the same inks, tonal bands and paper texture.
 const uniforms = {

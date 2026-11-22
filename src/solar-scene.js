@@ -113,7 +113,7 @@ function makeSolarMaterial(ink, {
       void main() {
         vec3 normal = normalize(eyeNormal);
         vec3 viewRay = normalize(eyePosition);
-        // Monolith's color modules operate on the sRGB-authored paint.
+        // The model colors operate on the sRGB-authored paint.
         // Convert back to linear after shading for the VISITORS compositor.
         vec3 linearPaint = hasMap ? texture2D(albedo,texCoord).rgb : base;
         vec3 color = sRGBTransferOETF(vec4(linearPaint,1.)).rgb;
@@ -484,7 +484,7 @@ export function createSolarScene(scene, camera) {
       planet.body.rotation.set(.12, time * .10 + planet.phase, -.21);
     }
 
-    // Map Monolith's 1 → 3.75 → 4.5 scroll beats onto this chapter's portal
+    // Map the 1 → 3.75 → 4.5 scroll beats onto this chapter's portal
     // reveal and atlas handoff. The scene stays fully scrub-able in reverse.
     exploration += (Number(orbit.active) - exploration) * (1 - Math.exp(-dt / .115));
     const storyWeight = 1 - exploration;
@@ -560,7 +560,7 @@ export function createSolarScene(scene, camera) {
       visibility: paused ? 0 : ease(2.30, 2.50, p) * (1 - ease(3.34, 3.62, p)),
     });
 
-    // Monolith's LensFlare follows a two-second cycle sampled in 24 steps.
+    // The lens flare follows a two-second cycle sampled in 24 steps.
     const flarePhase = Math.floor((time % 2) * 12) / 12;
     const flareBeat = flarePhase < 1 ? flarePhase ** 3 : 1 - (2 - flarePhase) ** 3;
     const openingBeat = flarePhase < 1 ? flareBeat : 1 - flareBeat;
