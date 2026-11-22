@@ -7,7 +7,7 @@
   --recovery-surface: #141b57;
   --recovery-border: #a8bff38a;
   box-sizing: border-box;
-  width: min(calc(100% - 36px), 1040px);
+  width: min(calc(100% - 24px), 1280px);
   margin: clamp(36px, 7vw, 110px) auto 0;
   scroll-margin-top: clamp(84px, 12svh, 128px);
   padding: clamp(12px, 2vw, 24px);
@@ -20,20 +20,13 @@
   font: 400 13px/1.45 var(--sans, Arial), sans-serif;
 }
 
-.recovery-map :is(figcaption, figcaption *, .recovery-map__card, .recovery-map__card *, .recovery-map__plot text) {
+.recovery-map :is(figcaption, figcaption *, .recovery-map__plot text) {
   font-family: var(--sans, Arial), sans-serif;
 }
 
-.recovery-map__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(204px, 22vw, 254px);
-  gap: clamp(15px, 3vw, 34px);
-  align-items: center;
-}
-
 .recovery-map__plot { display: block; width: 100%; aspect-ratio: 1.75; }
-.recovery-map__axis { fill: var(--recovery-label); font-size: 19px; }
-.recovery-map__place-label { fill: var(--recovery-cream); font-size: 20px; font-weight: 500; }
+.recovery-map__axis { fill: var(--recovery-label); font-size: clamp(16px, 1.55vw, 23px); }
+.recovery-map__place-label { fill: var(--recovery-cream); font-size: clamp(19px, 1.9vw, 28px); }
 .recovery-map__plot line { stroke: var(--recovery-grid); stroke-width: 1; }
 .recovery-map__lake { fill: none; stroke: var(--recovery-blue); }
 .recovery-map__place { fill: var(--recovery-blue); }
@@ -76,28 +69,23 @@
 .recovery-map__point:is(.is-active, :focus-visible) .recovery-map__halo { stroke-width: 1.5; }
 .recovery-map__plot:has(.is-active) .recovery-map__point.is-c14:not(.is-active, :focus-visible) .recovery-map__halo { visibility: hidden; }
 
-.recovery-map__rail { min-height: 92px; }
 .recovery-map__card {
   position: relative;
-  padding: 12px 26px 12px 12px;
-  border: 1px solid var(--recovery-grid);
-  border-top-color: var(--recovery-cream);
-  background: #1b2a72;
-  overflow-wrap: anywhere;
-  font-size: 19px;
+  padding-right: 44px;
+  font-size: clamp(17px, 1.5vw, 22px);
   font-variant-numeric: tabular-nums;
+  text-align: start;
 }
 .recovery-map [hidden] { display: none !important; }
-.recovery-map__readout { display: grid; gap: 3px; }
-.recovery-map__readout span { line-height: 1.45; }
-.recovery-map__readout span:first-child { color: var(--recovery-cream); font-weight: 650; }
-.recovery-map__readout span + span { color: var(--recovery-blue); }
+.recovery-map__readout { display: grid; color: var(--recovery-blue); line-height: 1.25; }
+.recovery-map__readout strong { color: var(--recovery-cream); }
 .recovery-map__close {
   position: absolute;
-  top: 3px;
-  right: 4px;
-  width: 24px;
-  height: 24px;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
   color: inherit;
   background: transparent;
   border: none;
@@ -109,22 +97,29 @@
 .recovery-map__close:focus-visible { outline: 1px solid var(--recovery-cream); }
 
 .recovery-map figcaption {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 88px;
+  border-top: 1px solid var(--recovery-grid);
+  color: var(--recovery-cream);
+  font-size: clamp(19px, 1.7vw, 25px);
+}
+.recovery-map__legend {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 22px;
-  padding-top: 10px;
-  color: var(--recovery-cream);
-  font-size: 20px;
+  gap: 6px clamp(12px, 2vw, 22px);
 }
-.recovery-map figcaption span { display: inline-flex; align-items: center; gap: 7px; color: inherit; }
+.recovery-map__legend span { display: inline-flex; align-items: center; gap: 7px; }
 .recovery-map__key-line { width: 20px; border-top: 1px dashed var(--recovery-cream); }
 .recovery-map__key-point { width: 10px; height: 10px; border-radius: 50%; background: var(--recovery-mark); }
 
-@media (max-width: 760px) {
-  .recovery-map__layout { grid-template-columns: 1fr; gap: 0; }
-  .recovery-map__rail { min-height: 84px; }
-  .recovery-map__card { width: fit-content; max-width: 100%; }
+@media (max-width: 600px) {
+  .recovery-map figcaption { grid-template-columns: minmax(0, 1fr); }
+  .recovery-map figcaption > div { grid-area: 1 / 1; }
+  .recovery-map figcaption:has(.recovery-map__card:not([hidden])) .recovery-map__legend { visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -134,12 +129,11 @@
 
 /* Keep recovery chart labels legible against the textured page. */
 .recovery-map .recovery-map__plot text,
-.recovery-map figcaption,
-.recovery-map figcaption *,
-.recovery-map .recovery-map__card { font-weight: 700; }
+.recovery-map__legend { font-weight: 700; }
 
 .recovery-map__title {
   margin: 0 0 12px;
   color: #fff0c9;
-  font: 700 clamp(22px, 3vw, 34px)/1.2 var(--sans, Arial), sans-serif;
+  font: 700 clamp(28px, 3.4vw, 46px)/1.15 var(--sans, Arial), sans-serif;
+  text-wrap: balance;
 }

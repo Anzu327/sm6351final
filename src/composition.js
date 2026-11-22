@@ -1,4 +1,4 @@
-import { atmosphericLine, bindGrainHeatmap, crustBars, mineralRanges, orbitArea, veinRanges } from './composition-charts.js';
+import { atmosphericLine, bindMineralBalance, crustBars, mineralRanges, orbitArea, veinRanges } from './composition-charts.js';
 import { ease } from './motion.js';
 
 const topics = {
@@ -26,7 +26,7 @@ export function bindComposition(section) {
     graphic.setAttribute('aria-label', label);
     chartResize.observe(graphic);
   }
-  bindGrainHeatmap(section.querySelector('.grain-heatmap'));
+  bindMineralBalance(section.querySelector('.mineral-balance'));
 
   const track = section.querySelector('.composition');
   const rail = track.querySelector('.composition__specimen');

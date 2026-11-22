@@ -843,7 +843,7 @@ p.parag,
       <div class="origins-timeline-limits" aria-hidden="true"><span>0 s</span><span>16 s</span></div>
     </div>
     <div class="origins-flight-reading">
-      <output class="origins-number" for="origins-flight-time" data-flight-value>0 s · 97.1 km</output>
+      <output class="origins-number" for="origins-flight-time" data-flight-value><span data-flight-seconds>0.00</span> s · <span data-flight-altitude>97.1</span> km</output>
       <p class="origins-event-name" data-flight-name>First detection</p>
     </div>
   </div>
@@ -981,31 +981,43 @@ p.parag,
               <svg class="composition__graphic" role="img"></svg>
             </div>
           </figure>
-          <figure class="composition__chart grain-heatmap" data-topic="sun">
-            <figcaption id="grain-heatmap-title">Magnesium-to-iron ratios</figcaption>
-            <p class="grain-heatmap__guide" id="grain-heatmap-guide">13 olivine–chromite pairs. Select a mineral to sort. Each column has its own color scale.</p>
-            <table aria-labelledby="grain-heatmap-title" aria-describedby="grain-heatmap-guide">
-              <colgroup>
-                <col class="grain-heatmap__pair-column">
-                <col span="2">
-              </colgroup>
-              <thead>
-                <tr>
-                  <th scope="col">Pair</th>
-                  <th scope="col"><button type="button" data-mineral="olivine">Olivine <span aria-hidden="true">↕</span></button></th>
-                  <th scope="col"><button type="button" data-mineral="chromite">Chromite <span aria-hidden="true">↕</span></button></th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-              <tfoot>
-                <tr>
-                  <th scope="row">Scale</th>
-                  <td data-scale="olivine"></td>
-                  <td data-scale="chromite"></td>
-                </tr>
-              </tfoot>
-            </table>
-            <a class="grain-heatmap__source" href="https://doi.org/10.1111/maps.13027" target="_blank" rel="noopener">Kaeter et al. (2018), Table 2 ↗</a>
+          <figure class="composition__chart mineral-balance">
+            <figcaption id="mineral-balance-title">Magnesium vs. iron</figcaption>
+            <p class="mineral-balance__guide">Ranges across 13 mineral pairs</p>
+            <div class="mineral-balance__plot">
+              <div class="mineral-balance__axis" aria-hidden="true">
+                <span><b>Fe</b> More iron</span>
+                <span><b>=</b> Equal</span>
+                <span><b>Mg</b> More magnesium</span>
+              </div>
+              <div class="mineral-balance__row">
+                <h4>Olivine</h4>
+                <div class="mineral-balance__track" data-range="olivine" role="img">
+                  <span class="mineral-balance__range" aria-hidden="true"></span>
+                </div>
+              </div>
+              <div class="mineral-balance__row">
+                <h4>Chromite</h4>
+                <div class="mineral-balance__track" data-range="chromite" role="img">
+                  <span class="mineral-balance__range" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+            <details class="mineral-balance__details">
+              <summary><span class="mineral-balance__toggle" aria-hidden="true"></span>View sample data</summary>
+              <table aria-labelledby="mineral-ratio-caption">
+                <caption id="mineral-ratio-caption">Magnesium-to-iron ratios</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Pair ID</th>
+                    <th scope="col"><button type="button" data-mineral="olivine">Olivine <span aria-hidden="true">↕</span></button></th>
+                    <th scope="col"><button type="button" data-mineral="chromite">Chromite <span aria-hidden="true">↕</span></button></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <a class="mineral-balance__source" href="https://doi.org/10.1111/maps.13027" target="_blank" rel="noopener">Kaeter et al. (2018), Table 2 ↗</a>
+            </details>
           </figure>
         </div>
       </div>
@@ -1027,18 +1039,16 @@ p.parag,
 </svg></div></div></div><div class="drop-cans__bottom"><div data-anima="parag" class="drop-cans__bottom__left"><div class="description">The surviving pieces are meteorites. The main mass from Chelyabinsk was recovered from Lake Chebarkul.</div></div></div>
 <figure id="recovery-map" class="recovery-map" aria-labelledby="recovery-map-title">
   <h2 id="recovery-map-title" class="recovery-map__title">Chelyabinsk Meteorite Recovery Map</h2>
-  <div class="recovery-map__layout">
-    <svg class="recovery-map__plot" role="group" aria-label="Selected recovery locations and the projected fireball trajectory near Chelyabinsk"></svg>
-    <aside class="recovery-map__rail" aria-label="Point details">
-      <div class="recovery-map__card" hidden>
-        <div class="recovery-map__readout" aria-live="polite"></div>
-        <button class="recovery-map__close" type="button" aria-label="Clear selected location" hidden>×</button>
-      </div>
-    </aside>
-  </div>
+  <svg class="recovery-map__plot" role="group" aria-label="Selected recovery locations and the projected fireball trajectory near Chelyabinsk"></svg>
   <figcaption>
-    <span><i class="recovery-map__key-line" aria-hidden="true"></i>Flight path</span>
-    <span><i class="recovery-map__key-point" aria-hidden="true"></i>Selected finds</span>
+    <div class="recovery-map__legend">
+      <span><i class="recovery-map__key-line" aria-hidden="true"></i>Flight path</span>
+      <span><i class="recovery-map__key-point" aria-hidden="true"></i>Selected finds</span>
+    </div>
+    <div class="recovery-map__card" hidden>
+      <div class="recovery-map__readout" aria-live="polite"></div>
+      <button class="recovery-map__close" type="button" aria-label="Clear selected location" hidden>×</button>
+    </div>
   </figcaption>
 </figure>
 </div></section>
@@ -1133,7 +1143,7 @@ window.scrollTo(0,0);
 </script>
 
 <!-- <script type="module" defer crossorigin="" src="http://localhost:5173/main.js"></script>  -->
-<script type="module" vite-ignore crossorigin="" src="./files/sleep-well-creatives.netlify.app/assets/index-8YjIcPvu.js?v=phone-screen"></script>
+<script type="module" vite-ignore crossorigin="" src="./files/sleep-well-creatives.netlify.app/assets/index-8YjIcPvu.js?v=tunnel-visibility"></script>
 
 <script type="module" vite-ignore src="./meteorite/story.js"></script>
 <script>
@@ -1209,5 +1219,11 @@ window.scrollTo(0,0);
 <script type="module" src="/src/impact-timeline.js"></script>
 <script type="module" src="/src/recovery-map.js"></script>
 <script type="module" src="/src/inside-stone.js"></script>
+<button id="story-fullscreen" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path class="fullscreen-enter" d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/>
+    <path class="fullscreen-exit" d="M4 9h5V4m11 5h-5V4M9 20v-5H4m11 5v-5h5"/>
+  </svg>
+</button>
 <script type="module" src="/src/continuous-story.js"></script>
 </body></html>
