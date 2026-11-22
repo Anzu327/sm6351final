@@ -7,7 +7,7 @@ import {
   SphereGeometry, SRGBColorSpace, TextureLoader, Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { chartReturnSpan, clamp, ease, earthArrivalPose, mix, outroFlightPoint, outroFlightProgress, powerInOut } from './motion.js';
+import { clamp, ease, earthArrivalPose, mix, powerInOut } from './motion.js';
 import { makeSolarBelt, makeSolarComet, makeSolarParticles } from './solar-atmosphere.js';
 import { earthLatitudePaint } from './earth-palette.js';
 import { createSolarMeteorShowers } from './meteor-arrivals.js';
@@ -320,6 +320,8 @@ async function loadSolarArt() {
   return { meshes, maps: new Map(maps) };
 }
 
+export const solarSkyLayer = 1;
+
 export function createSolarScene(scene, camera) {
   scene.background = new Color(cobalt);
   const earthGeographyMap = { value: null };
@@ -330,6 +332,7 @@ export function createSolarScene(scene, camera) {
 
   const clock = { value: 0 };
   const stars = makeSolarParticles();
+  stars.layers.enable(solarSkyLayer);
   const placeholder = new SphereGeometry(.852, 40, 32);
   const sun = new Group();
   const ember = makeSolarParticles({ sun: true });
@@ -460,9 +463,10 @@ export function createSolarScene(scene, camera) {
   const earthTarget = new Vector3();
   const earthView = new Vector3();
   const flareOffset = new Vector3();
-  const returnDirection = new Vector3();
+  const closingLatitude = 54.9594 * radians;
+  const closingDirection = new Vector3(0, Math.sin(closingLatitude), Math.cos(closingLatitude));
 
-  function update({ p, time, mobile, yaw, pitch, step, dt, paused, pointer, orbit, returnShot }) {
+  function update({ p, time, mobile, yaw, pitch, step, dt, paused, pointer, orbit, closing }) {
     clock.value = time;
     sun.rotation.y = time * .10;
     const viewportScale = Math.min(devicePixelRatio, 1.6) * (innerHeight / 900);
@@ -532,24 +536,12 @@ export function createSolarScene(scene, camera) {
     earth.body.rotation.x += (.15 + pitch - earth.body.rotation.x) * center;
     earth.body.rotation.y += (-2.6 + yaw + arrival.turn - earth.body.rotation.y) * center;
     earth.body.rotation.z *= 1 - center;
-    if (returnShot) {
-      const turn = ease(.59, .88, returnShot.progress);
-      const push = ease(.67, .91, returnShot.progress);
-      const latitude = mix(0, 54.9594 * radians, turn);
-      const longitude = mix(returnShot.longitude, 60.3221 * radians, turn);
-      const startDistance = earth.size * Math.hypot(1, innerHeight / (2 * returnShot.radius * halfFov));
-      const returnDistance = approachDistance(startDistance, coverDistance, push);
-      earth.body.rotation.set(0, -Math.PI / 2 - longitude, 0);
-      returnDirection.set(0, Math.sin(latitude), Math.cos(latitude));
-      camera.position.copy(earthTarget).addScaledVector(returnDirection, returnDistance);
+    if (closing) {
+      const closingDiameter = Math.min(.58, .84 * innerWidth / innerHeight);
+      const closingDistance = earth.size * Math.hypot(1, 1 / (closingDiameter * halfFov));
+      earth.body.rotation.set(0, (-90 - 60.3221) * radians, 0);
+      camera.position.copy(earthTarget).addScaledVector(closingDirection, closingDistance);
       camera.lookAt(earthTarget);
-      const scroll = -1 - (1 - returnShot.progress) * chartReturnSpan;
-      const [x, y] = outroFlightPoint(outroFlightProgress(scroll), .5, .5);
-      const track = ease(.66, .76, returnShot.progress) * (1 - ease(.85, .96, returnShot.progress));
-      camera.setViewOffset(innerWidth, innerHeight,
-        (x - .5) * innerWidth * .28 * track, (y - .5) * innerHeight * .22 * track, innerWidth, innerHeight);
-    } else if (camera.view?.enabled) {
-      camera.clearViewOffset();
     }
     camera.updateMatrixWorld();
 

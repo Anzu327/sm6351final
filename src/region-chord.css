@@ -43,16 +43,6 @@
   transform: translateY(var(--chart-shift, 0px));
 }
 
-#region-chord-anchor.is-returning::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: #0c1234;
-  opacity: var(--chart-return-fade);
-  pointer-events: none;
-}
-
-#region-chord-anchor.is-returned { background: #0c1234; }
 .is-returned #region-chord { visibility: hidden; }
 
 #region-chord.is-bridging {

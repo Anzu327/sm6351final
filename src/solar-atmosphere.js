@@ -6,6 +6,7 @@ import {
 
 const turn = Math.PI * 2;
 const radians = Math.PI / 180;
+const starPigment = '#b2c6f2';
 const random = seed => {
   const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
   return value - Math.floor(value);
@@ -18,9 +19,7 @@ function direction(seed, target) {
   return target.set(horizontal * Math.cos(angle), y, horizontal * Math.sin(angle));
 }
 
-// SceneSolar's Stars and Sun use prewarmed sphere emitters. Star positions
-// stay fixed between cycles; each particle tapers in and out over its own life.
-export function makeSolarParticles({ sun = false } = {}) {
+function solarParticleData(sun) {
   const count = sun ? 1024 : 4096;
   const positions = new Float32Array(count * 3);
   const seeds = new Float32Array(count * 2);
@@ -29,7 +28,13 @@ export function makeSolarParticles({ sun = false } = {}) {
     direction(index + 31, vertex).multiplyScalar(sun ? 1 : 80).toArray(positions, index * 3);
     seeds.set([random(index + 103), random(index + 1307)], index * 2);
   }
+  return { positions, seeds };
+}
 
+// SceneSolar's Stars and Sun use prewarmed sphere emitters. Star positions
+// stay fixed between cycles; each particle tapers in and out over its own life.
+export function makeSolarParticles({ sun = false } = {}) {
+  const { positions, seeds } = solarParticleData(sun);
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
   geometry.setAttribute('seed', new Float32BufferAttribute(seeds, 2));
@@ -39,7 +44,7 @@ export function makeSolarParticles({ sun = false } = {}) {
     depthWrite: false,
     blending: sun ? AdditiveBlending : NormalBlending,
     uniforms: {
-      pigment: { value: new Color(sun ? 15559029 : '#b2c6f2') },
+      pigment: { value: new Color(sun ? 15559029 : starPigment) },
       sun: { value: sun },
       time: { value: 0 },
       viewportScale: { value: 1 },

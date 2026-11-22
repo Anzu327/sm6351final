@@ -17,16 +17,6 @@ export const ease = (start, end, value) => {
 export const powerInOut = (t, power) => t < .5 ? (2 * t) ** power / 2 : 1 - (2 - 2 * t) ** power / 2;
 
 export const chartReturnSpan = 1.55;
-// Start the flight during the last third of the return, which ends one viewport before the outro.
-export const outroFlightStart = -1 - .32 * chartReturnSpan;
-export const outroFlightEnd = .34;
-export const outroFlightProgress = scroll => fraction(scroll, outroFlightStart, outroFlightEnd - outroFlightStart);
-
-export function outroFlightPoint(progress, landingX, landingY) {
-  const bank = 1 - (1 - clamp(progress / .95)) ** 1.6;
-  const descent = 1 - (1 - progress) ** 1.2;
-  return [mix(1.12, landingX, bank), mix(-.09, landingY, descent)];
-}
 
 // Both Earth scenes meet at full coverage before the archive pulls back.
 // Use the viewport diagonal so the globe also covers the corners on wide screens.
